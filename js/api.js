@@ -29,7 +29,10 @@ const redirectURL = () => new URL('index.html', location.href.split('#')[0]).hre
 const safe = async f => { try { return await f(); } catch (e) { return {data: {}, error: e || {}}; } };
 function classer(e, map = {}) {
   const code = e.code || e.name || '', st = e.status || 0, m = String(e.message || '');
+  // Trace minimale pour le diagnostic (code et statut, jamais l'adresse ni le mot de passe).
+  try { console.warn('[auth]', code || '-', st, m.slice(0, 120)); } catch {}
   if (map[code]) return map[code];
+  if (/sending .*email|smtp|send.*mail/i.test(code + ' ' + m)) return 'email_send';
   if (st === 429 || /rate.?limit|too many/i.test(code + ' ' + m)) return 'rate_limit';
   if (/email_address_invalid|validation_failed/.test(code) || /invalid format|validate email|email address .* invalid/i.test(m)) return 'invalid_email';
   if (/Invalid login credentials/i.test(m)) return map.invalid_credentials || 'invalid_credentials';

@@ -17,6 +17,7 @@ export const MSG = {
   email_not_confirmed: 'Confirmez d’abord votre adresse grâce à l’e-mail reçu à l’inscription.',
   rate_limit: 'Trop de demandes en peu de temps. Patientez quelques minutes avant de réessayer.',
   server: 'Impossible de traiter votre demande pour le moment. Veuillez réessayer ultérieurement.',
+  email_send: 'L’e-mail n’a pas pu être envoyé pour le moment (problème d’envoi côté serveur). Réessayez plus tard ; si cela persiste, prévenez votre professeur.',
   demo: 'Mode démonstration : aucun e-mail ne peut être envoyé tant que Supabase n’est pas configuré.',
   bad_class_code: 'Code de classe invalide. Vérifiez-le auprès de votre professeur.',
   signup_refused: 'Impossible de créer un compte avec cette adresse. Si vous avez déjà un compte, connectez-vous ou réinitialisez votre mot de passe.',
