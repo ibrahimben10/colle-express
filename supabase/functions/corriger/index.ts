@@ -85,7 +85,9 @@ Deno.serve(async (req) => {
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Requête invalide." }, 400); }
   const mode = String(body.mode);
-  if (!["copie", "indice", "solution", "import"].includes(mode)) return json({ error: "Mode inconnu." }, 400);
+  // L'évaluation automatique des copies est remplacée par la soumission sur l'honneur et la notation entre pairs.
+  if (mode === "copie") return json({ error: "La correction automatique des copies est désactivée : soumets ta réponse à ton groupe." }, 410);
+  if (!["indice", "solution", "import"].includes(mode)) return json({ error: "Mode inconnu." }, 400);
   if (mode === "import" && !isProf) return json({ error: "Réservé au professeur." }, 403);
 
   if (!isProf) {

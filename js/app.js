@@ -28,6 +28,19 @@ const byId = id => all().find(e => e.id === id);
 const F = Object.assign({lvl: 1, mat: '', chap: '', q: ''}, store.get('filters', {}));
 let CUR = null, SUIVI = {}, CONF = {message: '', sel: {}}, CLASS = [], PRES = {}, LIVE = [];
 const SESS = {};
+let GROUPS = [], MES = [];
+const FIL = {}, MEMB = {};
+const ROLE = {responsable: 'Responsable', moderateur: 'Modérateur', membre: 'Membre'};
+const ENGAGEMENT = 'Je déclare sur l’honneur que cette réponse est mon travail personnel, rédigé sans aide extérieure non signalée.';
+const myGroups = () => GROUPS.filter(g => g.role || api.isProf);
+const GSEL = () => { const g = store.get('groupe', null), l = myGroups(); return (l.find(x => x.id === g) || l.find(x => x.role) || l[0])?.id || null; };
+const gById = g => GROUPS.find(x => x.id === g);
+const myRole = g => gById(g)?.role || null;
+const canMod = g => api.isProf || ['responsable', 'moderateur'].includes(myRole(g));
+const moy = ns => ns?.length ? ns.reduce((a, n) => a + n.note, 0) / ns.length : null;
+const fmtNote = v => v == null ? '—' : String(Math.round(v * 10) / 10).replace('.', ',');
+const nameOf = (g, u) => u === api.user.id ? (api.profile.full_name || 'Moi') : (MEMB[g] || []).find(m => m.user_id === u)?.full_name || 'Ancien membre';
+const mine = (ex, g) => MES.find(r => r.exercice_id === ex && (!g || r.groupe_id === g));
 const notice = h => { $('#notice').innerHTML = h || ''; };
 
 /* ---------- textes fixes ---------- */
@@ -35,7 +48,7 @@ document.querySelectorAll('[data-site]').forEach(e => e.textContent = CONFIG.NOM
 document.querySelectorAll('[data-prof]').forEach(e => e.textContent = CONFIG.NOM_PROF);
 $('#aboutMini').innerHTML = presentationCourte();
 $('#yr').textContent = new Date().getFullYear();
-$('#feat').innerHTML = [['camera', 'Photographie ta copie : correction étape par étape'], ['bulb', 'Des indices gradués, du plus vague au plus précis'], ['chart', 'Ton suivi par chapitre, du CCINP à l’X-ENS']]
+$('#feat').innerHTML = [['users', 'Travaille en groupe : réponses sur l’honneur, notées sur 10 par tes pairs'], ['msg', 'Un fil de discussion sous chaque exercice'], ['bulb', 'Indices gradués et corrigés détaillés, du CCINP à l’X-ENS']]
   .map(([i, t]) => `<div>${ic(i)}<span>${t}</span></div>`).join('');
 $('#searchIc').outerHTML = ic('search');
 if (DEMO) $('#demo').hidden = false;
@@ -108,13 +121,14 @@ function renderMe() {
 }
 async function afterLogin2() {
   const p = api.profile;
-  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#suivi" data-v="suivi">${ic('chart')}<span class="lbl">Mon suivi</span></a>` +
-    (api.isProf ? `<a href="#prof" data-v="prof">${ic('users')}<span class="lbl">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '') +
+  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#groupes" data-v="groupes">${ic('users')}<span class="lbl">Groupes</span></a><a href="#suivi" data-v="suivi">${ic('chart')}<span class="lbl">Mon suivi</span></a>` +
+    (api.isProf ? `<a href="#prof" data-v="prof">${ic('live')}<span class="lbl">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '') +
     `<a href="#apropos" data-v="apropos">${ic('cap')}<span class="lbl">À propos</span></a>`;
   $('#bnav').innerHTML = $('#nav').innerHTML;
   if (!store.get('filters', null)) F.lvl = p.niveau || 1;
   [SUIVI, CONF, BANK] = await Promise.all([api.loadSuivi(), api.config(), api.banque()]);
   SUIVI = SUIVI && typeof SUIVI === 'object' ? SUIVI : {};
+  await loadGroups();
   renderMe();
   if (!started) {
     started = true;
@@ -122,6 +136,13 @@ async function afterLogin2() {
     on('banque', async () => { BANK = await api.banque(); rerender(); });
     on('classe', debounce(async () => { CLASS = await api.classe(); rerender(); }, 800));
     on('presence', st => { PRES = st; const n = Object.keys(PRES).length; document.querySelectorAll('#liveN').forEach(el => el.textContent = n); $('#conn')?.classList.add('on'); rerenderProf(); });
+    on('groupe', debounce(async ev => {
+      if (ev?.t === 'groupe_membres' || !ev) { await loadGroups(); for (const k in MEMB) delete MEMB[k]; }
+      else { MES = await api.mesReponses().catch(() => MES); syncNotes(); }
+      const v = document.querySelector('.view.on')?.id;
+      if (v === 'v-groupes') renderGroupes();
+      else if (v === 'v-exercices' && CUR) { const G = GSEL(); if (G) await loadFil(CUR, G); renderRep(byId(CUR)); }
+    }, 400));
     on('activity', a => { if (!api.isProf || !a) return; LIVE.unshift({...a, d: now()}); LIVE = LIVE.slice(0, 60); rerenderProf(); });
   }
   if (api.isProf) CLASS = await api.classe();
@@ -187,11 +208,12 @@ function route() {
   document.body.classList.toggle('detail', h === 'exercices' && !!CUR);
   if (h === 'prof' && !api.isProf) h = 'exercices';
   if (h === 'envoyer') { h = 'apropos'; setTimeout(() => $('#envoi')?.scrollIntoView({behavior: 'smooth'}), 50); }
-  if (!['exercices', 'suivi', 'prof', 'apropos'].includes(h)) h = 'exercices';
+  if (!['exercices', 'groupes', 'suivi', 'prof', 'apropos'].includes(h)) h = 'exercices';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + h));
   document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   if (h === 'exercices') { renderStrip(); renderList(); renderCopy(); }
   if (h === 'suivi') renderSuivi();
+  if (h === 'groupes') renderGroupes();
   if (h === 'prof') renderProf(true);
   if (h === 'apropos') { $('#v-apropos').innerHTML = presentationPage({nom: api.profile.full_name, email: api.user.email, merci: SENT}); bindEnvoi(); SENT = false; }
   if (pres.v !== h) presence({v: h});
@@ -201,6 +223,7 @@ function rerender() {
   const v = document.querySelector('.view.on')?.id;
   if (v === 'v-exercices') { renderStrip(); renderList(); if (!CUR || !sess(CUR).busy) renderCopy(); }
   else if (v === 'v-suivi') renderSuivi();
+  else if (v === 'v-groupes') renderGroupes();
   else if (v === 'v-prof') renderProf(false);
 }
 const rerenderProf = debounce(() => { if (document.querySelector('.view.on')?.id === 'v-prof') renderProf(false); }, 200);
@@ -211,8 +234,8 @@ function renderStrip() {
   const ok = atL.filter(e => SUIVI.ex?.[e.id]?.s === 'reussi').length;
   const first = (api.profile.full_name || '').split(' ')[0];
   $('#strip').innerHTML = `<div><h2>Bonjour ${esc(first)} !</h2>
-      ${CONF.message ? `<p class="msg">${ic('msg')} ${esc(CONF.message)}</p>` : `<p>Niveau ${LV[lvl]} : ${esc(LVD[lvl])}. Choisis un exercice, rédige, photographie, fais corriger.</p>`}</div>
-    <div class="mini"><div><b>${ok}</b><span>réussis</span></div><div><b>${atL.length}</b><span>exercices</span></div><div><b>${Object.values(SUIVI.ex || {}).reduce((a, x) => a + (x.e || 0), 0)}</b><span>copies</span></div></div>`;
+      ${CONF.message ? `<p class="msg">${ic('msg')} ${esc(CONF.message)}</p>` : `<p>Niveau ${LV[lvl]} : ${esc(LVD[lvl])}. Choisis un exercice, cherche, soumets ta réponse sur l’honneur à ton groupe, puis note et discute celles des autres.</p>`}</div>
+    <div class="mini"><div><b>${ok}</b><span>réussis</span></div><div><b>${atL.length}</b><span>exercices</span></div><div><b>${Object.values(SUIVI.ex || {}).reduce((a, x) => a + (x.e || 0), 0)}</b><span>réponses</span></div></div>`;
 }
 const favs = () => Array.isArray(SUIVI.fav) ? SUIVI.fav : [];
 const isFav = id => favs().includes(id);
@@ -300,7 +323,8 @@ function renderCopy() {
       <div class="steps">
         <div><b>${ic('pen')} 1. Cherche</b><span class="small">Sur papier, comme au tableau, en surveillant le chrono.</span></div>
         <div><b>${ic('bulb')} 2. Débloque-toi</b><span class="small">Deux indices cachés : piste globale, puis méthode précise.</span></div>
-        <div><b>${ic('book')} 3. Compare</b><span class="small">Correction détaillée, théorèmes utilisés et réflexes à retenir.</span></div>
+        <div><b>${ic('users')} 3. Soumets</b><span class="small">Ta réponse, sur l’honneur, devient visible par ton groupe.</span></div>
+        <div><b>${ic('msg')} 4. Évalue</b><span class="small">Note les réponses des autres sur 10, discute, puis compare au corrigé.</span></div>
       </div>
       ${sel.length ? `<h3 class="sec">${ic('star')} La sélection du professeur</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}</div>`;
     el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openEx(b.dataset.open));
@@ -308,10 +332,10 @@ function renderCopy() {
   }
   const S = sess(ex.id), st = SUIVI.ex?.[ex.id], fig = FIG[ex.id];
   S.openH ||= [];
-  const nCopies = S.tours.filter(t => t.kind === 'copie').length;
   const K = CORR[ex.id];
   const nH = K ? hintLevels(K).length : 2;
-  const locked = !(S.tours.some(t => t.verdict === 'juste') || nCopies >= 1 || st?.s === 'reussi' || S.hint >= nH);
+  const G = GSEL();
+  const locked = !(mine(ex.id) || st?.s === 'reussi' || S.hint >= nH);
   const sol = K || (S.solution ? {corrige: S.solution, reponse: S.reponse, theoremes: S.theoremes, astuces: S.astuces} : null);
   const aiHints = S.tours.filter(t => t.kind === 'indice' && t.indice);
   el.innerHTML = `
@@ -320,7 +344,7 @@ function renderCopy() {
     <div class="titlerow"><h2>${esc(ex.titre)}</h2>
       <div class="tools"><button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
       <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button></div></div>
-    ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Déjà réussi' : 'En cours'} · ${st.e || 0} copie${(st.e || 0) > 1 ? 's' : ''} corrigée${(st.e || 0) > 1 ? 's' : ''}</div>` : ''}
+    ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 6/10)' : mine(ex.id) ? 'Réponse soumise' : 'En cours'}</div>` : ''}
 
     <section class="co co-enonce">
       <div class="co-h"><span class="co-e" aria-hidden="true">📘</span>Énoncé<span class="co-meta">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree} min</span></div>
@@ -328,15 +352,10 @@ function renderCopy() {
       ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}</div>
     </section>
 
-    <section class="co co-copie">
-      <div class="co-h"><span class="co-e" aria-hidden="true">✍️</span>Ta copie<span class="co-meta">facultatif</span></div>
-      <div class="drop" id="drop">
-        <label class="pick"><input type="file" id="file" accept="image/*" multiple>${ic('camera', 'lg')} Photographier ma copie <span class="small" style="font-weight:400">(4 pages max.)</span></label>
-        ${S.imgs.length ? `<div class="thumbs" id="thumbs">${S.imgs.map((im, i) => `<div class="thumb"><img src="${im.url}" alt="Page ${i + 1}"><button data-rm="${i}" aria-label="Retirer la page ${i + 1}">${ic('x')}</button></div>`).join('')}</div>` : ''}
-        ${S.imgs.length ? `<textarea class="note" id="note" placeholder="Facultatif : où bloques-tu ? que veux-tu faire vérifier ?">${esc(S.note)}</textarea>
-        <button class="btn primary wide" id="bCorr" ${S.busy ? 'disabled' : ''}>${S.busy === 'copie' ? '<span class="spin"></span> Lecture de la copie…' : ic('pen') + ' Faire corriger ma copie'}</button>` : ''}
-      </div>
-      <div class="feed">${S.tours.filter(t => t.kind === 'copie').map(tourHTML).join('')}</div>
+    <section class="co co-rep" id="repSec">
+      <div class="co-h"><span class="co-e" aria-hidden="true">✍️</span>Ma réponse
+        ${myGroups().length > 1 ? `<select id="gSel" class="gsel" aria-label="Groupe">${myGroups().map(g => `<option value="${esc(g.id)}" ${g.id === G ? 'selected' : ''}>${esc(g.nom)}${g.role ? '' : ' (prof)'}</option>`).join('')}</select>` : G ? `<span class="co-meta">${ic('users')} ${esc(gById(G).nom)}</span>` : ''}</div>
+      <div id="repBox"></div>
     </section>
 
     <section class="co co-indices" id="hintsSec">
@@ -347,30 +366,40 @@ function renderCopy() {
 
     <section class="co co-corr" id="corrSec">
       <details class="acc corr-acc" id="corrAcc" ${S.openC && !locked && sol ? 'open' : ''} ${locked ? 'data-locked="1"' : ''}>
-        <summary><span class="co-e" aria-hidden="true">${locked ? '🔒' : '📝'}</span><span class="acc-t"><b>Correction détaillée</b><small id="corrHint">${locked ? `Disponible après ${nH > 1 ? 'les deux indices' : 'l’indice'} ou une copie corrigée` : 'Touche pour afficher la correction'}</small></span><span class="chev" aria-hidden="true"></span></summary>
+        <summary><span class="co-e" aria-hidden="true">${locked ? '🔒' : '📝'}</span><span class="acc-t"><b>Correction détaillée</b><small id="corrHint">${locked ? `Disponible après l’envoi de ta réponse ou ${nH > 1 ? 'les deux indices' : 'l’indice'}` : 'Touche pour afficher la correction'}</small></span><span class="chev" aria-hidden="true"></span></summary>
         <div class="acc-body">${S.busy === 'solution' ? '<p><span class="spin"></span> Rédaction du corrigé…</p>' : sol ? `${correctionHTML(sol)}
           <div class="soltools">${K ? `<a class="btn" href="${esc(correctionURL(ex.id))}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="btn" id="bShareCorr">${ic('share')} Partager</button>` : ''}</div>
           <p class="small">${K ? 'Corrigé de référence de la colle.' : 'Corrigé rédigé par IA : vérifie-le avec ton cours.'}</p>` : ''}</div>
       </details>
     </section>
 
+    <section class="co co-grp" id="grpSec">
+      <div class="co-h"><span class="co-e" aria-hidden="true">👥</span>Réponses du groupe<span class="co-meta" id="grpMeta"></span></div>
+      <div id="repList">${G ? '<p class="small"><span class="spin"></span> Chargement…</p>' : '<p class="small">Les réponses des membres de ton groupe s’afficheront ici.</p>'}</div>
+    </section>
+
+    <section class="co co-disc" id="discSec">
+      <div class="co-h"><span class="co-e" aria-hidden="true">💬</span>Discussion<span class="co-meta" id="discMeta"></span></div>
+      <div id="comList"></div>
+      ${G && myRole(G) ? `<div class="comform"><div class="replyto" id="replyTo" hidden></div>
+        <textarea class="note" id="comTxt" placeholder="Une question, une autre méthode, une erreur repérée… (formules entre $…$)" maxlength="4000">${esc(S.com || '')}</textarea>
+        <div class="comform-b"><span class="small">Visible par tout le groupe · Ctrl+Entrée pour publier</span><button class="btn primary" id="comSend">${ic('msg')} Publier</button></div></div>` : ''}
+    </section>
+
     <div class="actions" id="actions">
-      <button class="btn" id="bGoCopy">${ic('camera')}<span>Ma copie</span></button>
+      <button class="btn" id="bGoCopy">${ic('pen')}<span>Réponse</span></button>
       <button class="btn" id="bHint">${ic('bulb')}<span>Indice</span></button>
       <button class="btn ${locked ? '' : 'primary'}" id="bSol">${ic(locked ? 'lock' : 'book')}<span>Correction</span></button>
+      <button class="btn" id="bDisc">${ic('msg')}<span>Discussion</span></button>
     </div>`;
   typeset(visibleParts(el));
   el.querySelectorAll('details.acc').forEach(lazyTypeset);
   const tm = $('#timer'); const upd = () => { const s = (now() - S.start) / 1000; tm.textContent = mmss(s); tm.classList.toggle('late', s > ex.duree * 60); };
   upd(); tick = setInterval(upd, 1000);
-  $('#file').onchange = e => addFiles(ex.id, e.target.files);
-  $('#note') && ($('#note').oninput = e => { S.note = e.target.value; });
-  $('#thumbs') && ($('#thumbs').onclick = e => { const b = e.target.closest('[data-rm]'); if (b) { S.imgs.splice(+b.dataset.rm, 1); renderCopy(); } });
-  const d = $('#drop');
-  d.ondragover = e => { e.preventDefault(); d.classList.add('over'); };
-  d.ondragleave = () => d.classList.remove('over');
-  d.ondrop = e => { e.preventDefault(); d.classList.remove('over'); addFiles(ex.id, e.dataTransfer.files); };
-  $('#bCorr') && ($('#bCorr').onclick = () => ask(ex, 'copie'));
+  renderRep(ex);
+  if (G) { if (FIL[G + '|' + ex.id]) renderFil(ex, G); loadFil(ex.id, G).then(() => { if (CUR === ex.id) renderFil(ex, G); }); }
+  $('#gSel') && ($('#gSel').onchange = e => { store.set('groupe', e.target.value); renderCopy(); });
+  bindComForm(ex, G);
   $('#bHintAI') && ($('#bHintAI').onclick = () => ask(ex, 'indice'));
   // Indices préparés : ouvrir un accordéon compte comme un indice demandé.
   el.querySelectorAll('.hint-acc').forEach(dd => dd.addEventListener('toggle', async () => {
@@ -398,7 +427,8 @@ function renderCopy() {
     $('#bSol').classList.add('primary'); $('#bSol').innerHTML = `${ic('book')}<span>Correction</span>`;
   }
   const go = (sec, f) => { f?.(); $(sec).scrollIntoView({behavior: 'smooth', block: 'start'}); };
-  $('#bGoCopy').onclick = () => go('.co-copie', () => !S.imgs.length && $('#file').click());
+  $('#bGoCopy').onclick = () => go('#repSec', () => $('#repTxt')?.focus({preventScroll: true}));
+  $('#bDisc').onclick = () => go('#discSec', () => $('#comTxt')?.focus({preventScroll: true}));
   $('#bHint').onclick = () => go('#hintsSec', () => { const nx = [...el.querySelectorAll('.hint-acc')].find(x => !x.open); if (nx) nx.open = true; else $('#bHintAI')?.click(); });
   $('#bSol').onclick = () => go('#corrSec', () => { if (acc.dataset.locked) { acc.classList.remove('shake'); void acc.offsetWidth; acc.classList.add('shake'); } else if (sol) acc.open = true; else ask(ex, 'solution'); });
   $('#bBack').onclick = closeEx;
@@ -406,15 +436,271 @@ function renderCopy() {
   $('#bShareEx').onclick = () => shareEx(ex, false);
   $('#bShareCorr') && ($('#bShareCorr').onclick = () => shareEx(ex, true));
 }
-function tourHTML(t) {
-  const vlab = {juste: 'Juste', partiel: 'Partiel', faux: 'Erreur', illisible: 'Illisible', bloque: 'Coup de pouce'}[t.verdict] || t.verdict;
-  return `<div class="tour"><div class="h"><b>${t.kind === 'copie' ? 'Copie ' + t.n : 'Indice demandé'}</b><span class="verdict ${esc(t.verdict)}">${esc(vlab)}</span>
-    ${t.score != null && t.kind === 'copie' ? `<span class="meter" title="Avancement estimé"><i style="width:${t.score}%"></i></span><span class="small">${t.score} %</span>` : ''}</div>
-    ${t.resume ? `<div>${rich(t.resume)}</div>` : ''}
-    ${t.points?.length ? `<ul class="pts">${t.points.map(p => `<li><span class="mk ${esc(p.statut)}">${p.statut === 'ok' ? ic('check') : p.statut === 'erreur' ? ic('x') : '·'}</span><span><b>${esc(p.etape)}</b>${p.note ? ' — ' + esc(p.note) : ''}</span></li>`).join('')}</ul>` : ''}
-    ${t.retour ? `<div>${rich(t.retour)}</div>` : ''}
-    ${t.indice ? `<div class="hint">${ic('bulb')}<div><span class="lab">Indice ${t.hint || ''}</span><div>${rich(t.indice)}</div></div></div>` : ''}
-    ${t.question ? `<div class="q">« ${esc(t.question)} »</div>` : ''}</div>`;
+
+/* ================= GROUPES : réponses sur l'honneur, notes, discussion ================= */
+async function loadGroups() {
+  try { [GROUPS, MES] = await Promise.all([api.groupes(), api.mesReponses()]); } catch (e) { GROUPS = []; MES = []; notice(esc(e.message)); }
+  syncNotes();
+}
+// La moyenne reçue des pairs alimente le suivi : réussi si au moins 2 notes et moyenne ≥ 6/10.
+function syncNotes() {
+  SUIVI.ex ||= {}; let ch = false;
+  const best = {};
+  for (const r of MES) { const m = moy(r.notes); best[r.exercice_id] = Math.max(best[r.exercice_id] ?? -1, m ?? -1); if ((r.notes?.length || 0) >= 2 && m >= 6) best[r.exercice_id + '!'] = 1; }
+  for (const r of MES) {
+    const id = r.exercice_id, st = SUIVI.ex[id] ||= {s: 'en_cours', e: 1, i: 0, sc: 0, d: Date.parse(r.created_at) || now(), t: 0};
+    const sc = best[id] >= 0 ? Math.round(best[id] * 10) : 0;
+    if (st.sc !== sc) { st.sc = sc; ch = true; }
+    if (best[id + '!'] && st.s !== 'reussi') { st.s = 'reussi'; ch = true; }
+  }
+  if (ch) api.saveSuivi(SUIVI);
+}
+async function loadFil(ex, g) {
+  try {
+    const [f, m] = await Promise.all([api.fil(g, ex), MEMB[g] ? MEMB[g] : api.membres(g)]);
+    FIL[g + '|' + ex] = f; MEMB[g] = m;
+  } catch (e) { FIL[g + '|' + ex] = {reponses: [], commentaires: [], err: e.message}; }
+}
+
+/* --- encadré « Ma réponse » --- */
+function renderRep(ex) {
+  const box = $('#repBox'); if (!box || !ex) return;
+  const S = sess(ex.id), st = SUIVI.ex?.[ex.id], G = GSEL(), g = gById(G);
+  if (!G) {
+    box.innerHTML = `<p>Pour soumettre ta réponse et voir celles des autres, rejoins un groupe avec le code donné par ton responsable, ou crée le tien.</p>
+      <a class="btn primary wide" href="#groupes">${ic('users')} Rejoindre ou créer un groupe</a>`;
+    return;
+  }
+  if (!g.role) { box.innerHTML = `<p class="small">Tu consultes ce groupe en tant que professeur : lecture et modération, sans soumission.</p>`; return; }
+  const r = mine(ex.id, G);
+  if (r) {
+    const m = moy(r.notes), n = r.notes?.length || 0;
+    box.innerHTML = `<div class="sub-ok">${ic('check')}<div><b>Réponse soumise sur l’honneur</b> le ${fmtDate(r.created_at)}
+      <span class="small">Visible par les ${g.n} membres de « ${esc(g.nom)} » · non modifiable</span></div>
+      <div class="avg-big" title="Moyenne des notes reçues"><b>${fmtNote(m)}</b><span>/10</span><small>${n} note${n > 1 ? 's' : ''}</small></div></div>
+      <a class="btn wide" href="#rep-${esc(r.id)}" id="seeMine">${ic('eye')} Voir ma réponse et les autres</a>`;
+    $('#seeMine').onclick = e => { e.preventDefault(); $('#rep-' + r.id)?.scrollIntoView({behavior: 'smooth', block: 'start'}); };
+    return;
+  }
+  const aide = !!(st?.vu || st?.vr);
+  box.innerHTML = `
+    <label class="field">Ta réponse rédigée <span class="small">(formules entre $…$, ou photos de ta feuille)</span>
+      <textarea class="note big" id="repTxt" maxlength="20000" placeholder="Ex. : On pose $u_n = …$. Par récurrence…">${esc(S.rep || '')}</textarea></label>
+    <div class="reptools">
+      <button class="btn" id="repPrev" type="button">${ic('eye')} Aperçu</button>
+      <label class="btn pick"><input type="file" id="file" accept="image/*" multiple class="sr">${ic('camera')} Ajouter des photos <span class="small">(4 max.)</span></label>
+    </div>
+    <div class="prev" id="repPrevBox" hidden></div>
+    ${S.imgs.length ? `<div class="thumbs" id="thumbs">${S.imgs.map((im, i) => `<div class="thumb"><img src="${im.url}" alt="Page ${i + 1}"><button data-rm="${i}" aria-label="Retirer la page ${i + 1}">${ic('x')}</button></div>`).join('')}</div>` : ''}
+    ${aide ? `<p class="warnline">⚠️ Tu as déjà consulté la correction ou les réponses d’autres membres : ta réponse portera la mention « aide consultée ».</p>` : ''}
+    <label class="honor"><input type="checkbox" id="repHon"><span><b>Engagement sur l’honneur.</b> ${esc(ENGAGEMENT)}</span></label>
+    <p class="small">Dès l’envoi, ta réponse devient publique pour les ${g.n} membre${g.n > 1 ? 's' : ''} du groupe « ${esc(g.nom)} » et ne peut plus être modifiée.</p>
+    <button class="btn primary wide" id="repSend" disabled>${ic('upload')} Soumettre ma réponse</button>`;
+  const txt = $('#repTxt'), hon = $('#repHon'), send = $('#repSend');
+  const upd = () => { send.disabled = !(hon.checked && (txt.value.trim() || S.imgs.length)) || S.busy === 'rep'; };
+  txt.oninput = () => { S.rep = txt.value; upd(); };
+  hon.onchange = upd; upd();
+  $('#file').onchange = e => addFiles(ex.id, e.target.files);
+  $('#thumbs') && ($('#thumbs').onclick = e => { const b = e.target.closest('[data-rm]'); if (b) { S.imgs.splice(+b.dataset.rm, 1); renderRep(ex); } });
+  $('#repPrev').onclick = () => { const p = $('#repPrevBox'); p.hidden = !p.hidden; if (!p.hidden) { p.innerHTML = rich(txt.value) || '<span class="small">Rien à afficher.</span>'; typeset(p); } };
+  send.onclick = async () => {
+    if (!hon.checked) return;
+    S.busy = 'rep'; send.disabled = true; send.innerHTML = '<span class="spin"></span> Envoi…'; notice('');
+    try {
+      await api.soumettre({g: G, ex: ex.id, contenu: txt.value.trim(), images: S.imgs.map(i => i.data), engagementTexte: ENGAGEMENT, aide});
+      S.rep = ''; S.imgs = [];
+      MES = await api.mesReponses();
+      await record(ex, {kind: 'reponse'});
+      presence({st: 'soumis'});
+      api.activity({uid: api.user.id, name: api.profile.full_name, id: ex.id, k: 'reponse', v: '', sc: null});
+      S.busy = false; await loadFil(ex.id, G); renderCopy();
+      $('#grpSec')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+    } catch (e) { S.busy = false; notice(esc(e.message)); renderRep(ex); }
+  };
+}
+
+/* --- encadrés « Réponses du groupe » et « Discussion » --- */
+async function renderFil(ex, G) {
+  const list = $('#repList'), cl = $('#comList'); if (!list || !ex) return;
+  const f = FIL[G + '|' + ex.id]; if (!f) return;
+  if (f.err) { list.innerHTML = `<p class="err">${esc(f.err)}</p>`; return; }
+  const S = sess(ex.id), st = SUIVI.ex?.[ex.id], me = api.user.id, member = !!myRole(G);
+  const reps = f.reponses, coms = f.commentaires;
+  $('#grpMeta').textContent = `${reps.length} réponse${reps.length > 1 ? 's' : ''}`;
+  $('#discMeta').textContent = `${coms.length} message${coms.length > 1 ? 's' : ''}`;
+  const visible = !member || mine(ex.id, G) || st?.vr || S.showReps;
+  if (!reps.length) list.innerHTML = '<p class="small">Personne n’a encore soumis de réponse dans ce groupe. Lance-toi !</p>';
+  else if (!visible) {
+    list.innerHTML = `<p>${reps.length} membre${reps.length > 1 ? 's ont' : ' a'} déjà répondu.</p>
+      <button class="btn wide" id="reveal">${ic('eye')} Afficher les réponses</button>
+      <p class="small">Conseil : soumets d’abord la tienne. Les consulter avant ajoutera la mention « aide consultée » à ta réponse.</p>`;
+    $('#reveal').onclick = () => { S.showReps = true; SUIVI.ex ||= {}; (SUIVI.ex[ex.id] ||= {s: 'en_cours', e: 0, i: 0, sc: 0, d: now(), t: 0}).vr = 1; api.saveSuivi(SUIVI); renderFil(ex, G); renderRep(ex); };
+  } else {
+    list.innerHTML = reps.map(r => {
+      const own = r.user_id === me, ns = r.notes || [], m = moy(ns), my = ns.find(n => n.evaluateur_id === me)?.note;
+      return `<article class="rep ${own ? 'own' : ''}" id="rep-${esc(r.id)}">
+        <header>${avatar(r.user_id, nameOf(G, r.user_id))}<div><b>${esc(nameOf(G, r.user_id))}${own ? ' (moi)' : ''}</b><span class="small">${fmtDate(r.created_at)}</span></div>
+          <span class="badges"><span class="badge honor" title="${esc(r.engagement_texte)}">🤝 Sur l’honneur</span>${r.aide_consultee ? '<span class="badge aide" title="Correction ou autres réponses consultées avant l’envoi">aide consultée</span>' : ''}</span></header>
+        ${r.contenu ? `<div class="rep-body">${rich(r.contenu)}</div>` : ''}
+        ${r.photos?.length ? `<div class="thumbs">${r.photos.map((p, i) => `<a class="thumb" data-ph="${esc(p)}" target="_blank" rel="noopener"><img alt="Photo ${i + 1} de la réponse"></a>`).join('')}</div>` : ''}
+        <div class="rate">
+          <div class="avg" title="Moyenne des pairs">${m == null ? '<span class="small">Pas encore notée</span>' : `<b>${fmtNote(m)}</b>/10 <span class="small">· ${ns.length} note${ns.length > 1 ? 's' : ''}</span>`}</div>
+          ${member && !own ? `<div class="scale" role="group" aria-label="Ta note sur 10 pour ${esc(nameOf(G, r.user_id))}">${[...Array(11).keys()].map(n => `<button data-rate="${n}" data-r="${esc(r.id)}" aria-pressed="${my === n}" title="${my === n ? 'Retirer ma note' : 'Noter ' + n + '/10'}">${n}</button>`).join('')}</div>`
+            : own ? '<span class="small">Tu ne peux pas noter ta propre réponse.</span>' : ''}
+        </div>
+        <div class="rep-act">${member ? `<button class="linkbtn" data-reply="${esc(r.id)}">${ic('msg')} Commenter</button>` : ''}
+          ${canMod(G) ? `<button class="linkbtn danger" data-delrep="${esc(r.id)}">${ic('trash')} Supprimer</button>` : ''}
+          ${(k => k ? `<span class="small">${k} commentaire${k > 1 ? 's' : ''}</span>` : '')(coms.filter(c => c.reponse_id === r.id).length)}</div>
+      </article>`;
+    }).join('');
+    typeset([...list.querySelectorAll('.rep-body')]);
+    const paths = reps.flatMap(r => r.photos || []);
+    if (paths.length) api.photoURLs(paths).then(u => list.querySelectorAll('[data-ph]').forEach(a => { const url = u[a.dataset.ph]; if (url) { a.href = url; a.querySelector('img').src = url; } }));
+    list.onclick = async e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.rate != null) {
+        const n = +b.dataset.rate, cur = b.getAttribute('aria-pressed') === 'true';
+        b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+        if (!cur) b.setAttribute('aria-pressed', 'true');
+        try { await api.noter(b.dataset.r, cur ? null : n); await loadFil(ex.id, G); renderFil(ex, G); } catch (x) { notice(esc(x.message)); }
+      } else if (b.dataset.reply) { S.replyTo = b.dataset.reply; showReply(G); $('#discSec').scrollIntoView({behavior: 'smooth', block: 'start'}); $('#comTxt')?.focus({preventScroll: true}); }
+      else if (b.dataset.delrep) {
+        const r = reps.find(x => x.id === b.dataset.delrep);
+        if (!confirm(`Supprimer définitivement la réponse de ${nameOf(G, r.user_id)} (et ses notes et commentaires) ?`)) return;
+        try { await api.supprimerReponse(r); await loadFil(ex.id, G); MES = await api.mesReponses(); renderFil(ex, G); renderRep(ex); } catch (x) { notice(esc(x.message)); }
+      }
+    };
+  }
+  // fil de discussion
+  const refName = rid => { const r = reps.find(x => x.id === rid); return r ? nameOf(G, r.user_id) : null; };
+  cl.innerHTML = coms.length ? coms.map(c => {
+    const own = c.user_id === me, rn = c.reponse_id && refName(c.reponse_id);
+    return `<div class="com" id="com-${esc(c.id)}">${avatar(c.user_id, nameOf(G, c.user_id))}<div class="com-in">
+      <div class="com-h"><b>${esc(nameOf(G, c.user_id))}</b><span class="small">${ago(c.created_at)}${c.edited_at ? ' · modifié' : ''}</span>
+        ${rn ? `<a class="ref" href="#rep-${esc(c.reponse_id)}" data-goto="${esc(c.reponse_id)}">↪ réponse de ${esc(rn)}</a>` : ''}</div>
+      <div class="com-b">${rich(c.contenu)}</div>
+      <div class="com-act">${own ? `<button class="linkbtn" data-edit="${esc(c.id)}">Modifier</button>` : ''}${own || canMod(G) ? `<button class="linkbtn danger" data-delc="${esc(c.id)}">Supprimer</button>` : ''}</div>
+    </div></div>`;
+  }).join('') : '<p class="small">Aucun message. Pose une question ou propose une autre méthode.</p>';
+  typeset([...cl.querySelectorAll('.com-b')]);
+  cl.onclick = async e => {
+    const a = e.target.closest('[data-goto]'); if (a) { e.preventDefault(); if (!visible) { $('#reveal')?.click(); } $('#rep-' + a.dataset.goto)?.scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.delc) { if (!confirm('Supprimer ce message ?')) return; try { await api.supprimerCommentaire(b.dataset.delc); await loadFil(ex.id, G); renderFil(ex, G); } catch (x) { notice(esc(x.message)); } }
+    if (b.dataset.edit) {
+      const c = coms.find(x => x.id === b.dataset.edit), body = $('#com-' + c.id + ' .com-b');
+      body.innerHTML = `<textarea class="note" maxlength="4000">${esc(c.contenu)}</textarea><div class="comform-b"><button class="btn ghost" data-cancel>Annuler</button><button class="btn primary" data-save>Enregistrer</button></div>`;
+      body.querySelector('[data-cancel]').onclick = () => renderFil(ex, G);
+      body.querySelector('[data-save]').onclick = async () => { const v = body.querySelector('textarea').value.trim(); if (!v) return; try { await api.modifierCommentaire(c.id, v); await loadFil(ex.id, G); renderFil(ex, G); } catch (x) { notice(esc(x.message)); } };
+    }
+  };
+  showReply(G);
+}
+function showReply(G) {
+  const S = CUR && sess(CUR), box = $('#replyTo'); if (!box || !S) return;
+  const f = FIL[G + '|' + CUR], r = S.replyTo && f?.reponses.find(x => x.id === S.replyTo);
+  box.hidden = !r;
+  if (r) { box.innerHTML = `↪ À propos de la réponse de <b>${esc(nameOf(G, r.user_id))}</b> <button class="linkbtn" id="noReply" aria-label="Annuler">${ic('x')}</button>`; $('#noReply').onclick = () => { S.replyTo = null; showReply(G); }; }
+}
+function bindComForm(ex, G) {
+  const t = $('#comTxt'), b = $('#comSend'); if (!t) return;
+  const S = sess(ex.id);
+  t.oninput = () => { S.com = t.value; };
+  t.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); b.click(); } };
+  b.onclick = async () => {
+    const v = t.value.trim(); if (!v) return;
+    b.disabled = true;
+    try { await api.commenter({g: G, ex: ex.id, rid: S.replyTo, contenu: v}); S.com = ''; S.replyTo = null; t.value = ''; await loadFil(ex.id, G); renderFil(ex, G); }
+    catch (x) { notice(esc(x.message)); }
+    b.disabled = false;
+  };
+}
+
+/* --- page « Groupes » --- */
+let GV = null;   // groupe affiché en détail
+async function renderGroupes() {
+  const el = $('#v-groupes');
+  const mineL = GROUPS.filter(g => g.role), others = api.isProf ? GROUPS.filter(g => !g.role) : [];
+  if (!GV || !gById(GV)) GV = GSEL();
+  const card = g => `<button class="gcard" data-g="${esc(g.id)}" aria-current="${g.id === GV}"><b>${esc(g.nom)}</b>
+      <span class="small">${g.n} membre${g.n > 1 ? 's' : ''}</span>${g.role ? `<span class="rolepill ${g.role}">${ROLE[g.role]}</span>` : '<span class="rolepill">Professeur</span>'}</button>`;
+  el.innerHTML = `
+    <div class="pagehead"><h2>Groupes</h2><span class="small">Réponses sur l’honneur, notes de 0 à 10 et discussion entre membres</span></div>
+    ${mineL.length || others.length ? `<div><h3 class="sec">${ic('users')} Mes groupes</h3>
+        <div class="gcards">${mineL.map(card).join('') || '<div class="empty">Tu n’es dans aucun groupe pour l’instant.</div>'}</div>
+        ${others.length ? `<h3 class="sec">${ic('eye')} Autres groupes de la classe</h3><div class="gcards">${others.map(card).join('')}</div>` : ''}</div>
+    <div id="gDetail"></div>
+    <details class="gmore"><summary>${ic('plus')} Rejoindre ou créer un autre groupe</summary><div class="grid2">      <div><h3 class="sec">${ic('key')} Rejoindre un groupe</h3>
+        <form class="panel form" id="gJoin"><label class="field">Code d’invitation<input id="gCode" autocomplete="off" maxlength="12" placeholder="Ex. : 4F9A2C" style="text-transform:uppercase"></label>
+          <button class="btn primary">Rejoindre</button><span class="small err" id="gJoinErr"></span></form>
+        </div><div><h3 class="sec">${ic('plus')} Créer un groupe</h3>
+        <form class="panel form" id="gNew"><label class="field">Nom du groupe<input id="gNom" maxlength="60" required placeholder="Ex. : MP* — trinôme du jeudi"></label>
+          <label class="field">Description (facultatif)<input id="gDesc" maxlength="300"></label>
+          <button class="btn primary">Créer et devenir responsable</button><span class="small err" id="gNewErr"></span></form>
+      </div>
+</div></details>`
+    : `<div class="grid2">      <div>
+        <h3 class="sec">${ic('key')} Rejoindre un groupe</h3>
+        <form class="panel form" id="gJoin"><label class="field">Code d’invitation<input id="gCode" autocomplete="off" maxlength="12" placeholder="Ex. : 4F9A2C" style="text-transform:uppercase"></label>
+          <button class="btn primary">Rejoindre</button><span class="small err" id="gJoinErr"></span></form>
+        </div><div><h3 class="sec">${ic('plus')} Créer un groupe</h3>
+        <form class="panel form" id="gNew"><label class="field">Nom du groupe<input id="gNom" maxlength="60" required placeholder="Ex. : MP* — trinôme du jeudi"></label>
+          <label class="field">Description (facultatif)<input id="gDesc" maxlength="300"></label>
+          <button class="btn primary">Créer et devenir responsable</button><span class="small err" id="gNewErr"></span></form>
+      </div>
+</div><div id="gDetail"></div>`}
+    <h3 class="sec">${ic('key')} Les rôles</h3>
+    <div class="panel roles">
+      <div><span class="rolepill responsable">Responsable</span><span>Gère le groupe (nom, code d’invitation), attribue les rôles, exclut des membres, modère. Il en reste toujours au moins un.</span></div>
+      <div><span class="rolepill moderateur">Modérateur</span><span>Voit le code d’invitation, supprime les réponses et messages inappropriés, exclut des membres simples.</span></div>
+      <div><span class="rolepill membre">Membre</span><span>Soumet ses réponses sur l’honneur, note celles des autres de 0 à 10, participe à la discussion.</span></div>
+      <div><span class="rolepill">Professeur</span><span>Voit et modère tous les groupes de la classe.</span></div>
+    </div>`;
+  el.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { GV = b.dataset.g; if (gById(GV)?.role) store.set('groupe', GV); renderGroupes(); });
+  $('#gJoin').onsubmit = async e => { e.preventDefault(); $('#gJoinErr').textContent = '';
+    try { GV = await api.rejoindre($('#gCode').value); store.set('groupe', GV); await loadGroups(); renderGroupes(); } catch (x) { $('#gJoinErr').textContent = x.message; } };
+  $('#gNew').onsubmit = async e => { e.preventDefault(); $('#gNewErr').textContent = '';
+    const nom = $('#gNom').value.trim(); if (nom.length < 2) { $('#gNewErr').textContent = 'Nom trop court.'; return; }
+    try { GV = await api.creerGroupe(nom, $('#gDesc').value.trim()); store.set('groupe', GV); await loadGroups(); renderGroupes(); } catch (x) { $('#gNewErr').textContent = x.message; } };
+  if (GV) renderGroupeDetail(GV);
+}
+async function renderGroupeDetail(gid) {
+  const box = $('#gDetail'), g = gById(gid); if (!box || !g) return;
+  box.innerHTML = '<p class="small"><span class="spin"></span> Chargement du groupe…</p>';
+  let membres = [], recent = [];
+  try { [membres, recent] = await Promise.all([api.membres(gid), api.recentes(gid)]); MEMB[gid] = membres; } catch (e) { box.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+  if (GV !== gid) return;
+  const resp = api.isProf || g.role === 'responsable', mod = canMod(gid), me = api.user.id;
+  box.innerHTML = `
+    <div class="panel gdetail">
+      <div class="gd-head"><div><h3>${esc(g.nom)}</h3>${g.description ? `<p class="small">${esc(g.description)}</p>` : ''}</div>
+        ${resp ? `<button class="btn ghost" id="gEdit">${ic('pen')} Modifier</button>` : ''}</div>
+      ${mod ? `<div class="gcode"><span>Code d’invitation</span><b id="gCodeV">${esc(g.code)}</b>
+        <button class="btn ghost" id="gCopy">${ic('link')} Copier</button>${resp ? `<button class="btn ghost" id="gRegen" title="L’ancien code ne fonctionnera plus">Nouveau code</button>` : ''}</div>` : ''}
+      <h4>${ic('users')} Membres (${membres.length})</h4>
+      <div class="scroll"><table class="stack"><thead><tr><th>Membre</th><th>Rôle</th><th>Arrivée</th><th></th></tr></thead><tbody>
+      ${membres.map(m => `<tr><td data-l="Membre"><span class="person">${avatar(m.user_id, m.full_name)}${esc(m.full_name)}${m.user_id === me ? ' (moi)' : ''}</span></td>
+        <td data-l="Rôle">${resp ? `<select data-role="${esc(m.user_id)}" aria-label="Rôle de ${esc(m.full_name)}">${Object.entries(ROLE).map(([k, v]) => `<option value="${k}" ${k === m.role ? 'selected' : ''}>${v}</option>`).join('')}</select>` : `<span class="rolepill ${m.role}">${ROLE[m.role]}</span>`}</td>
+        <td data-l="Arrivée">${fmtDate(m.joined_at)}</td>
+        <td>${m.user_id !== me && (resp || (mod && m.role === 'membre')) ? `<button class="linkbtn danger" data-kick="${esc(m.user_id)}">Exclure</button>` : ''}</td></tr>`).join('')}
+      </tbody></table></div>
+      <h4>${ic('clock')} Dernières réponses</h4>
+      <div class="glist">${recent.map(r => { const e = byId(r.exercice_id); return `<a class="item" href="#ex-${esc(r.exercice_id)}"><span class="t">${esc(e?.titre || r.exercice_id)}</span>
+        <span class="avgpill">${fmtNote(moy(r.notes))}/10</span><span class="m">${esc(nameOf(gid, r.user_id))} · ${ago(r.created_at)}${r.aide_consultee ? ' · aide consultée' : ''}</span></a>`; }).join('') || '<div class="empty">Aucune réponse soumise pour l’instant.</div>'}</div>
+      <div class="gactions">${g.role ? `<button class="btn" id="gLeave">${ic('logout')} Quitter le groupe</button>` : ''}${resp ? `<button class="btn danger" id="gDel">${ic('trash')} Supprimer le groupe</button>` : ''}</div>
+      <span class="small err" id="gErr"></span>
+    </div>`;
+  const err = m => { $('#gErr').textContent = m; };
+  const reload = async () => { await loadGroups(); renderGroupes(); };
+  box.querySelectorAll('[data-role]').forEach(s => s.onchange = async () => { try { await api.definirRole(gid, s.dataset.role, s.value); await reload(); } catch (x) { err(x.message); renderGroupeDetail(gid); } });
+  box.querySelectorAll('[data-kick]').forEach(b => b.onclick = async () => { const m = membres.find(x => x.user_id === b.dataset.kick);
+    if (!confirm(`Exclure ${m.full_name} du groupe ? Ses réponses restent visibles.`)) return; try { await api.exclure(gid, m.user_id); await reload(); } catch (x) { err(x.message); } });
+  $('#gCopy') && ($('#gCopy').onclick = async () => { try { await navigator.clipboard.writeText(g.code); $('#gCopy').innerHTML = `${ic('check')} Copié`; } catch { err('Copie impossible : note le code à la main.'); } });
+  $('#gRegen') && ($('#gRegen').onclick = async () => { if (!confirm('Générer un nouveau code ? L’ancien ne permettra plus de rejoindre le groupe.')) return; try { await api.regenererCode(gid); await reload(); } catch (x) { err(x.message); } });
+  $('#gEdit') && ($('#gEdit').onclick = async () => { const nom = prompt('Nom du groupe', g.nom); if (nom == null) return; const desc = prompt('Description', g.description || ''); if (desc == null) return;
+    if (nom.trim().length < 2) return err('Nom trop court.'); try { await api.majGroupe(gid, {nom: nom.trim().slice(0, 60), description: desc.trim().slice(0, 300)}); await reload(); } catch (x) { err(x.message); } });
+  $('#gLeave') && ($('#gLeave').onclick = async () => { if (!confirm(`Quitter « ${g.nom} » ? Tes réponses y restent visibles.`)) return; try { await api.quitter(gid); GV = null; await reload(); } catch (x) { err(x.message); } });
+  $('#gDel') && ($('#gDel').onclick = async () => { if (!confirm(`Supprimer « ${g.nom} » ainsi que toutes ses réponses, notes et discussions ? Action irréversible.`)) return; try { await api.supprimerGroupe(gid); GV = null; await reload(); } catch (x) { err(x.message); } });
 }
 
 /* ---------- images ---------- */
@@ -434,13 +720,12 @@ async function addFiles(id, files) {
   for (const f of [...files].filter(f => f.type.startsWith('image/')).slice(0, 4 - S.imgs.length)) {
     try { S.imgs.push(await shrink(f)); } catch { notice('Une image n’a pas pu être lue.'); }
   }
-  presence({st: 'redige'}); renderCopy();
+  presence({st: 'redige'}); renderRep(byId(id));
 }
 
 /* ---------- IA ---------- */
 async function ask(ex, mode) {
   const S = sess(ex.id), K = CORR[ex.id];
-  if (mode === 'copie' && !S.imgs.length) return;
   if (K && mode === 'indice') {            // indices préparés : instantanés, sans IA
     if (S.hint >= 3) return;
     const t = {kind: 'indice', n: 0, hint: S.hint + 1, verdict: 'bloque', score: null, resume: '', retour: '', indice: K.indices[S.hint], question: '', points: []};
@@ -457,11 +742,11 @@ async function ask(ex, mode) {
     return;
   }
   S.busy = mode; renderCopy(); notice('');
-  presence({st: mode === 'copie' ? 'correction' : mode === 'indice' ? 'indice' : 'corrige'});
+  presence({st: mode === 'indice' ? 'indice' : 'corrige'});
   try {
     const hist = S.tours.map(t => `- ${t.kind === 'copie' ? 'Copie ' + t.n : 'Indice'} : ${t.verdict}. ${t.retour || ''} ${t.indice ? 'Indice : ' + t.indice : ''}`).join('\n');
     const r = await api.ia({mode, exercice: {titre: ex.titre, mat: ex.mat, chap: ex.chap, niveau: ex.niveau, enonce: ex.enonce},
-      images: mode === 'copie' ? S.imgs.map(i => i.data) : [], note: S.note, hint: Math.min(S.hint + 1, 2), historique: hist,
+      images: [], note: '', hint: Math.min(S.hint + 1, 2), historique: hist,
       reference: K ? `${K.corrige}\n\nRÉSULTAT ATTENDU : ${K.reponse}` : '', indices: K ? K.indices : []});
     if (mode === 'solution') {
       const arr = v => Array.isArray(v) ? v.slice(0, 5).map(String) : [];
@@ -469,15 +754,14 @@ async function ask(ex, mode) {
       S.openC = true; S.seen = true; await record(ex, {kind: 'solution'});
     }
     else {
-      const t = {kind: mode, n: S.tours.filter(t => t.kind === 'copie').length + 1, hint: r.indice ? Math.min(S.hint + 1, 2) : 0,
-        verdict: ['juste', 'partiel', 'faux', 'illisible', 'bloque'].includes(r.verdict) ? r.verdict : (mode === 'copie' ? 'partiel' : 'bloque'),
+      const t = {kind: mode, n: 0, hint: r.indice ? Math.min(S.hint + 1, 2) : 0, verdict: 'bloque',
         score: r.score != null && Number.isFinite(+r.score) ? Math.max(0, Math.min(100, Math.round(+r.score))) : null,
         resume: String(r.resume || ''), retour: String(r.retour || ''), indice: String(r.indice || ''), question: String(r.question || ''),
         points: Array.isArray(r.points) ? r.points.slice(0, 8).map(p => ({etape: String(p.etape || ''), statut: ['ok', 'erreur', 'manquant'].includes(p.statut) ? p.statut : 'manquant', note: String(p.note || '')})) : []};
       if (t.indice) S.hint = Math.min(S.hint + 1, 2);
-      S.tours.push(t); if (mode === 'copie') S.imgs = [];
+      S.tours.push(t);
       await record(ex, t);
-      presence({st: t.verdict === 'juste' ? 'reussi' : 'redige'});
+      presence({st: 'redige'});
       api.activity({uid: api.user.id, name: api.profile.full_name, id: ex.id, k: t.kind, v: t.verdict, sc: t.score});
     }
   } catch (e) { notice(esc(e.message || 'Erreur')); }
@@ -488,8 +772,8 @@ async function ask(ex, mode) {
 async function record(ex, t) {
   SUIVI.ex ||= {}; SUIVI.journal ||= []; SUIVI.cree ||= now();
   const st = SUIVI.ex[ex.id] ||= {s: 'en_cours', e: 0, i: 0, sc: 0, d: 0, t: 0};
-  if (t.kind === 'copie') { st.e++; if (t.score != null) st.sc = Math.max(st.sc || 0, t.score); if (t.verdict === 'juste') { st.s = 'reussi'; st.sc = 100; } }
-  if (t.kind === 'indice' || (t.kind === 'copie' && t.indice)) st.i++;
+  if (t.kind === 'reponse') st.e++;
+  if (t.kind === 'indice') st.i++;
   if (t.kind === 'solution') st.vu = 1;
   st.d = now(); st.t = Math.round((now() - sess(ex.id).start) / 1000);
   SUIVI.journal = [{d: now(), id: ex.id, k: t.kind, v: t.verdict || '', sc: t.score ?? null}].concat(SUIVI.journal).slice(0, 60);
@@ -528,7 +812,8 @@ function renderSuivi() {
         <div class="big">${ok}<span style="font-size:.42em;color:var(--soft)"> / ${atL.length}</span></div>
         <div class="bar" style="grid-template-columns:minmax(0,1fr);margin-top:10px"><span class="tr"><i style="width:${atL.length ? 100 * ok / atL.length : 0}%;background:var(--green)"></i></span></div></div>
       <div class="stats">
-        <div class="panel stat"><div class="k">${ic('pen')} Copies corrigées</div><div class="v">${tot('e')}</div></div>
+        <div class="panel stat"><div class="k">${ic('pen')} Réponses soumises</div><div class="v">${MES.length}</div></div>
+        <div class="panel stat"><div class="k">${ic('star')} Note moyenne reçue</div><div class="v">${fmtNote(moy(MES.flatMap(r => r.notes || [])))}<span style="font-size:.5em"> /10</span></div></div>
         <div class="panel stat"><div class="k">${ic('bulb')} Indices demandés</div><div class="v">${tot('i')}</div></div>
         <div class="panel stat"><div class="k">${ic('clock')} Temps de travail</div><div class="v">${Math.round(tot('t') / 60)}<span style="font-size:.5em"> min</span></div></div>
         <div class="panel stat"><div class="k">${ic('target')} Exercices commencés</div><div class="v">${exs.length}</div></div>
@@ -542,8 +827,8 @@ function renderSuivi() {
     <h3 class="sec">${ic('heart')} Mes exercices enregistrés</h3>
     <div class="panel" style="padding:8px">${favs().map(byId).filter(Boolean).map(e => `<button class="item" data-open="${esc(e.id)}"><span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span><span class="t">${esc(e.titre)}</span><span></span><span class="m">${LV[e.niveau]} · ${esc(e.chap)} · ${e.duree} min</span></button>`).join('') || `<div class="empty">Aucun exercice enregistré. Appuie sur ${ic('heart')} dans un exercice pour le retrouver ici.</div>`}</div>
     <h3 class="sec">${ic('clock')} Historique</h3>
-    <div class="panel scroll"><table class="stack"><thead><tr><th>Date</th><th>Exercice</th><th>Action</th><th class="r">Avancement</th></tr></thead><tbody>
-    ${(s.journal || []).map(j => `<tr><td>${fmtDate(j.d)}</td><td>${esc(byId(j.id)?.titre || j.id)}</td><td>${j.k === 'copie' ? 'Copie : ' + esc({juste: 'juste', partiel: 'partielle', faux: 'erreur', illisible: 'illisible'}[j.v] || j.v) : j.k === 'indice' ? 'Indice' : 'Corrigé consulté'}</td><td class="r">${j.sc != null ? j.sc + ' %' : ''}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Pas encore d’activité.</td></tr>'}
+    <div class="panel scroll"><table class="stack"><thead><tr><th>Date</th><th>Exercice</th><th>Action</th><th class="r">Note</th></tr></thead><tbody>
+    ${(s.journal || []).map(j => `<tr><td>${fmtDate(j.d)}</td><td>${esc(byId(j.id)?.titre || j.id)}</td><td>${j.k === 'reponse' ? 'Réponse soumise sur l’honneur' : j.k === 'copie' ? 'Copie : ' + esc({juste: 'juste', partiel: 'partielle', faux: 'erreur', illisible: 'illisible'}[j.v] || j.v) : j.k === 'indice' ? 'Indice' : 'Corrigé consulté'}</td><td class="r">${j.k === 'reponse' ? (() => { const r = mine(j.id); const m = r && moy(r.notes); return m != null ? fmtNote(m) + '/10' : ''; })() : j.sc != null ? j.sc + ' %' : ''}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Pas encore d’activité.</td></tr>'}
     </tbody></table></div>
     <a class="panel cta" href="#envoyer">${ic('upload')}<span><b>Tu as passé un oral ?</b><span class="small">Envoie ton sujet en PDF pour enrichir la plateforme.</span></span></a>`;
   $('#phChange').onclick = pickPhoto;
@@ -567,7 +852,7 @@ function buildProf() {
     <h3 class="sec">${ic('live')} En direct</h3><div class="live" id="pLive"></div>
     <div class="grid2">
       <div><h3 class="sec">${ic('users')} Élèves</h3>
-        <div class="panel scroll"><table class="stack"><thead><tr><th>Élève</th><th>Niveau</th><th class="r">Réussis</th><th class="r">Copies</th><th class="r">Indices</th><th>À revoir</th><th>Dernière activité</th></tr></thead><tbody id="pRows"></tbody></table></div></div>
+        <div class="panel scroll"><table class="stack"><thead><tr><th>Élève</th><th>Niveau</th><th class="r">Réussis</th><th class="r">Réponses</th><th class="r">Indices</th><th>À revoir</th><th>Dernière activité</th></tr></thead><tbody id="pRows"></tbody></table></div></div>
       <div><h3 class="sec">${ic('msg')} Fil d’activité</h3><ul class="stream" id="pStream"></ul></div>
     </div>
     <div class="grid2">
@@ -609,7 +894,7 @@ function livePeople() {
   return Object.entries(PRES).map(([uid, metas]) => ({uid, ...(metas[metas.length - 1] || {})}));
 }
 function doing(p) {
-  const st = {lit: 'lit l’énoncé', redige: 'rédige', correction: 'attend la correction', indice: 'demande un indice', corrige: 'lit le corrigé', reussi: 'a réussi'}[p.st] || '';
+  const st = {lit: 'lit l’énoncé', redige: 'rédige', soumis: 'a soumis sa réponse', correction: 'attend la correction', indice: 'demande un indice', corrige: 'lit le corrigé', reussi: 'a réussi'}[p.st] || '';
   if (p.v === 'suivi') return 'consulte son suivi';
   if (p.v === 'prof') return 'tableau de bord';
   if (p.ex) return `${st ? st + ' — ' : ''}<b>${esc(p.t || p.ex)}</b> <span class="stamp n${p.n || 1}" style="font-size:10px">${LV[p.n] || ''}</span>`;
@@ -621,12 +906,13 @@ function updateProf() {
   const students = CLASS.filter(c => c.id !== api.user.id);
   const today = new Date(); today.setHours(0, 0, 0, 0);
   let triesToday = 0, okToday = 0;
-  for (const s of students) for (const j of s.data?.journal || []) if (j.d >= +today && j.k === 'copie') { triesToday++; if (j.v === 'juste') okToday++; }
+  for (const s of students) for (const j of s.data?.journal || []) if (j.d >= +today && (j.k === 'reponse' || j.k === 'copie')) triesToday++;
+  okToday = GROUPS.length;
   $('#pStats').innerHTML = `
     <div class="panel stat"><div class="k">${ic('live')} Connectés maintenant</div><div class="v">${people.length}</div></div>
     <div class="panel stat"><div class="k">${ic('users')} Élèves inscrits</div><div class="v">${students.length}</div></div>
-    <div class="panel stat"><div class="k">${ic('pen')} Copies corrigées aujourd’hui</div><div class="v">${triesToday}</div></div>
-    <div class="panel stat"><div class="k">${ic('trophy')} Réussites aujourd’hui</div><div class="v">${okToday}</div></div>`;
+    <div class="panel stat"><div class="k">${ic('pen')} Réponses soumises aujourd’hui</div><div class="v">${triesToday}</div></div>
+    <div class="panel stat"><div class="k">${ic('users')} Groupes</div><div class="v">${okToday}</div></div>`;
   $('#pLive').innerHTML = DEMO ? '<div class="empty">Le temps réel fonctionne une fois Supabase configuré.</div>' : people.map(p => `<div class="panel lc">
       <div class="person">${avatar(p.uid, p.name)}<b>${esc(p.name || 'Élève')}</b>${p.uid === api.user.id ? '<span class="small">(vous)</span>' : ''}${p.role === 'prof' ? '<span class="small">prof</span>' : ''}</div>
       <div class="doing">${doing(p)}</div><div class="since">${ic('clock')} depuis ${mmss((now() - (p.since || now())) / 1000)}</div></div>`).join('') || '<div class="empty">Personne en ligne pour l’instant.</div>';
@@ -641,7 +927,7 @@ function updateProf() {
   for (const s of students) for (const j of (s.data?.journal || []).slice(0, 8)) fromDb.push({d: j.d, uid: s.id, name: s.full_name, id: j.id, k: j.k, v: j.v, sc: j.sc});
   const seen = new Set(), items = [];
   for (const it of LIVE.concat(fromDb).sort((a, b) => b.d - a.d)) { const key = it.uid + it.id + it.k + Math.round(it.d / 8000); if (seen.has(key)) continue; seen.add(key); items.push(it); if (items.length >= 30) break; }
-  $('#pStream').innerHTML = items.map(it => `<li>${ic(it.k === 'copie' ? (it.v === 'juste' ? 'trophy' : 'pen') : it.k === 'indice' ? 'bulb' : 'eye')}<span><b>${esc(it.name || 'Élève')}</b> · ${it.k === 'copie' ? 'copie ' + esc({juste: 'juste', partiel: 'partielle', faux: 'avec erreur', illisible: 'illisible'}[it.v] || it.v) : it.k === 'indice' ? 'indice demandé' : 'corrigé consulté'} — ${esc(byId(it.id)?.titre || it.id)} <span class="small">${ago(it.d)}</span></span></li>`).join('') || '<li class="small">Rien pour l’instant.</li>';
+  $('#pStream').innerHTML = items.map(it => `<li>${ic(it.k === 'reponse' ? 'users' : it.k === 'copie' ? (it.v === 'juste' ? 'trophy' : 'pen') : it.k === 'indice' ? 'bulb' : 'eye')}<span><b>${esc(it.name || 'Élève')}</b> · ${it.k === 'reponse' ? 'réponse soumise sur l’honneur' : it.k === 'copie' ? 'copie ' + esc({juste: 'juste', partiel: 'partielle', faux: 'avec erreur', illisible: 'illisible'}[it.v] || it.v) : it.k === 'indice' ? 'indice demandé' : 'corrigé consulté'} — ${esc(byId(it.id)?.titre || it.id)} <span class="small">${ago(it.d)}</span></span></li>`).join('') || '<li class="small">Rien pour l’instant.</li>';
   $('#pBank').innerHTML = BANK.length ? `<h3 class="sec">Exercices ajoutés</h3><div class="panel" style="padding:8px">${BANK.map(e => `<div class="row" style="align-items:center;padding:6px"><span style="flex:3 1 200px"><b>${esc(e.titre)}</b> <span class="small">${LV[e.niveau]} · ${esc(e.chap)}</span></span><button class="btn" data-del="${esc(e.id)}" style="flex:0 0 auto">${ic('trash')} Supprimer</button></div>`).join('')}</div>` : '';
 }
 function studentDialog(id) {
@@ -652,8 +938,8 @@ function studentDialog(id) {
     <div class="row" style="align-items:end"><label class="field">Niveau de l’élève<select id="dLvl">${[1, 2, 3].map(n => `<option value="${n}" ${n === lvl ? 'selected' : ''}>${LV[n]}</option>`).join('')}</select></label><span class="small">Inscrit ${fmtDate(c.created_at)} · vu ${ago(c.last_seen)}</span></div>
     <h3 class="sec" style="font-size:20px">Chapitres (${LV[lvl]})</h3><div class="bars" style="padding:0">${bars(chapStats(lvl, d))}</div>
     <h3 class="sec" style="font-size:20px">Exercices travaillés</h3>
-    <div class="scroll"><table class="stack"><thead><tr><th>Exercice</th><th>Statut</th><th class="r">Copies</th><th class="r">Indices</th><th class="r">Max</th><th>Date</th></tr></thead><tbody>
-    ${Object.entries(d.ex || {}).sort((a, b) => b[1].d - a[1].d).map(([eid, v]) => `<tr><td>${esc(byId(eid)?.titre || eid)}</td><td>${v.s === 'reussi' ? '✓ réussi' : 'en cours'}${v.vu ? ' · corrigé vu' : ''}</td><td class="r">${v.e || 0}</td><td class="r">${v.i || 0}</td><td class="r">${v.sc || 0} %</td><td>${fmtDate(v.d)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Rien encore.</td></tr>'}
+    <div class="scroll"><table class="stack"><thead><tr><th>Exercice</th><th>Statut</th><th class="r">Réponses</th><th class="r">Indices</th><th class="r">Note</th><th>Date</th></tr></thead><tbody>
+    ${Object.entries(d.ex || {}).sort((a, b) => b[1].d - a[1].d).map(([eid, v]) => `<tr><td>${esc(byId(eid)?.titre || eid)}</td><td>${v.s === 'reussi' ? '✓ réussi' : 'en cours'}${v.vu ? ' · corrigé vu' : ''}</td><td class="r">${v.e || 0}</td><td class="r">${v.i || 0}</td><td class="r">${v.sc ? fmtNote(v.sc / 10) + '/10' : '—'}</td><td>${fmtDate(v.d)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Rien encore.</td></tr>'}
     </tbody></table></div>`;
   $('#dLvl').onchange = async e => { try { await api.setLevel(id, +e.target.value); c.niveau = +e.target.value; updateProf(); } catch { notice('Modification impossible.'); } };
   $('#dlg').showModal();

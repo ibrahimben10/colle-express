@@ -6,11 +6,14 @@ Site de colles courtes de maths et de physique-chimie pour la prépa MP, par **B
 - 36 schémas dessinés pour les énoncés de physique-chimie
 - Pour **chaque** exercice : 3 indices gradués et un corrigé complet et détaillé (`data/corriges.json`)
 - Comptes élèves (e-mail + mot de passe) protégés par un **code de classe**
-- L’élève photographie sa copie : l’IA (Claude) valide les étapes, pointe la première erreur et donne **un indice gradué** — le corrigé n’est accessible qu’après 2 copies ou une réussite
+- **Groupes d’étudiants** avec rôles (responsable, modérateur, membre) : on rejoint un groupe avec son code d’invitation
+- **Réponse sur l’honneur** : l’élève coche un engagement sur l’honneur puis soumet sa réponse (texte LaTeX et/ou photos) ; elle devient **immédiatement visible** par les membres de son groupe et n’est plus modifiable
+- **Notation par les pairs de 0 à 10** et **fil de discussion** sous chaque exercice (commentaires liés ou non à une réponse)
+- Le corrigé s’ouvre après l’envoi de sa réponse ou les deux indices ; consulter le corrigé ou les autres réponses avant d’envoyer la sienne ajoute la mention « aide consultée »
 - **Suivi** de chaque élève par chapitre, historique, exercices conseillés
 - **Tableau de bord** du professeur : élèves connectés **en temps réel**, fil d’activité, progression de chaque élève, message et sélection d’exercices pour la classe, ajout d’exercices (y compris par photo)
 
-Le site est **statique** (hébergé gratuitement par GitHub Pages). Les comptes, le suivi et le temps réel passent par **Supabase** (gratuit), et la correction par l’**API Claude** d’Anthropic (payante, à l’usage).
+Le site est **statique** (hébergé gratuitement par GitHub Pages). Les comptes, le suivi et le temps réel passent par **Supabase** (gratuit), et l’**API Claude** d’Anthropic (facultative, payante à l’usage) sert seulement aux indices et corrigés des exercices ajoutés par le professeur et à l’import d’énoncés par photo. La correction automatique des copies est désactivée.
 
 ---
 
@@ -46,9 +49,11 @@ Le site est **statique** (hébergé gratuitement par GitHub Pages). Les comptes,
    ```
    → **Commit changes**. Le site se met à jour en 1 à 2 minutes.
 
-### Étape 4 — Activer la correction par l’IA
+### Étape 4 (facultative) — Activer l’IA pour les exercices ajoutés
 
-1. Crée une clé API sur **https://console.anthropic.com** → *API Keys* → **Create Key** (ajoute un peu de crédit dans *Billing* ; une correction de copie coûte de l’ordre de quelques centimes).
+Sans cette étape, tout fonctionne (groupes, réponses, notes, discussion, indices et corrigés des exercices fournis) ; seuls les exercices que tu ajoutes toi-même n’ont pas d’indice ni de corrigé automatique.
+
+1. Crée une clé API sur **https://console.anthropic.com** → *API Keys* → **Create Key** (ajoute un peu de crédit dans *Billing* ; un corrigé coûte quelques centimes).
 2. Dans Supabase : **Edge Functions** → **Deploy a new function** → **Via Editor** :
    - Nom de la fonction : **`corriger`** (exactement)
    - Remplace le code par le contenu de [`supabase/functions/corriger/index.ts`](supabase/functions/corriger/index.ts) → **Deploy**.
@@ -100,7 +105,7 @@ Format d’un exercice dans `data/exercices.json` :
 
 ## Sécurité et coûts
 
-- Les indices préparés et les corrigés s’affichent sans appel à l’IA (gratuit, instantané). Le corrigé n’apparaît dans l’interface qu’après 2 copies corrigées, une réussite ou les 3 indices ; mais le fichier `data/corriges.json` est public : un élève curieux peut le lire directement.
+- Les indices préparés et les corrigés s’affichent sans appel à l’IA (gratuit, instantané). Le corrigé n’apparaît dans l’interface qu’après l’envoi de sa réponse ou les indices ; mais le fichier `data/corriges.json` est public : un élève curieux peut le lire directement.
 
 - Les règles de sécurité (RLS) de Supabase empêchent un élève de lire le suivi des autres ; seul le professeur voit toute la classe.
 - La clé Anthropic reste côté serveur (Edge Function) : elle n’apparaît jamais dans le site.
@@ -125,15 +130,34 @@ L'onglet « À propos » contient un formulaire « Enrichir la plateforme » : l
 
 Chaque élève peut ajouter une photo (onglet « Mon suivi » ou clic sur son avatar en haut). Elle est recadrée et compressée sur l'appareil (160 × 160 px), puis enregistrée avec son suivi : aucune configuration supplémentaire n'est nécessaire.
 
+## Groupes, réponses et notation par les pairs
+
+**Mise à jour d’une installation existante** : réexécute tout le fichier [`supabase/schema.sql`](supabase/schema.sql) dans *SQL Editor* (il est sans risque de le relancer : il ne supprime aucune donnée). Il crée les tables `groupes`, `groupe_membres`, `reponses`, `notes`, `commentaires`, le stockage privé `reponses` pour les photos, ainsi que toutes les règles de sécurité.
+
+| Rôle | Droits |
+|---|---|
+| Responsable | renomme le groupe, voit et renouvelle le code d’invitation, attribue les rôles, exclut des membres, modère, supprime le groupe (il reste toujours au moins un responsable) |
+| Modérateur | voit le code d’invitation, supprime réponses et messages, exclut des membres simples |
+| Membre | soumet ses réponses sur l’honneur, note celles des autres de 0 à 10, commente |
+| Professeur | voit et modère tous les groupes de la classe |
+
+Règles garanties par la base (et non seulement par l’interface) :
+- une réponse exige l’engagement sur l’honneur, une seule réponse par élève, exercice et groupe, et elle n’est pas modifiable ;
+- seuls les membres du groupe voient les réponses, les notes, les photos et la discussion ;
+- on ne peut pas noter sa propre réponse ; les notes sont des entiers de 0 à 10, modifiables ou retirables par leur auteur ;
+- un commentaire ne peut être modifié que par son auteur, et supprimé par lui ou par un modérateur.
+
+Dans le suivi, un exercice est marqué **réussi** quand la réponse a reçu au moins 2 notes et une moyenne d’au moins 6/10.
+
 ## Ajouter des exercices en lot
 
 Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 indices, corrigé). Pour régénérer les fichiers de données : `python3 tools/build_new.py`, puis `python3 tools/build_bilan.py`.
 
 ## Structure pédagogique de chaque exercice
 
-- **Énoncé** (encadré bleu), **Ta copie** (photo corrigée par l'IA, facultatif).
+- **Énoncé** (encadré bleu), **Ma réponse** : engagement sur l’honneur puis envoi au groupe (texte et/ou photos).
 - **Indices** (encadré orange, fermés par défaut) : Indice 1 = piste globale, Indice 2 = méthode précise.
-- **Correction détaillée** (encadré vert, accordéon) : déverrouillée après les deux indices ou une copie corrigée ; elle se termine par le **Bilan** (encadré violet) : 📜 théorèmes & définitions utilisés, 💡 astuces & réflexes à retenir.
+- **Correction détaillée** (encadré vert, accordéon) : déverrouillée après l’envoi de sa réponse ou les deux indices ; elle se termine par le **Bilan** (encadré violet) : 📜 théorèmes & définitions utilisés, 💡 astuces & réflexes à retenir.
 
 Les bilans sont rédigés dans `tools/bilan_*.py` (énoncés de référence communs dans `tools/bilan_lib.py`). Pour les exercices ajoutés par le professeur depuis le site, l'IA produit le même format (corrigé, résultat, théorèmes, astuces).
 

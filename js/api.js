@@ -6,8 +6,16 @@ const ls = { get(k, d) { try { const v = localStorage.getItem('ce:' + k); return
              set(k, v) { try { localStorage.setItem('ce:' + k, JSON.stringify(v)); } catch {} } };
 
 let sb = null, channel = null;
-const listeners = { auth: [], presence: [], activity: [], classe: [], config: [], banque: [] };
+const listeners = { auth: [], presence: [], activity: [], classe: [], config: [], banque: [], groupe: [] };
 const emit = (k, v) => listeners[k].forEach(f => f(v));
+const uid4 = () => (crypto.randomUUID ? crypto.randomUUID() : 'x' + Date.now() + Math.random().toString(16).slice(2));
+const dataToBlob = d => { const [h, b] = d.split(','); const bin = atob(b); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], {type: h.slice(5).split(';')[0]}); };
+const errFr = e => { const m = e?.message || String(e);
+  if (/duplicate key.*reponses/.test(m)) return 'Tu as déjà soumis une réponse à cet exercice dans ce groupe.';
+  if (/row-level security/.test(m)) return 'Action non autorisée (rôle ou appartenance au groupe).';
+  return m; };
+// Mode démonstration : tout est conservé dans le navigateur.
+const D = { get: () => ls.get('demo-g', {groupes: [], membres: [], reponses: [], notes: [], coms: []}), set(v) { ls.set('demo-g', v); emit('groupe'); } };
 export const on = (k, f) => listeners[k].push(f);
 
 export const api = {
@@ -143,6 +151,129 @@ export const api = {
     if (error) throw error;
   },
 
+
+  /* ---------- groupes ---------- */
+  async groupes() {
+    if (DEMO) { const d = D.get(); return d.groupes.map(g => ({...g, role: d.membres.find(m => m.groupe_id === g.id && m.user_id === 'demo')?.role || null, n: d.membres.filter(m => m.groupe_id === g.id).length})); }
+    const [{ data: gs, error }, { data: ms }] = await Promise.all([
+      sb.from('groupes').select('id, nom, description, code, created_at').order('created_at'),
+      sb.from('groupe_membres').select('groupe_id, user_id, role')]);
+    if (error) throw new Error(errFr(error));
+    return (gs || []).map(g => ({...g, role: (ms || []).find(m => m.groupe_id === g.id && m.user_id === this.user.id)?.role || null, n: (ms || []).filter(m => m.groupe_id === g.id).length}));
+  },
+  async membres(g) {
+    if (DEMO) { const d = D.get(); return d.membres.filter(m => m.groupe_id === g).map(m => ({...m, full_name: m.user_id === 'demo' ? this.profile.full_name : m.full_name})); }
+    const { data: ms, error } = await sb.from('groupe_membres').select('user_id, role, joined_at').eq('groupe_id', g).order('joined_at');
+    if (error) throw new Error(errFr(error));
+    const ids = (ms || []).map(m => m.user_id);
+    const { data: ps } = ids.length ? await sb.from('profiles').select('id, full_name').in('id', ids) : {data: []};
+    const nm = Object.fromEntries((ps || []).map(p => [p.id, p.full_name]));
+    return (ms || []).map(m => ({...m, full_name: nm[m.user_id] || 'Membre'}));
+  },
+  async _rpc(f, args) { const { data, error } = await sb.rpc(f, args); if (error) throw new Error(errFr(error)); return data; },
+  async creerGroupe(nom, description = '') {
+    if (DEMO) { const d = D.get(), id = uid4(); d.groupes.push({id, nom, description, code: Math.random().toString(36).slice(2, 8).toUpperCase(), created_at: new Date().toISOString()});
+      d.membres.push({groupe_id: id, user_id: 'demo', role: 'responsable', joined_at: new Date().toISOString()}); D.set(d); return id; }
+    return this._rpc('creer_groupe', {p_nom: nom, p_description: description});
+  },
+  async rejoindre(code) {
+    if (DEMO) { const d = D.get(), g = d.groupes.find(x => x.code === code.trim().toUpperCase()); if (!g) throw new Error('Code de groupe inconnu'); if (!d.membres.some(m => m.groupe_id === g.id && m.user_id === 'demo')) d.membres.push({groupe_id: g.id, user_id: 'demo', role: 'membre', joined_at: new Date().toISOString()}); D.set(d); return g.id; }
+    return this._rpc('rejoindre_groupe', {p_code: code});
+  },
+  async quitter(g) {
+    if (DEMO) { const d = D.get(); d.membres = d.membres.filter(m => !(m.groupe_id === g && m.user_id === 'demo')); if (!d.membres.some(m => m.groupe_id === g)) d.groupes = d.groupes.filter(x => x.id !== g); D.set(d); return; }
+    return this._rpc('quitter_groupe', {g});
+  },
+  async definirRole(g, u, r) {
+    if (DEMO) { const d = D.get(), m = d.membres.find(m => m.groupe_id === g && m.user_id === u); if (m) m.role = r;
+      if (!d.membres.some(m => m.groupe_id === g && m.role === 'responsable')) { m.role = 'responsable'; throw new Error('Le groupe doit garder au moins un responsable'); } D.set(d); return; }
+    return this._rpc('definir_role', {g, u, r});
+  },
+  async exclure(g, u) {
+    if (DEMO) { const d = D.get(); d.membres = d.membres.filter(m => !(m.groupe_id === g && m.user_id === u)); D.set(d); return; }
+    return this._rpc('exclure_membre', {g, u});
+  },
+  async regenererCode(g) {
+    if (DEMO) { const d = D.get(), x = d.groupes.find(x => x.id === g); x.code = Math.random().toString(36).slice(2, 8).toUpperCase(); D.set(d); return x.code; }
+    return this._rpc('regenerer_code', {g});
+  },
+  async majGroupe(g, champs) {
+    if (DEMO) { const d = D.get(); Object.assign(d.groupes.find(x => x.id === g), champs); D.set(d); return; }
+    const { error } = await sb.from('groupes').update(champs).eq('id', g); if (error) throw new Error(errFr(error));
+  },
+  async supprimerGroupe(g) {
+    if (DEMO) { const d = D.get(); d.groupes = d.groupes.filter(x => x.id !== g); d.membres = d.membres.filter(m => m.groupe_id !== g); d.reponses = d.reponses.filter(r => r.groupe_id !== g); d.coms = d.coms.filter(c => c.groupe_id !== g); D.set(d); return; }
+    const { error } = await sb.from('groupes').delete().eq('id', g); if (error) throw new Error(errFr(error));
+  },
+
+  /* ---------- réponses sur l'honneur, notes, commentaires ---------- */
+  async fil(g, ex) {
+    if (DEMO) { const d = D.get();
+      return {reponses: d.reponses.filter(r => r.groupe_id === g && r.exercice_id === ex).map(r => ({...r, notes: d.notes.filter(n => n.reponse_id === r.id)})),
+              commentaires: d.coms.filter(c => c.groupe_id === g && c.exercice_id === ex).sort((a, b) => a.created_at.localeCompare(b.created_at))}; }
+    const [r, c] = await Promise.all([
+      sb.from('reponses').select('*, notes(note, evaluateur_id)').eq('groupe_id', g).eq('exercice_id', ex).order('created_at'),
+      sb.from('commentaires').select('*').eq('groupe_id', g).eq('exercice_id', ex).order('created_at')]);
+    if (r.error) throw new Error(errFr(r.error));
+    return {reponses: r.data || [], commentaires: c.data || []};
+  },
+  async recentes(g) {   // dernières réponses d'un groupe (page Groupes)
+    if (DEMO) { const d = D.get(); return d.reponses.filter(r => r.groupe_id === g).map(r => ({...r, notes: d.notes.filter(n => n.reponse_id === r.id)})).sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 30); }
+    const { data } = await sb.from('reponses').select('id, exercice_id, user_id, created_at, aide_consultee, notes(note)').eq('groupe_id', g).order('created_at', {ascending: false}).limit(30);
+    return data || [];
+  },
+  async mesReponses() {
+    if (DEMO) { const d = D.get(); return d.reponses.filter(r => r.user_id === 'demo').map(r => ({...r, notes: d.notes.filter(n => n.reponse_id === r.id)})); }
+    const { data } = await sb.from('reponses').select('id, groupe_id, exercice_id, created_at, notes(note)').eq('user_id', this.user.id);
+    return data || [];
+  },
+  async soumettre({g, ex, contenu, images, engagementTexte, aide}) {
+    const base = {groupe_id: g, exercice_id: ex, contenu, engagement: true, engagement_texte: engagementTexte, aide_consultee: !!aide};
+    if (DEMO) { const d = D.get();
+      if (d.reponses.some(r => r.groupe_id === g && r.exercice_id === ex && r.user_id === 'demo')) throw new Error(errFr('duplicate key reponses'));
+      d.reponses.push({...base, id: uid4(), user_id: 'demo', photos: images.slice(0, 4), created_at: new Date().toISOString()}); D.set(d); return; }
+    const photos = [];
+    try {
+      for (const im of images.slice(0, 4)) {
+        const path = `${g}/${this.user.id}/${uid4()}.jpg`;
+        const { error } = await sb.storage.from('reponses').upload(path, dataToBlob(im), {contentType: 'image/jpeg'});
+        if (error) throw new Error('Envoi d’une photo impossible : ' + error.message);
+        photos.push(path);
+      }
+      const { error } = await sb.from('reponses').insert({...base, photos});
+      if (error) throw new Error(errFr(error));
+    } catch (e) { if (photos.length) sb.storage.from('reponses').remove(photos).catch(() => {}); throw e; }
+  },
+  async supprimerReponse(r) {
+    if (DEMO) { const d = D.get(); d.reponses = d.reponses.filter(x => x.id !== r.id); d.notes = d.notes.filter(n => n.reponse_id !== r.id); d.coms = d.coms.filter(c => c.reponse_id !== r.id); D.set(d); return; }
+    const { error } = await sb.from('reponses').delete().eq('id', r.id); if (error) throw new Error(errFr(error));
+    if (r.photos?.length) sb.storage.from('reponses').remove(r.photos).catch(() => {});
+  },
+  async noter(rid, note) {   // note entière de 0 à 10, ou null pour retirer sa note
+    if (DEMO) { const d = D.get(); d.notes = d.notes.filter(n => !(n.reponse_id === rid && n.evaluateur_id === 'demo')); if (note != null) d.notes.push({reponse_id: rid, evaluateur_id: 'demo', note}); D.set(d); return; }
+    const q = note == null ? sb.from('notes').delete().eq('reponse_id', rid).eq('evaluateur_id', this.user.id)
+      : sb.from('notes').upsert({reponse_id: rid, evaluateur_id: this.user.id, note, updated_at: new Date().toISOString()});
+    const { error } = await q; if (error) throw new Error(errFr(error));
+  },
+  async commenter({g, ex, rid, contenu}) {
+    if (DEMO) { const d = D.get(); d.coms.push({id: uid4(), groupe_id: g, exercice_id: ex, reponse_id: rid || null, user_id: 'demo', contenu, created_at: new Date().toISOString(), edited_at: null}); D.set(d); return; }
+    const { error } = await sb.from('commentaires').insert({groupe_id: g, exercice_id: ex, reponse_id: rid || null, contenu}); if (error) throw new Error(errFr(error));
+  },
+  async modifierCommentaire(id, contenu) {
+    if (DEMO) { const d = D.get(), c = d.coms.find(c => c.id === id); c.contenu = contenu; c.edited_at = new Date().toISOString(); D.set(d); return; }
+    const { error } = await sb.from('commentaires').update({contenu}).eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  async supprimerCommentaire(id) {
+    if (DEMO) { const d = D.get(); d.coms = d.coms.filter(c => c.id !== id); D.set(d); return; }
+    const { error } = await sb.from('commentaires').delete().eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  _urls: {},
+  async photoURLs(paths) {   // URL signées (1 h) pour les photos privées
+    const todo = paths.filter(p => !p.startsWith('data:') && !this._urls[p]);
+    if (todo.length && !DEMO) { const { data } = await sb.storage.from('reponses').createSignedUrls(todo, 3600); (data || []).forEach(x => { if (x.signedUrl) this._urls[x.path] = x.signedUrl; }); }
+    return Object.fromEntries(paths.map(p => [p, p.startsWith('data:') ? p : this._urls[p] || '']));
+  },
+
   /* ---------- IA ---------- */
   async ia(body) {
     if (DEMO) throw new Error('La correction par l’IA est désactivée en mode démonstration.');
@@ -167,6 +298,8 @@ export const api = {
       channel.on('postgres_changes', {event: '*', schema: 'public', table: 'suivi'}, () => emit('classe'))
              .on('postgres_changes', {event: '*', schema: 'public', table: 'profiles'}, () => emit('classe'));
     }
+    for (const t of ['reponses', 'notes', 'commentaires', 'groupe_membres'])
+      channel.on('postgres_changes', {event: '*', schema: 'public', table: t}, p => emit('groupe', {t, p}));
     channel.on('postgres_changes', {event: '*', schema: 'public', table: 'classe_config'}, () => emit('config'))
            .on('postgres_changes', {event: '*', schema: 'public', table: 'banque'}, () => emit('banque'));
     channel.subscribe(st => { if (st === 'SUBSCRIBED') channel.track(state).catch(() => {}); });
