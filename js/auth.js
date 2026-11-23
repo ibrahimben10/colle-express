@@ -24,6 +24,8 @@ export const MSG = {
   same_password: 'Le nouveau mot de passe doit être différent de l’ancien.',
   link_invalid: 'Ce lien de réinitialisation est invalide ou a déjà été utilisé. Demandez un nouveau lien ci-dessous.',
   link_expired: 'Ce lien de réinitialisation a expiré. Demandez un nouveau lien ci-dessous.',
+  email_link: 'Ce lien a expiré ou a déjà été utilisé (il ne fonctionne qu’une fois). Si vous veniez de confirmer votre adresse, connectez-vous simplement ; sinon, utilisez « Mot de passe oublié ? ».',
+  confirm_sent: 'E-mail de confirmation renvoyé. Ouvrez le lien qu’il contient (pensez aux spams), puis connectez-vous.',
   reset_sent: 'Si un compte est associé à cette adresse, vous recevrez un lien de réinitialisation.',
   signup_confirm: 'Compte presque prêt : ouvrez l’e-mail de confirmation que nous venons de vous envoyer, puis connectez-vous.',
 };
@@ -147,6 +149,7 @@ export function initAuth({ onSignedIn }) {
       const c = err(x);
       if (c === 'invalid_credentials') noteFail();
       if (c === 'invalid_email') fieldErr(mail, MSG.invalid_email); else setAlert('error', MSG[c] || MSG.server);
+      if (c === 'email_not_confirmed') offerResend(mail.value);
       tickLock();
     }
   });
@@ -218,6 +221,23 @@ export function initAuth({ onSignedIn }) {
     }
   });
   if (DEMO) $('#fgDemo').hidden = false;
+}
+
+// Bouton « Renvoyer l'e-mail de confirmation » sous l'alerte (connexion refusée : adresse non confirmée).
+let resending = false;
+function offerResend(email) {
+  const a = $('#authAlert'), b = document.createElement('button');
+  b.type = 'button'; b.className = 'alink'; b.id = 'resendBtn'; b.textContent = 'Renvoyer l’e-mail de confirmation';
+  a.lastChild.append(document.createElement('br'), b);
+  b.onclick = async () => {
+    if (resending) return;
+    const wait = Math.max(0, 60 - Math.floor((Date.now() - (rd('ce:confirm-at', 0) || 0)) / 1000));
+    if (wait) { b.textContent = `Patientez ${wait} s avant un nouvel envoi`; return; }
+    resending = true; const done = busy(b, 'Envoi…');
+    try { await api.resendConfirmation(email); wr('ce:confirm-at', Date.now()); done(); setAlert('ok', MSG.confirm_sent); }
+    catch (x) { done(); setAlert('error', MSG[err(x)] || MSG.server); }
+    resending = false;
+  };
 }
 
 function meter(pw, sel) {

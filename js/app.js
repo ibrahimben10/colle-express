@@ -963,6 +963,7 @@ async function importPhoto(file) {
   document.querySelectorAll('[data-nbex]').forEach(e => e.textContent = BASE.length || e.textContent);
   try { await api.init(); }
   catch { showAuth('in', {alert: navigator.onLine ? 'Connexion au serveur impossible pour le moment. Réessayez dans un instant.' : 'Vous êtes hors connexion : reconnectez-vous à Internet pour accéder à votre compte.'}); return; }
+  if (api.linkError === 'email_link') return showAuth('in', {alert: MSG.email_link});
   if (api.linkError) return showAuth('forgot', {alert: MSG[api.linkError]});
   if (api.recovery && api.user) return showAuth('new');
   if (api.user) start(); else showAuth('in');

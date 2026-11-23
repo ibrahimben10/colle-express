@@ -59,7 +59,7 @@ export const api = {
     const h = new URLSearchParams(location.hash.slice(1)), q = new URLSearchParams(location.search);
     const err = h.get('error_code') || q.get('error_code') || h.get('error') || q.get('error');
     if (err) {
-      this.linkError = /expired/i.test(err + (h.get('error_description') || q.get('error_description') || '')) ? 'link_expired' : 'link_invalid';
+      this.linkError = 'email_link';   // lien de confirmation ou de réinitialisation expiré / déjà utilisé
       history.replaceState(null, '', location.pathname);
     }
     if (h.get('type') === 'recovery' || q.get('type') === 'recovery') this.recovery = true;
@@ -116,6 +116,14 @@ export const api = {
     if (!emailValide(email)) throw new AuthFail('invalid_email');
     if (DEMO) throw new AuthFail('demo');
     const { error } = await safe(() => sb.auth.resetPasswordForEmail(email.trim(), {redirectTo: redirectURL()}));
+    if (error) throw new AuthFail(classer(error));
+    return true;
+  },
+  /** Renvoie l'e-mail de confirmation d'inscription. Ne se résout que si Supabase accepte. */
+  async resendConfirmation(email) {
+    if (!emailValide(email)) throw new AuthFail('invalid_email');
+    if (DEMO) throw new AuthFail('demo');
+    const { error } = await safe(() => sb.auth.resend({type: 'signup', email: email.trim(), options: {emailRedirectTo: redirectURL()}}));
     if (error) throw new AuthFail(classer(error));
     return true;
   },
