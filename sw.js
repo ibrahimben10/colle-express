@@ -1,11 +1,11 @@
 // Service worker de Colle express : l'application s'ouvre instantanément et les
 // énoncés, indices et corrigés restent consultables hors connexion.
 // Les données personnelles (Supabase) ne sont jamais mises en cache.
-const VERSION = 'ce-v1';
+const VERSION = 'ce-v2';
 const SHELL = ['./', './index.html', './correction.html', './manifest.webmanifest',
   './css/style.css', './js/app.js', './js/api.js', './js/config.js', './js/format.js', './js/icons.js',
   './js/figures.js', './js/apropos.js', './js/correction.js', './js/mathjax-config.js',
-  './data/exercices.json', './data/corriges.json', './icons/icon-192.png', './icons/icon-512.png'];
+  './data/exercices.json', './data/corriges.json', './icons/icon-192.png', './icons/icon-512.png', './img/embleme.png', './img/logo.webp'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)

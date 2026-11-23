@@ -30,7 +30,7 @@ async function load() {
   const fig = FIG[id];
   $('#sheet').innerHTML = `
     <header class="sh-head">
-      <svg class="crest" viewBox="0 0 48 48" aria-hidden="true"><circle class="ring" cx="24" cy="24" r="23"/><circle class="in" cx="24" cy="24" r="19.5"/><text x="24" y="33" text-anchor="middle">∮</text></svg>
+      <img class="crest" src="img/embleme.png" alt="" width="68" height="46">
       <div class="t"><b>${esc(CONFIG.NOM_SITE)}</b><small>Prépa MP · ${esc(CONFIG.NOM_PROF)}</small></div>
       <div class="lvl"><span class="stamp n${EX.niveau}">${LV[EX.niveau]}</span><br>${esc(EX.mat)} · ${esc(EX.chap)}</div>
     </header>
