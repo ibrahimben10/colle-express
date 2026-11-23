@@ -317,7 +317,7 @@ function renderCopy() {
         <div><b>${ic('users')} 3. Soumets</b><span class="small">Ta réponse, sur l’honneur, devient visible par ton groupe.</span></div>
         <div><b>${ic('msg')} 4. Évalue</b><span class="small">Note les réponses des autres sur 10, discute, puis compare au corrigé.</span></div>
       </div>
-      ${sel.length ? `<h3 class="sec">${ic('star')} La sélection du professeur</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}</div>`;
+      ${sel.length ? `<h3 class="sec">${ic('star')} Sélection recommandée</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}</div>`;
     el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openEx(b.dataset.open));
     return;
   }
@@ -345,7 +345,7 @@ function renderCopy() {
 
     <section class="co co-rep" id="repSec">
       <div class="co-h"><span class="co-e" aria-hidden="true">✍️</span>Ma réponse
-        ${myGroups().length > 1 ? `<select id="gSel" class="gsel" aria-label="Groupe">${myGroups().map(g => `<option value="${esc(g.id)}" ${g.id === G ? 'selected' : ''}>${esc(g.nom)}${g.role ? '' : ' (prof)'}</option>`).join('')}</select>` : G ? `<span class="co-meta">${ic('users')} ${esc(gById(G).nom)}</span>` : ''}</div>
+        ${myGroups().length > 1 ? `<select id="gSel" class="gsel" aria-label="Groupe">${myGroups().map(g => `<option value="${esc(g.id)}" ${g.id === G ? 'selected' : ''}>${esc(g.nom)}${g.role ? '' : ' (admin)'}</option>`).join('')}</select>` : G ? `<span class="co-meta">${ic('users')} ${esc(gById(G).nom)}</span>` : ''}</div>
       <div id="repBox"></div>
     </section>
 
@@ -462,7 +462,7 @@ function renderRep(ex) {
       <a class="btn primary wide" href="#groupes">${ic('users')} Rejoindre ou créer un groupe</a>`;
     return;
   }
-  if (!g.role) { box.innerHTML = `<p class="small">Tu consultes ce groupe en tant que professeur : lecture et modération, sans soumission.</p>`; return; }
+  if (!g.role) { box.innerHTML = `<p class="small">Tu consultes ce groupe en tant qu’administrateur : lecture et modération, sans soumission.</p>`; return; }
   const r = mine(ex.id, G);
   if (r) {
     const m = moy(r.notes), n = r.notes?.length || 0;
@@ -614,7 +614,7 @@ async function renderGroupes() {
   const mineL = GROUPS.filter(g => g.role), others = api.isProf ? GROUPS.filter(g => !g.role) : [];
   if (!GV || !gById(GV)) GV = GSEL();
   const card = g => `<button class="gcard" data-g="${esc(g.id)}" aria-current="${g.id === GV}"><b>${esc(g.nom)}</b>
-      <span class="small">${g.n} membre${g.n > 1 ? 's' : ''}</span>${g.role ? `<span class="rolepill ${g.role}">${ROLE[g.role]}</span>` : '<span class="rolepill">Professeur</span>'}</button>`;
+      <span class="small">${g.n} membre${g.n > 1 ? 's' : ''}</span>${g.role ? `<span class="rolepill ${g.role}">${ROLE[g.role]}</span>` : '<span class="rolepill">Administrateur</span>'}</button>`;
   el.innerHTML = `
     <div class="pagehead"><h2>Groupes</h2><span class="small">Réponses sur l’honneur, notes de 0 à 10 et discussion entre membres</span></div>
     ${mineL.length || others.length ? `<div><h3 class="sec">${ic('users')} Mes groupes</h3>
@@ -645,7 +645,7 @@ async function renderGroupes() {
       <div><span class="rolepill responsable">Responsable</span><span>Gère le groupe (nom, code d’invitation), attribue les rôles, exclut des membres, modère. Il en reste toujours au moins un.</span></div>
       <div><span class="rolepill moderateur">Modérateur</span><span>Voit le code d’invitation, supprime les réponses et messages inappropriés, exclut des membres simples.</span></div>
       <div><span class="rolepill membre">Membre</span><span>Soumet ses réponses sur l’honneur, note celles des autres de 0 à 10, participe à la discussion.</span></div>
-      <div><span class="rolepill">Professeur</span><span>Voit et modère tous les groupes de la classe.</span></div>
+      <div><span class="rolepill">Administrateur</span><span>Voit et modère tous les groupes de la classe.</span></div>
     </div>`;
   el.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { GV = b.dataset.g; if (gById(GV)?.role) store.set('groupe', GV); renderGroupes(); });
   $('#gJoin').onsubmit = async e => { e.preventDefault(); $('#gJoinErr').textContent = '';
@@ -905,7 +905,7 @@ function updateProf() {
     <div class="panel stat"><div class="k">${ic('pen')} Réponses soumises aujourd’hui</div><div class="v">${triesToday}</div></div>
     <div class="panel stat"><div class="k">${ic('users')} Groupes</div><div class="v">${okToday}</div></div>`;
   $('#pLive').innerHTML = DEMO ? '<div class="empty">Le temps réel fonctionne une fois Supabase configuré.</div>' : people.map(p => `<div class="panel lc">
-      <div class="person">${avatar(p.uid, p.name)}<b>${esc(p.name || 'Élève')}</b>${p.uid === api.user.id ? '<span class="small">(vous)</span>' : ''}${p.role === 'prof' ? '<span class="small">prof</span>' : ''}</div>
+      <div class="person">${avatar(p.uid, p.name)}<b>${esc(p.name || 'Élève')}</b>${p.uid === api.user.id ? '<span class="small">(vous)</span>' : ''}${p.role === 'prof' ? '<span class="small">admin</span>' : ''}</div>
       <div class="doing">${doing(p)}</div><div class="since">${ic('clock')} depuis ${mmss((now() - (p.since || now())) / 1000)}</div></div>`).join('') || '<div class="empty">Personne en ligne pour l’instant.</div>';
   const rows = students.map(c => {
     const v = Object.values(c.data?.ex || {});

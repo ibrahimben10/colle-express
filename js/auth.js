@@ -11,15 +11,15 @@ export const MSG = {
   invalid_email: 'Veuillez saisir une adresse email valide.',
   missing_password: 'Saisissez votre mot de passe.',
   missing_name: 'Indiquez votre prénom et votre nom.',
-  missing_code: 'Saisissez le code de classe donné par votre professeur.',
+  missing_code: 'Saisissez le code de classe qui vous a été communiqué.',
   mismatch: 'Les deux mots de passe ne sont pas identiques.',
   invalid_credentials: 'Adresse e-mail ou mot de passe incorrect.',
   email_not_confirmed: 'Confirmez d’abord votre adresse grâce à l’e-mail reçu à l’inscription.',
   rate_limit: 'Trop de demandes en peu de temps. Patientez quelques minutes avant de réessayer.',
   server: 'Impossible de traiter votre demande pour le moment. Veuillez réessayer ultérieurement.',
-  email_send: 'L’e-mail n’a pas pu être envoyé pour le moment (problème d’envoi côté serveur). Réessayez plus tard ; si cela persiste, prévenez votre professeur.',
+  email_send: 'L’e-mail n’a pas pu être envoyé pour le moment (problème d’envoi côté serveur). Réessayez plus tard ; si cela persiste, prévenez l’administrateur du site.',
   demo: 'Mode démonstration : aucun e-mail ne peut être envoyé tant que Supabase n’est pas configuré.',
-  bad_class_code: 'Code de classe invalide. Vérifiez-le auprès de votre professeur.',
+  bad_class_code: 'Code de classe invalide. Vérifiez-le auprès de la personne qui vous l’a donné.',
   signup_refused: 'Impossible de créer un compte avec cette adresse. Si vous avez déjà un compte, connectez-vous ou réinitialisez votre mot de passe.',
   weak_password: `Le mot de passe doit contenir au moins ${PW_MIN} caractères, dont une lettre et un chiffre.`,
   same_password: 'Le nouveau mot de passe doit être différent de l’ancien.',
@@ -32,7 +32,7 @@ export const MSG = {
 };
 const HEAD = {
   in: ['Bon retour !', 'Connectez-vous pour retrouver vos exercices, vos groupes et votre suivi.'],
-  up: ['Créer votre compte', 'Gratuit. Il vous faut seulement le code de classe donné par votre professeur.'],
+  up: ['Créer votre compte', 'Gratuit. Il vous faut seulement le code de classe qui vous a été communiqué.'],
   forgot: ['Mot de passe oublié', 'Indiquez votre adresse : vous recevrez un lien sécurisé, temporaire et utilisable une seule fois.'],
   new: ['Nouveau mot de passe', `Choisissez un mot de passe d’au moins ${PW_MIN} caractères, avec au moins une lettre et un chiffre.`],
 };

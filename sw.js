@@ -1,7 +1,7 @@
 // Service worker de Colle express : l'application s'ouvre instantanément et les
 // énoncés, indices et corrigés restent consultables hors connexion.
 // Les données personnelles (Supabase) ne sont jamais mises en cache.
-const VERSION = 'ce-v5';
+const VERSION = 'ce-v6';
 const SHELL = ['./', './index.html', './correction.html', './manifest.webmanifest',
   './css/style.css', './js/app.js', './js/api.js', './js/config.js', './js/format.js', './js/icons.js',
   './js/figures.js', './js/auth.js', './js/validation.js', './js/ui.js', './fonts/manrope-latin-wght-normal.woff2', './fonts/manrope-latin-ext-wght-normal.woff2', './js/apropos.js', './js/correction.js', './js/mathjax-config.js',
