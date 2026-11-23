@@ -27,7 +27,12 @@ function prompt(mode: string, b: any) {
   const ex = b.exercice ?? {};
   const hint = Math.max(1, Math.min(3, Number(b.hint) || 1));
   const hist = clip(b.historique, 4000) || "(aucun)";
-  const base = `${regles(ex, hint)}\n\nÉNONCÉ :\n${clip(ex.enonce, 6000)}\n\nRETOURS PRÉCÉDENTS :\n${hist}`;
+  const ref = clip(b.reference, 9000);
+  const ind = Array.isArray(b.indices) ? b.indices.slice(0, 3).map((t: unknown, i: number) => `Niveau ${i + 1} : ${clip(t, 600)}`).join("\n") : "";
+  const base = `${regles(ex, hint)}\n\nÉNONCÉ :\n${clip(ex.enonce, 6000)}` +
+    (ref ? `\n\nCORRIGÉ DE RÉFÉRENCE DU PROFESSEUR (confidentiel : sers-t'en pour juger la copie, ne le recopie jamais et ne révèle pas les résultats) :\n${ref}` : "") +
+    (ind ? `\n\nINDICES PRÉPARÉS PAR LE PROFESSEUR (reprends de préférence celui du niveau demandé, adapté à la copie) :\n${ind}` : "") +
+    `\n\nRETOURS PRÉCÉDENTS :\n${hist}`;
   const note = b.note ? ` (message de l'élève : « ${clip(b.note, 600)} »)` : "";
   if (mode === "copie") return `${base}
 

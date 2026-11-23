@@ -19,7 +19,7 @@ const avatar = (id, name) => `<span class="avatar" style="background:${hue(id)}"
 const store = { get(k, d) { try { const v = localStorage.getItem('ce:' + k); return v ? JSON.parse(v) : d; } catch { return d; } }, set(k, v) { try { localStorage.setItem('ce:' + k, JSON.stringify(v)); } catch {} } };
 
 /* ---------- état ---------- */
-let BASE = [], BANK = [];
+let BASE = [], BANK = [], CORR = {};
 const all = () => BASE.concat(BANK);
 const byId = id => all().find(e => e.id === id);
 const F = Object.assign({lvl: 1, mat: '', chap: '', q: ''}, store.get('filters', {}));
@@ -41,7 +41,7 @@ function typeset(el) {
   if (window.MathJax?.typesetPromise) { MathJax.typesetClear?.([el]); MathJax.typesetPromise([el]).catch(() => {}); }
   else setTimeout(() => typeset(el), 400);
 }
-const rich = t => esc(t).split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+const rich = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[\s(])\*([^*\n$]+?)\*(?=[\s.,:;)]|$)/g, '$1<i>$2</i>').split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 
 /* ================= CONNEXION ================= */
 function showAuth(mode = 'in') {
@@ -208,7 +208,9 @@ function renderCopy() {
   }
   const S = sess(ex.id), st = SUIVI.ex?.[ex.id], fig = FIG[ex.id];
   const nCopies = S.tours.filter(t => t.kind === 'copie').length;
-  const canReveal = S.tours.some(t => t.verdict === 'juste') || nCopies >= 2 || st?.s === 'reussi';
+  const K = CORR[ex.id];
+  const canReveal = S.tours.some(t => t.verdict === 'juste') || nCopies >= 2 || st?.s === 'reussi' || (K && S.hint >= 3);
+  const hintsLeft = K ? 3 - S.hint : 3;
   el.innerHTML = `
     <div class="kicker"><span class="stamp n${ex.niveau}">${LV[ex.niveau]}</span><span class="pill">${ic(MAT_IC[ex.mat])}${esc(ex.mat)}</span><span class="pill">${ic(chapIcon(ex.mat, ex.chap))}${esc(ex.chap)}</span>
       <span style="margin-left:auto" class="pill">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree}:00</span></div>
@@ -225,11 +227,11 @@ function renderCopy() {
     </div>
     <div class="actions">
       <button class="btn primary" id="bCorr" ${S.busy || !S.imgs.length ? 'disabled' : ''}>${S.busy === 'copie' ? '<span class="spin"></span> Lecture de la copie…' : ic('pen') + ' Faire corriger ma copie'}</button>
-      <button class="btn" id="bHint" ${S.busy ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + ` Un indice${S.hint ? ` (niveau ${Math.min(S.hint + 1, 3)})` : ''}`}</button>
-      <button class="btn" id="bSol" ${S.busy || !canReveal ? 'disabled' : ''} title="${canReveal ? '' : 'Disponible après 2 copies corrigées ou une réussite'}">${S.busy === 'solution' ? '<span class="spin"></span> Rédaction…' : ic('eye') + ' Voir un corrigé'}</button>
+      <button class="btn" id="bHint" ${S.busy || hintsLeft <= 0 ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + (hintsLeft <= 0 ? ' Tous les indices sont donnés' : ` Indice ${Math.min(S.hint + 1, 3)}/3`)}</button>
+      <button class="btn" id="bSol" ${S.busy || !canReveal ? 'disabled' : ''} title="${canReveal ? '' : 'Disponible après 2 copies corrigées, une réussite ou les 3 indices'}">${S.busy === 'solution' ? '<span class="spin"></span> Rédaction…' : ic('eye') + ' Voir le corrigé'}</button>
     </div>
     <div class="feed">${S.tours.map(tourHTML).join('')}</div>
-    ${S.solution ? `<div class="sol"><h3 class="sec" style="margin-top:0">${ic('book')} Corrigé</h3><div class="enonce">${rich(S.solution)}</div><p class="small">Corrigé rédigé par IA : vérifie-le avec ton cours.</p></div>` : ''}`;
+    ${S.solution ? `<div class="sol"><h3 class="sec" style="margin-top:0">${ic('book')} Corrigé détaillé</h3>${S.reponse ? `<div class="hint" style="margin:0 0 12px">${ic('target')}<div><span class="lab">Résultat</span><div>${rich(S.reponse)}</div></div></div>` : ''}<div class="enonce">${rich(S.solution)}</div><p class="small">${K ? 'Corrigé de référence de la colle.' : 'Corrigé rédigé par IA : vérifie-le avec ton cours.'}</p></div>` : ''}`;
   typeset(el);
   const tm = $('#timer'); const upd = () => { const s = (now() - S.start) / 1000; tm.textContent = mmss(s); tm.classList.toggle('late', s > ex.duree * 60); };
   upd(); tick = setInterval(upd, 1000);
@@ -277,14 +279,30 @@ async function addFiles(id, files) {
 
 /* ---------- IA ---------- */
 async function ask(ex, mode) {
-  const S = sess(ex.id);
+  const S = sess(ex.id), K = CORR[ex.id];
   if (mode === 'copie' && !S.imgs.length) return;
+  if (K && mode === 'indice') {            // indices préparés : instantanés, sans IA
+    if (S.hint >= 3) return;
+    const t = {kind: 'indice', n: 0, hint: S.hint + 1, verdict: 'bloque', score: null, resume: '', retour: '', indice: K.indices[S.hint], question: '', points: []};
+    S.hint++; S.tours.push(t); renderCopy();
+    presence({st: 'indice'});
+    await record(ex, t);
+    api.activity({uid: api.user.id, name: api.profile.full_name, id: ex.id, k: 'indice', v: 'bloque', sc: null});
+    return;
+  }
+  if (K && mode === 'solution') {          // corrigé préparé
+    S.solution = K.corrige; S.reponse = K.reponse; renderCopy();
+    presence({st: 'corrige'});
+    await record(ex, {kind: 'solution'});
+    return;
+  }
   S.busy = mode; renderCopy(); notice('');
   presence({st: mode === 'copie' ? 'correction' : mode === 'indice' ? 'indice' : 'corrige'});
   try {
     const hist = S.tours.map(t => `- ${t.kind === 'copie' ? 'Copie ' + t.n : 'Indice'} : ${t.verdict}. ${t.retour || ''} ${t.indice ? 'Indice : ' + t.indice : ''}`).join('\n');
     const r = await api.ia({mode, exercice: {titre: ex.titre, mat: ex.mat, chap: ex.chap, niveau: ex.niveau, enonce: ex.enonce},
-      images: mode === 'copie' ? S.imgs.map(i => i.data) : [], note: S.note, hint: Math.min(S.hint + 1, 3), historique: hist});
+      images: mode === 'copie' ? S.imgs.map(i => i.data) : [], note: S.note, hint: Math.min(S.hint + 1, 3), historique: hist,
+      reference: K ? `${K.corrige}\n\nRÉSULTAT ATTENDU : ${K.reponse}` : '', indices: K ? K.indices : []});
     if (mode === 'solution') { S.solution = String(r.corrige || ''); await record(ex, {kind: 'solution'}); }
     else {
       const t = {kind: mode, n: S.tours.filter(t => t.kind === 'copie').length + 1, hint: r.indice ? Math.min(S.hint + 1, 3) : 0,
@@ -493,6 +511,7 @@ async function importPhoto(file) {
 /* ================= LANCEMENT ================= */
 (async function boot() {
   try { BASE = await (await fetch('data/exercices.json')).json(); } catch { BASE = []; }
+  fetch('data/corriges.json').then(r => r.json()).then(d => { CORR = d || {}; if (api.user) rerender(); }).catch(() => {});
   await api.init();
   if (api.user) start(); else showAuth('in');
 })();

@@ -4,6 +4,7 @@ Site de colles courtes de maths et de physique-chimie pour la prépa MP, par **B
 
 - 151 exercices d’oraux classés en 3 niveaux : **CCINP**, **Mines-Centrale**, **X-ENS**
 - 36 schémas dessinés pour les énoncés de physique-chimie
+- Pour **chaque** exercice : 3 indices gradués et un corrigé complet et détaillé (`data/corriges.json`)
 - Comptes élèves (e-mail + mot de passe) protégés par un **code de classe**
 - L’élève photographie sa copie : l’IA (Claude) valide les étapes, pointe la première erreur et donne **un indice gradué** — le corrigé n’est accessible qu’après 2 copies ou une réussite
 - **Suivi** de chaque élève par chapitre, historique, exercices conseillés
@@ -86,6 +87,7 @@ Chaque élève crée son compte (nom, e-mail, mot de passe, niveau visé) et ret
 | Changer mon nom, le titre | `js/config.js` (`NOM_PROF`, `NOM_SITE`) |
 | Ajouter des exercices | Tableau de bord → *Ajouter un exercice* (ou `data/exercices.json`) |
 | Ajouter / modifier un schéma | `js/figures.js` (clé = identifiant de l’exercice) |
+| Modifier un indice ou un corrigé | `data/corriges.json` (clé = identifiant de l’exercice ; sources lisibles dans `tools/corr_*.py`) |
 | Couleurs, polices | `css/style.css` |
 | Consignes données à l’IA | `supabase/functions/corriger/index.ts` (puis redéployer la fonction) |
 
@@ -97,6 +99,8 @@ Format d’un exercice dans `data/exercices.json` :
 `niveau` : 1 = CCINP, 2 = Mines-Centrale, 3 = X-ENS.
 
 ## Sécurité et coûts
+
+- Les indices préparés et les corrigés s’affichent sans appel à l’IA (gratuit, instantané). Le corrigé n’apparaît dans l’interface qu’après 2 copies corrigées, une réussite ou les 3 indices ; mais le fichier `data/corriges.json` est public : un élève curieux peut le lire directement.
 
 - Les règles de sécurité (RLS) de Supabase empêchent un élève de lire le suivi des autres ; seul le professeur voit toute la classe.
 - La clé Anthropic reste côté serveur (Edge Function) : elle n’apparaît jamais dans le site.
