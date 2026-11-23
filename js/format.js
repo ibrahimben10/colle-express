@@ -21,6 +21,7 @@ function table(p) {
 const isTable = p => { const l = p.trim().split('\n'); return l.length > 1 && l.every(x => /^\s*\|.*\|\s*$/.test(x)); };
 // Paragraphe : lignes « - … » regroupées en liste à puces.
 function para(p) {
+  p = p.replace(/\$\$[\s\S]*?\$\$/g, m => m.replace(/\s*\n\s*/g, ' '));   // pas de <br> dans une formule centrée
   const L = p.split('\n');
   if (!L.some(l => /^\s*[-•]\s+/.test(l))) return `<p>${inline(p).replace(/\n/g, '<br>')}</p>`;
   let html = '', ul = [];
@@ -63,15 +64,18 @@ export function fmtEnonce(text) {
 
 // Corrigé : chaque paragraphe qui commence par **1.**, **2.(a)**, **Conclusion.** devient une étape titrée.
 export function fmtCorrige(text) {
-  return String(text ?? '').split(/\n{2,}/).map(p => {
+  // Un paragraphe « **Titre.** … » ouvre une étape ; les paragraphes suivants s'y rattachent.
+  let html = '', open = false;
+  for (const p of String(text ?? '').split(/\n{2,}/)) {
     const m = p.match(/^\*\*(.+?)\*\*\s*([\s\S]*)$/);
-    if (m && m[1].length < 60) {
+    if (m && m[1].length < 70) {
       let head = m[1].replace(/\s*[.:]\s*$/, '');
       if (/^\d+(\.?\([a-z]\))?$/.test(head)) head = 'Question ' + head.replace('.(', '(');
-      return `<section class="step"><h4>${inline(head)}</h4>${m[2].trim() ? para(m[2].trim()) : ''}</section>`;
-    }
-    return isTable(p) ? table(p) : para(p);
-  }).join('');
+      if (open) html += '</section>';
+      html += `<section class="step"><h4>${inline(head)}</h4>${m[2].trim() ? para(m[2].trim()) : ''}`; open = true;
+    } else html += isTable(p) ? table(p) : para(p);
+  }
+  return html + (open ? '</section>' : '');
 }
 
 /* ---------- Blocs pédagogiques partagés (site et page de correction) ---------- */
