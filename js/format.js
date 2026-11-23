@@ -7,7 +7,15 @@ export function inline(t) {
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
     .replace(/(^|[\s(])\*([^*\n$]+?)\*(?=[\s.,:;)]|$)/g, '$1<i>$2</i>');
 }
-export const rich = t => String(t ?? '').split(/\n{2,}/).map(p => `<p>${inline(p).replace(/\n/g, '<br>')}</p>`).join('');
+// Tableau Markdown simple : lignes « | a | b | », ligne de séparation « |---| » ignorée, première ligne en en-tête.
+function table(p) {
+  const rows = p.trim().split('\n').map(l => l.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
+  const body = rows.filter((r, i) => !(i === 1 && r.every(c => /^:?-{2,}:?$/.test(c))));
+  const [head, ...rest] = body;
+  return `<div class="tbl"><table><thead><tr>${head.map(c => `<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>${rest.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+const isTable = p => { const l = p.trim().split('\n'); return l.length > 1 && l.every(x => /^\s*\|.*\|\s*$/.test(x)); };
+export const rich = t => String(t ?? '').split(/\n{2,}/).map(p => isTable(p) ? table(p) : `<p>${inline(p).replace(/\n/g, '<br>')}</p>`).join('');
 
 // Énoncé : texte d'introduction, « Données » encadrées, questions numérotées et sous-questions (a), (b)…
 export function fmtEnonce(text) {

@@ -16,7 +16,9 @@ const fmtDate = t => t ? new Date(t).toLocaleString('fr-FR', {day: '2-digit', mo
 const ago = t => { if (!t) return '—'; const s = Math.round((now() - new Date(t)) / 1000); if (s < 60) return 'à l’instant'; if (s < 3600) return `il y a ${Math.round(s / 60)} min`; if (s < 86400) return `il y a ${Math.round(s / 3600)} h`; return `il y a ${Math.round(s / 86400)} j`; };
 const initials = n => (n || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
 const hue = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 42%)`; };
-const avatar = (id, name) => `<span class="avatar" style="background:${hue(id)}">${esc(initials(name))}</span>`;
+const photoOf = id => (api.user && id === api.user.id ? SUIVI?.photo : (CLASS || []).find(c => c.id === id)?.data?.photo) || '';
+const avatar = (id, name) => { const ph = photoOf(id);
+  return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(ph) ? `<img class="avatar" src="${ph}" alt="">` : `<span class="avatar" style="background:${hue(id)}">${esc(initials(name))}</span>`; };
 const store = { get(k, d) { try { const v = localStorage.getItem('ce:' + k); return v ? JSON.parse(v) : d; } catch { return d; } }, set(k, v) { try { localStorage.setItem('ce:' + k, JSON.stringify(v)); } catch {} } };
 
 /* ---------- état ---------- */
@@ -85,9 +87,17 @@ let started = false;
 async function start() {
   if (!api.user) return showAuth('in');
   $('#auth').hidden = true; $('#app').hidden = false;
+  renderMe();
+  return afterLogin2();
+}
+function renderMe() {
   const p = api.profile;
-  $('#me').innerHTML = `${avatar(p.id, p.full_name)}<span class="small" style="color:var(--ink);font-weight:600">${esc(p.full_name || 'Moi')}</span><span class="dot" id="conn"></span><button class="btn ghost" id="out" title="Se déconnecter" aria-label="Se déconnecter">${ic('logout')}</button>`;
+  $('#me').innerHTML = `<button class="avbtn" id="mePhoto" title="Changer ma photo de profil" aria-label="Changer ma photo de profil">${avatar(p.id, p.full_name)}</button><span class="small" style="color:var(--ink);font-weight:600">${esc(p.full_name || 'Moi')}</span><span class="dot" id="conn"></span><button class="btn ghost" id="out" title="Se déconnecter" aria-label="Se déconnecter">${ic('logout')}</button>`;
   $('#out').onclick = () => api.signOut();
+  $('#mePhoto').onclick = pickPhoto;
+}
+async function afterLogin2() {
+  const p = api.profile;
   $('#nav').innerHTML = `<a href="#exercices" data-v="exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#suivi" data-v="suivi">${ic('chart')}<span class="lbl">Mon suivi</span></a>` +
     (api.isProf ? `<a href="#prof" data-v="prof">${ic('users')}<span class="lbl">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '') +
     `<a href="#apropos" data-v="apropos">${ic('cap')}<span class="lbl">À propos</span></a>`;
@@ -95,6 +105,7 @@ async function start() {
   if (!store.get('filters', null)) F.lvl = p.niveau || 1;
   [SUIVI, CONF, BANK] = await Promise.all([api.loadSuivi(), api.config(), api.banque()]);
   SUIVI = SUIVI && typeof SUIVI === 'object' ? SUIVI : {};
+  renderMe();
   if (!started) {
     started = true;
     on('config', async () => { CONF = await api.config(); rerender(); });
@@ -106,6 +117,46 @@ async function start() {
   if (api.isProf) CLASS = await api.classe();
   presence({v: 'exercices'});
   route();
+}
+/* ---------- envoi de sujets d'oraux (PDF) par e-mail, via FormSubmit ---------- */
+let SENT = false;
+function bindEnvoi() {
+  const f = $('#envoi form'); if (!f) return;
+  f.querySelector('[name=_next]').value = location.href.split('#')[0] + '#merci';
+  f.onsubmit = e => {
+    const file = f.querySelector('[name=attachment]').files[0], err = f.querySelector('.err');
+    if (!file) { e.preventDefault(); err.textContent = 'Choisis un fichier PDF.'; return; }
+    if (!/pdf$/i.test(file.type) && !/\.pdf$/i.test(file.name)) { e.preventDefault(); err.textContent = 'Seuls les fichiers PDF sont acceptés.'; return; }
+    if (file.size > 10e6) { e.preventDefault(); err.textContent = 'Fichier trop lourd (10 Mo maximum) : compresse-le ou envoie-le en plusieurs parties.'; return; }
+    err.textContent = '';
+    f.querySelector('button[type=submit]').disabled = true;
+    f.querySelector('button[type=submit]').textContent = 'Envoi en cours…';
+  };
+}
+
+/* ---------- photo de profil : recadrée en carré 160 px, enregistrée dans le suivi de l'élève ---------- */
+function pickPhoto() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = async () => {
+    const f = inp.files?.[0]; if (!f) return;
+    if (!/^image\//.test(f.type)) return notice('Choisis une image (JPEG, PNG…).');
+    try {
+      const url = URL.createObjectURL(f);
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const S = 160, c = document.createElement('canvas'); c.width = c.height = S;
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      c.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, S, S);
+      URL.revokeObjectURL(url);
+      setPhoto(c.toDataURL('image/jpeg', 0.85));
+    } catch { notice('Image illisible : essaie une autre photo.'); }
+  };
+  inp.click();
+}
+function setPhoto(dataUrl) {
+  if (dataUrl) SUIVI.photo = dataUrl; else delete SUIVI.photo;
+  api.saveSuivi(SUIVI);
+  renderMe(); rerender();
 }
 function debounce(f, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => f(...a), ms); }; }
 
@@ -121,16 +172,18 @@ function presence(patch) {
 function route() {
   if (!api.user) return;
   let h = location.hash.slice(1) || 'exercices';
+  if (h === 'merci') { SENT = true; history.replaceState(null, '', '#apropos'); h = 'apropos'; }
   if (h.startsWith('ex-')) { const e = byId(h.slice(3)); if (e) { CUR = e.id; F.lvl = e.niveau; } h = 'exercices'; }
   document.body.classList.toggle('detail', h === 'exercices' && !!CUR);
   if (h === 'prof' && !api.isProf) h = 'exercices';
+  if (h === 'envoyer') { h = 'apropos'; setTimeout(() => $('#envoi')?.scrollIntoView({behavior: 'smooth'}), 50); }
   if (!['exercices', 'suivi', 'prof', 'apropos'].includes(h)) h = 'exercices';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + h));
   document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   if (h === 'exercices') { renderStrip(); renderList(); renderCopy(); }
   if (h === 'suivi') renderSuivi();
   if (h === 'prof') renderProf(true);
-  if (h === 'apropos') $('#v-apropos').innerHTML = presentationPage();
+  if (h === 'apropos') { $('#v-apropos').innerHTML = presentationPage({nom: api.profile.full_name, email: api.user.email, merci: SENT}); bindEnvoi(); SENT = false; }
   if (pres.v !== h) presence({v: h});
 }
 addEventListener('hashchange', route);
@@ -401,7 +454,10 @@ function renderSuivi() {
   const tot = (k) => exs.reduce((a, v) => a + (v[k] || 0), 0);
   const rec = recommend(s, lvl);
   $('#v-suivi').innerHTML = `
-    <div class="pagehead"><h2>Mon suivi</h2><span class="small">${esc(api.profile.full_name)} · ${DEMO ? 'mode démonstration' : 'enregistré sur ton compte'}</span></div>
+    <div class="pagehead"><h2>Mon suivi</h2><span class="small">${DEMO ? 'mode démonstration' : 'enregistré sur ton compte'}</span></div>
+    <div class="panel profile"><span class="ph">${avatar(api.user.id, api.profile.full_name)}</span>
+      <div><b>${esc(api.profile.full_name || 'Moi')}</b><span class="small">${esc(api.user.email || '')}</span></div>
+      <div class="pbtns"><button class="btn" id="phChange">${ic('camera')} ${SUIVI.photo ? 'Changer la photo' : 'Ajouter une photo'}</button>${SUIVI.photo ? `<button class="btn ghost" id="phDel">${ic('trash')} Retirer</button>` : ''}</div></div>
     <div class="lvl" id="lvlPick">${[1, 2, 3].map(n => `<button data-n="${n}" aria-pressed="${n === lvl}"><b>${LV[n]}</b><span>${esc(LVD[n])}</span></button>`).join('')}</div>
     <div class="hero">
       <div class="panel stat" style="padding:24px"><div class="k">${ic('trophy')} Exercices réussis — ${LV[lvl]}</div>
@@ -424,7 +480,10 @@ function renderSuivi() {
     <h3 class="sec">${ic('clock')} Historique</h3>
     <div class="panel scroll"><table class="stack"><thead><tr><th>Date</th><th>Exercice</th><th>Action</th><th class="r">Avancement</th></tr></thead><tbody>
     ${(s.journal || []).map(j => `<tr><td>${fmtDate(j.d)}</td><td>${esc(byId(j.id)?.titre || j.id)}</td><td>${j.k === 'copie' ? 'Copie : ' + esc({juste: 'juste', partiel: 'partielle', faux: 'erreur', illisible: 'illisible'}[j.v] || j.v) : j.k === 'indice' ? 'Indice' : 'Corrigé consulté'}</td><td class="r">${j.sc != null ? j.sc + ' %' : ''}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Pas encore d’activité.</td></tr>'}
-    </tbody></table></div>`;
+    </tbody></table></div>
+    <a class="panel cta" href="#envoyer">${ic('upload')}<span><b>Tu as passé un oral ?</b><span class="small">Envoie ton sujet en PDF pour enrichir la plateforme.</span></span></a>`;
+  $('#phChange').onclick = pickPhoto;
+  if ($('#phDel')) $('#phDel').onclick = () => setPhoto('');
   $('#lvlPick').onclick = async e => { const b = e.target.closest('button'); if (!b) return; F.lvl = +b.dataset.n; await api.setMyLevel(F.lvl); renderSuivi(); };
   document.querySelectorAll('#v-suivi [data-open]').forEach(b => b.onclick = () => { location.hash = 'ex-' + b.dataset.open; });
 }

@@ -114,3 +114,17 @@ Le texte de présentation, le parcours et le contact se trouvent dans `js/config
 ## Partager un corrigé en PDF
 
 Chaque exercice a une page publique `correction.html?id=…` (énoncé, schéma, indices, corrigé), lisible sans compte. Le bouton « PDF / Imprimer » ouvre l’export du navigateur : « Enregistrer au format PDF » sur ordinateur et Android, « Imprimer » puis « Partager » sur iPhone.
+
+## Recevoir les sujets d'oraux envoyés par les élèves
+
+L'onglet « À propos » contient un formulaire « Enrichir la plateforme » : l'élève joint un PDF, qui arrive en pièce jointe dans la boîte `ENVOI_EMAIL` (réglée dans `js/config.js`), via le service gratuit FormSubmit.
+
+**Au tout premier envoi**, FormSubmit envoie à cette adresse un e-mail « Activate Form » : il faut cliquer sur le bouton d'activation, sinon les envois suivants ne sont pas transmis. Fais toi-même un premier envoi test juste après la mise en ligne.
+
+## Photo de profil
+
+Chaque élève peut ajouter une photo (onglet « Mon suivi » ou clic sur son avatar en haut). Elle est recadrée et compressée sur l'appareil (160 × 160 px), puis enregistrée avec son suivi : aucune configuration supplémentaire n'est nécessaire.
+
+## Ajouter des exercices en lot
+
+Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 indices, corrigé). Pour régénérer les fichiers de données : `python3 tools/build_new.py`.

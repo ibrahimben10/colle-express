@@ -1,0 +1,12 @@
+# Ajoute les exercices des fichiers new_*.py aux bases JSON (idempotent : remplace les ids n-*).
+import json, sys, importlib
+sys.path.insert(0, 'tools')
+import newlib
+for m in ['new_phys1', 'new_phys2', 'new_chim', 'new_math']:
+    importlib.import_module(m)
+E = [e for e in json.load(open('data/exercices.json')) if not e['id'].startswith('n-')]
+C = {k: v for k, v in json.load(open('data/corriges.json')).items() if not k.startswith('n-')}
+E += newlib.E; C.update(newlib.C)
+json.dump(E, open('data/exercices.json', 'w'), ensure_ascii=False, indent=1)
+json.dump(C, open('data/corriges.json', 'w'), ensure_ascii=False)
+print(len(newlib.E), 'ajoutés ;', len(E), 'exercices au total')
