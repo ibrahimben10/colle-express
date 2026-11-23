@@ -6,13 +6,13 @@
 <title>Colle express — Prépa MP</title>
 <meta name="description" content="Colles courtes de maths et physique-chimie pour la prépa MP, en groupe : réponses sur l’honneur, notation et discussion entre pairs.">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script>try{var t=localStorage.getItem('ce:theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="css/style.css">
 <script src="js/mathjax-config.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-chtml.js"></script>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#13213f">
+<meta name="theme-color" content="#0a1a4a">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,56 +23,148 @@
 <div class="demo" id="demo" hidden>Mode démonstration : les données (groupes, réponses, notes, discussion) restent dans ce navigateur. Configure Supabase (voir le README).</div>
 
 <!-- ============ ACCUEIL / CONNEXION ============ -->
-<section class="auth" id="auth" hidden>
-  <div class="board">
-    <div class="brand">
-      <picture><source srcset="img/logo.webp" type="image/webp"><img class="logo-board" src="img/logo.png" alt="Colle express" width="900" height="587"></picture>
-      <h1 data-site class="sr"></h1>
+<div class="landing" id="auth" hidden>
+  <a class="skip" href="#authBox">Aller au formulaire de connexion</a>
+  <header class="lnav"><div class="lin">
+    <a class="lbrand" href="#top" aria-label="Colle express, accueil">
+      <img src="img/embleme.png" alt="" width="68" height="46"><span>Colle<b>express</b></span>
+    </a>
+    <nav class="llinks" aria-label="Accueil">
+      <a href="#fonctions">Fonctionnalités</a><a href="#methode">Méthode</a><a href="#auteur">Le professeur</a>
+    </nav>
+    <div class="lcta">
+      <button class="themebtn" type="button" data-theme-toggle aria-label="Changer de thème"></button>
+      <button class="btn ghost" type="button" data-auth="in">Connexion</button>
+      <button class="btn primary hide-sm" type="button" data-auth="up">Créer un compte</button>
     </div>
-    <p class="tag">Des colles courtes de maths et de physique-chimie, comme à l’oral. Tu cherches, tu soumets ta réponse sur l’honneur à ton groupe, tes camarades la notent sur 10 et on en discute — indices et corrigé détaillé quand tu en as besoin.</p>
-    <div class="chalk" aria-hidden="true">
-      <span style="left:2%;top:4%">∮ E·dℓ = − dΦ/dt</span>
-      <span style="left:46%;top:0%">Σ 1/n² = π²/6</span>
-      <span style="left:12%;top:34%">det(A − λIₙ) = 0</span>
-      <span style="left:52%;top:30%">ΔT = (1/D) ∂T/∂t</span>
-      <span style="left:0%;top:64%">∫ e^(−x²) dx = √π</span>
-      <span style="left:56%;top:62%">m a = Σ F</span>
-    </div>
-    <div class="feat" id="feat"></div>
-    <div class="sign"><small>Professeur</small><span data-prof></span></div>
-    <div id="aboutMini"></div>
-  </div>
-  <div class="authside">
-    <div class="authcard">
-      <h2 id="authTitle">Bienvenue</h2>
-      <p class="small">Connecte-toi pour retrouver ton suivi, ou crée ton compte avec le code donné en classe.</p>
-      <div class="tabs2" role="group"><button id="tIn" aria-pressed="true">Connexion</button><button id="tUp" aria-pressed="false">Créer un compte</button></div>
-      <form id="fIn">
-        <label class="field">Adresse e-mail<input type="email" id="inMail" autocomplete="email" required></label>
-        <label class="field">Mot de passe<input type="password" id="inPass" autocomplete="current-password" required minlength="6"></label>
-        <div class="err" id="inErr"></div>
-        <button class="btn primary wide" type="submit">Se connecter</button>
-        <p style="text-align:center"><button type="button" class="btn ghost" id="forgot">Mot de passe oublié ?</button></p>
-      </form>
-      <form id="fUp" hidden>
-        <label class="field">Prénom et nom<input id="upName" autocomplete="name" required maxlength="80"></label>
-        <label class="field">Adresse e-mail<input type="email" id="upMail" autocomplete="email" required></label>
-        <label class="field">Mot de passe (6 caractères min.)<input type="password" id="upPass" autocomplete="new-password" required minlength="6"></label>
-        <div class="row">
-          <label class="field">Code de la classe<input id="upCode" required autocomplete="off"></label>
-          <label class="field">Niveau visé<select id="upLvl"><option value="1">CCINP</option><option value="2">Mines-Centrale</option><option value="3">X-ENS</option></select></label>
+  </div></header>
+
+  <section class="hero2" id="top">
+    <div class="hero-bg" aria-hidden="true"><i class="g1"></i><i class="g2"></i></div>
+    <div class="hero-in">
+      <div class="hero-txt">
+        <p class="eyebrow reveal"><span class="dotlive"></span>Prépa MP · Maths &amp; Physique-Chimie</p>
+        <h1 class="reveal">Préparez vos colles <span class="grad">comme à l’oral.</span></h1>
+        <p class="lead reveal">Des exercices courts et ciblés, du CCINP à l’X-ENS. Vous cherchez, vous soumettez votre réponse sur l’honneur à votre groupe, vos camarades la notent sur&nbsp;10 — et le corrigé détaillé vous attend quand vous avez vraiment cherché.</p>
+        <div class="hero-btns reveal">
+          <button class="btn primary lg" type="button" data-auth="up">Commencer gratuitement <span data-ic="arrow"></span></button>
+          <a class="btn glass lg" href="#fonctions">Découvrir la méthode</a>
         </div>
-        <div class="err" id="upErr"></div>
-        <button class="btn primary wide" type="submit">Créer mon compte</button>
-      </form>
-      <form id="fNew" hidden>
-        <label class="field">Nouveau mot de passe<input type="password" id="newPass" autocomplete="new-password" required minlength="6"></label>
-        <div class="err" id="newErr"></div>
-        <button class="btn primary wide" type="submit">Enregistrer</button>
-      </form>
+        <ul class="hero-stats reveal" aria-label="En chiffres">
+          <li><b data-nbex>233</b><span>exercices corrigés</span></li>
+          <li><b>3</b><span>niveaux de concours</span></li>
+          <li><b>0–10</b><span>notation par les pairs</span></li>
+        </ul>
+      </div>
+
+      <div class="hero-side" id="authBox" tabindex="-1">
+        <div class="floaters" aria-hidden="true">
+          <span class="fl f1">Σ 1/n² = π²/6</span>
+          <span class="fl f2">∮ E·dℓ = −dΦ/dt</span>
+          <span class="fl f3"><b>8,5</b>/10 · 4 notes</span>
+        </div>
+        <div class="acard reveal" role="region" aria-labelledby="authTitle">
+          <div class="atabs" id="atabs" role="tablist" aria-label="Connexion ou inscription">
+            <button type="button" role="tab" id="tIn" aria-selected="true" aria-controls="fIn">Connexion</button>
+            <button type="button" role="tab" id="tUp" aria-selected="false" aria-controls="fUp">Inscription</button>
+          </div>
+          <h2 id="authTitle">Bon retour !</h2>
+          <p class="asub" id="authSub">Connectez-vous pour retrouver vos exercices, vos groupes et votre suivi.</p>
+          <div class="alert" id="authAlert" hidden></div>
+
+          <form id="fIn" novalidate>
+            <div class="fld"><label for="inMail">Adresse e-mail</label>
+              <input type="email" id="inMail" autocomplete="email" inputmode="email" placeholder="prenom.nom@exemple.fr" aria-describedby="inMailE" spellcheck="false">
+              <p class="ferr" id="inMailE"></p></div>
+            <div class="fld"><div class="lrow"><label for="inPass">Mot de passe</label><button type="button" class="alink" data-auth="forgot">Mot de passe oublié ?</button></div>
+              <div class="pw"><input type="password" id="inPass" autocomplete="current-password" aria-describedby="inPassE"><button type="button" class="eye" aria-label="Afficher le mot de passe" aria-pressed="false" aria-controls="inPass"><span data-ic="eye"></span></button></div>
+              <p class="ferr" id="inPassE"></p></div>
+            <button class="btn primary wide" type="submit" id="inBtn"><span class="bl">Se connecter</span></button>
+            <p class="aswitch">Pas encore de compte ? <button type="button" class="alink" data-auth="up">Créer un compte</button></p>
+          </form>
+
+          <form id="fUp" novalidate hidden>
+            <div class="fld"><label for="upName">Prénom et nom</label>
+              <input id="upName" autocomplete="name" maxlength="80" aria-describedby="upNameE"><p class="ferr" id="upNameE"></p></div>
+            <div class="fld"><label for="upMail">Adresse e-mail</label>
+              <input type="email" id="upMail" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="upMailE"><p class="ferr" id="upMailE"></p></div>
+            <div class="fld"><label for="upPass">Mot de passe</label>
+              <div class="pw"><input type="password" id="upPass" autocomplete="new-password" maxlength="72" aria-describedby="upMeter upPassE"><button type="button" class="eye" aria-label="Afficher le mot de passe" aria-pressed="false" aria-controls="upPass"><span data-ic="eye"></span></button></div>
+              <div class="meter2" id="upMeter" data-f="0"><i></i><i></i><i></i><i></i><span></span></div>
+              <p class="ferr" id="upPassE"></p></div>
+            <div class="frow">
+              <div class="fld"><label for="upCode">Code de la classe</label>
+                <input id="upCode" autocomplete="off" spellcheck="false" aria-describedby="upCodeE"><p class="ferr" id="upCodeE"></p></div>
+              <div class="fld"><label for="upLvl">Niveau visé</label>
+                <select id="upLvl"><option value="1">CCINP</option><option value="2">Mines-Centrale</option><option value="3">X-ENS</option></select></div>
+            </div>
+            <button class="btn primary wide" type="submit" id="upBtn"><span class="bl">Créer mon compte</span></button>
+            <p class="aswitch">Déjà inscrit ? <button type="button" class="alink" data-auth="in">Se connecter</button></p>
+          </form>
+
+          <form id="fForgot" novalidate hidden>
+            <div class="fld"><label for="fgMail">Adresse e-mail du compte</label>
+              <input type="email" id="fgMail" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="fgMailE"><p class="ferr" id="fgMailE"></p></div>
+            <p class="ahint" id="fgDemo" hidden>Mode démonstration : l’envoi d’e-mails nécessite la configuration de Supabase.</p>
+            <button class="btn primary wide" type="submit" id="fgBtn"><span class="bl">Envoyer le lien</span></button>
+            <p class="aswitch"><button type="button" class="alink" data-auth="in"><span data-ic="back"></span> Retour à la connexion</button></p>
+          </form>
+
+          <form id="fNew" novalidate hidden>
+            <div class="fld"><label for="newPass">Nouveau mot de passe</label>
+              <div class="pw"><input type="password" id="newPass" autocomplete="new-password" maxlength="72" aria-describedby="newMeter newPassE"><button type="button" class="eye" aria-label="Afficher le mot de passe" aria-pressed="false" aria-controls="newPass"><span data-ic="eye"></span></button></div>
+              <div class="meter2" id="newMeter" data-f="0"><i></i><i></i><i></i><i></i><span></span></div>
+              <p class="ferr" id="newPassE"></p></div>
+            <div class="fld"><label for="newPass2">Confirmez le mot de passe</label>
+              <div class="pw"><input type="password" id="newPass2" autocomplete="new-password" maxlength="72" aria-describedby="newPass2E"><button type="button" class="eye" aria-label="Afficher le mot de passe" aria-pressed="false" aria-controls="newPass2"><span data-ic="eye"></span></button></div>
+              <p class="ferr" id="newPass2E"></p></div>
+            <button class="btn primary wide" type="submit" id="newBtn"><span class="bl">Enregistrer le mot de passe</span></button>
+          </form>
+          <p class="asecure"><span data-ic="lock"></span> Connexion chiffrée · mots de passe jamais stockés en clair</p>
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <section class="lsec" id="fonctions" aria-labelledby="fT">
+    <div class="lhead reveal"><p class="eyebrow">Fonctionnalités</p><h2 id="fT">Tout ce qu’il faut pour travailler comme en colle</h2>
+      <p>Une méthode simple : chercher d’abord, s’aider ensuite, comprendre enfin.</p></div>
+    <div class="fgrid">
+      <article class="fcard reveal"><span class="fic" data-ic="users"></span><h3>Groupes de travail</h3><p>Rejoignez un groupe avec un code. Responsable, modérateurs, membres : chacun son rôle.</p></article>
+      <article class="fcard reveal"><span class="fic c2" data-ic="check"></span><h3>Réponse sur l’honneur</h3><p>Vous vous engagez à avoir cherché seul, puis votre réponse est aussitôt visible par le groupe.</p></article>
+      <article class="fcard reveal"><span class="fic c3" data-ic="star"></span><h3>Notation de 0 à 10</h3><p>Vos camarades notent votre réponse, vous notez les leurs : l’évaluation par les pairs, comme en vrai.</p></article>
+      <article class="fcard reveal"><span class="fic c4" data-ic="bulb"></span><h3>Indices progressifs</h3><p>Un coup de pouce gradué plutôt que la solution toute faite, pour débloquer sans tout dévoiler.</p></article>
+      <article class="fcard reveal"><span class="fic c5" data-ic="book"></span><h3>Corrigés détaillés</h3><p>Chaque étape justifiée, puis un bilan : méthodes à retenir et pièges classiques.</p></article>
+      <article class="fcard reveal"><span class="fic c6" data-ic="chart"></span><h3>Suivi personnel</h3><p>Exercices réussis, notes reçues, points à retravailler : vous savez quoi faire ensuite.</p></article>
+    </div>
+  </section>
+
+  <section class="lsec alt" id="methode" aria-labelledby="mT">
+    <div class="lhead reveal"><p class="eyebrow">Méthode</p><h2 id="mT">Trois étapes, vingt minutes</h2></div>
+    <ol class="steps2">
+      <li class="reveal"><span class="sn">1</span><h3>Choisissez un exercice</h3><p>Filtrez par niveau (CCINP, Mines-Centrale, X-ENS), matière et chapitre. Le chrono démarre.</p></li>
+      <li class="reveal"><span class="sn">2</span><h3>Cherchez puis soumettez</h3><p>Rédigez votre réponse ou prenez-la en photo, engagez-vous sur l’honneur et partagez-la au groupe.</p></li>
+      <li class="reveal"><span class="sn">3</span><h3>Notez, discutez, comprenez</h3><p>Lisez les réponses des autres, notez-les sur 10, discutez sous l’exercice, puis ouvrez le corrigé.</p></li>
+    </ol>
+  </section>
+
+  <section class="lsec" id="auteur" aria-labelledby="aT">
+    <div class="author reveal">
+      <div><p class="eyebrow">Le professeur</p><h2 id="aT" class="sr">Le professeur</h2><div id="aboutMini"></div></div>
+      <div class="author-cta"><p>Prêt pour votre prochaine colle&nbsp;?</p><button class="btn primary lg" type="button" data-auth="up">Créer mon compte</button></div>
+    </div>
+  </section>
+
+  <footer class="lfoot">
+    <div class="lin">
+      <div class="fbrand"><span class="lbrand"><img src="img/embleme.png" alt="" width="68" height="46"><span>Colle<b>express</b></span></span>
+        <p>Colles courtes de maths et de physique-chimie pour la prépa MP.</p></div>
+      <nav aria-label="Liens"><b>Plateforme</b><a href="#fonctions">Fonctionnalités</a><a href="#methode">Méthode</a><button type="button" class="alink" data-auth="in">Connexion</button><button type="button" class="alink" data-auth="up">Inscription</button></nav>
+      <div><b>Contact</b><a href="mailto:ibrahimben930@gmail.com">ibrahimben930@gmail.com</a><a href="tel:+33753144854">+33 7 53 14 48 54</a></div>
+    </div>
+    <div class="lin fbottom"><span>© <span class="yr"></span> <span data-prof></span> · <span data-site></span></span><span>Exercices de type oral · CCINP, Mines-Centrale, X-ENS</span></div>
+  </footer>
+</div>
 
 <!-- ============ APPLICATION ============ -->
 <div id="app" hidden>
@@ -97,10 +189,10 @@
             <div class="searchrow"><div class="searchbox"><span id="searchIc"></span><input id="fQ" type="search" placeholder="Rechercher un exercice" aria-label="Rechercher"></div>
             <button class="favtoggle" id="fFav" aria-pressed="false">Mes favoris</button></div>
           </div>
-          <div class="items" id="items"></div>
+          <div class="items" id="items" aria-busy="true"><div role="status" aria-label="Chargement des exercices"><div class="skel-item"><span class="skel"></span><span class="skel skel-l w80"></span><span class="skel skel-l w40"></span></div><div class="skel-item"><span class="skel"></span><span class="skel skel-l w60"></span><span class="skel skel-l w40"></span></div><div class="skel-item"><span class="skel"></span><span class="skel skel-l w80"></span><span class="skel skel-l w40"></span></div><div class="skel-item"><span class="skel"></span><span class="skel skel-l w60"></span><span class="skel skel-l w40"></span></div></div></div>
           <div class="count" id="count"></div>
         </aside>
-        <article class="panel copy" id="copy" aria-live="polite"></article>
+        <article class="panel copy" id="copy" aria-live="polite"><div aria-hidden="true"><span class="skel skel-l w40"></span><span class="skel skel-h" style="margin-top:12px"></span><span class="skel skel-card"></span></div></article>
       </div>
     </section>
     <section class="view" id="v-groupes"></section>

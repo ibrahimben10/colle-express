@@ -1,5 +1,6 @@
 // Couche de données : Supabase en production, navigateur (localStorage) en mode démonstration.
 import { CONFIG } from './config.js';
+import { emailValide, motDePasseErreur } from './validation.js';
 
 export const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 const ls = { get(k, d) { try { const v = localStorage.getItem('ce:' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
@@ -18,9 +19,34 @@ const errFr = e => { const m = e?.message || String(e);
 const D = { get: () => ls.get('demo-g', {groupes: [], membres: [], reponses: [], notes: [], coms: []}), set(v) { ls.set('demo-g', v); emit('groupe'); } };
 export const on = (k, f) => listeners[k].push(f);
 
+/* ---------- erreurs d'authentification ---------- */
+export class AuthFail extends Error {
+  constructor(code, detail = '') { super(detail || code); this.code = code; this.detail = detail; }
+}
+// Adresse de retour des liens d'e-mail : la page d'accueil du site (à déclarer dans Supabase > Auth > URL Configuration).
+const redirectURL = () => new URL('index.html', location.href.split('#')[0]).href;
+// Une exception réseau (hors connexion, DNS…) devient une erreur classée « serveur ».
+const safe = async f => { try { return await f(); } catch (e) { return {data: {}, error: e || {}}; } };
+function classer(e, map = {}) {
+  const code = e.code || e.name || '', st = e.status || 0, m = String(e.message || '');
+  if (map[code]) return map[code];
+  if (st === 429 || /rate.?limit|too many/i.test(code + ' ' + m)) return 'rate_limit';
+  if (/email_address_invalid|validation_failed/.test(code) || /invalid format|validate email|email address .* invalid/i.test(m)) return 'invalid_email';
+  if (/Invalid login credentials/i.test(m)) return map.invalid_credentials || 'invalid_credentials';
+  if (/Email not confirmed/i.test(m)) return map.email_not_confirmed || 'email_not_confirmed';
+  if (/should be different/i.test(m)) return map.same_password || 'same_password';
+  if (/Auth session missing/i.test(m)) return map.AuthSessionMissingError || 'link_invalid';
+  if (/already registered/i.test(m)) return map.user_already_exists || 'signup_refused';
+  if (/Password should/i.test(m)) return map.weak_password || 'weak_password';
+  return 'server';
+}
+
 export const api = {
   user: null,      // {id, email}
   profile: null,   // {id, full_name, role, niveau}
+
+  recovery: false,  // vrai quand l'utilisateur arrive par un lien de réinitialisation valide
+  linkError: '',    // code d'erreur d'un lien d'e-mail expiré ou invalide
 
   async init() {
     if (DEMO) {
@@ -28,15 +54,29 @@ export const api = {
       if (p) { this.user = {id: p.id, email: 'demo@local'}; this.profile = p; }
       return;
     }
+    // Lien reçu par e-mail : on lit l'URL AVANT que supabase-js ne la consomme,
+    // pour ne jamais rater l'arrivée d'un lien de réinitialisation (ni un lien expiré).
+    const h = new URLSearchParams(location.hash.slice(1)), q = new URLSearchParams(location.search);
+    const err = h.get('error_code') || q.get('error_code') || h.get('error') || q.get('error');
+    if (err) {
+      this.linkError = /expired/i.test(err + (h.get('error_description') || q.get('error_description') || '')) ? 'link_expired' : 'link_invalid';
+      history.replaceState(null, '', location.pathname);
+    }
+    if (h.get('type') === 'recovery' || q.get('type') === 'recovery') this.recovery = true;
+
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm');
     sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-    const { data } = await sb.auth.getSession();
-    if (data.session) await this._load(data.session.user);
-    sb.auth.onAuthStateChange(async (ev, session) => {
-      if (ev === 'PASSWORD_RECOVERY') { emit('auth', 'recovery'); return; }
-      if (ev === 'SIGNED_IN' && session && session.user.id !== this.user?.id) { await this._load(session.user); emit('auth', 'in'); }
+    // Abonnement immédiat (avant getSession) : l'événement PASSWORD_RECOVERY est émis pendant l'initialisation.
+    sb.auth.onAuthStateChange((ev, session) => setTimeout(async () => {
+      if (ev === 'PASSWORD_RECOVERY') { this.recovery = true; if (session && session.user.id !== this.user?.id) await this._load(session.user); emit('auth', 'recovery'); return; }
+      if (ev === 'SIGNED_IN' && this._ready && session && session.user.id !== this.user?.id) { await this._load(session.user); if (!this.recovery) emit('auth', 'in'); }
       if (ev === 'SIGNED_OUT') { this.user = null; this.profile = null; emit('auth', 'out'); }
-    });
+    }, 0));
+    const { data } = await sb.auth.getSession();
+    if (data.session && !this.user) await this._load(data.session.user);
+    if (this.recovery && !data.session) { this.recovery = false; this.linkError ||= 'link_invalid'; }
+    if (location.hash.includes('access_token') || location.hash.includes('type=')) history.replaceState(null, '', location.pathname + '#exercices');
+    this._ready = true;
   },
   async _load(u) {
     this.user = {id: u.id, email: u.email};
@@ -46,15 +86,22 @@ export const api = {
   },
   get isProf() { return this.profile?.role === 'prof'; },
 
+  /* ---------- authentification ---------- */
+  // Chaque échec est converti en AuthFail(code) ; les messages affichés sont choisis par l'interface
+  // et ne révèlent jamais si un compte existe, ni le détail technique de l'erreur.
   async signIn(email, password) {
+    if (!emailValide(email)) throw new AuthFail('invalid_email');
+    if (!password) throw new AuthFail('missing_password');
     if (DEMO) return this._demo(email.split('@')[0] || 'Démo');
-    const { error } = await sb.auth.signInWithPassword({email, password});
-    if (error) throw new Error(error.message.includes('Invalid') ? 'E-mail ou mot de passe incorrect.' : error.message.includes('confirm') ? 'Confirme d’abord ton adresse (e-mail reçu).' : error.message);
+    const { error } = await safe(() => sb.auth.signInWithPassword({email: email.trim(), password}));
+    if (error) throw new AuthFail(classer(error, {invalid_credentials: 'invalid_credentials', email_not_confirmed: 'email_not_confirmed'}));
   },
   async signUp({name, email, password, code, niveau}) {
+    if (!emailValide(email)) throw new AuthFail('invalid_email');
+    const pe = motDePasseErreur(password); if (pe) throw new AuthFail('weak_password', pe);
     if (DEMO) return this._demo(name, niveau);
-    const { data, error } = await sb.auth.signUp({email, password, options: {data: {full_name: name, code, niveau}, emailRedirectTo: location.origin + location.pathname}});
-    if (error) throw new Error(/Database error|code/i.test(error.message) ? 'Code de classe invalide.' : error.message);
+    const { data, error } = await safe(() => sb.auth.signUp({email: email.trim(), password, options: {data: {full_name: name, code, niveau}, emailRedirectTo: redirectURL()}}));
+    if (error) throw new AuthFail(/Database error|code de classe/i.test(error.message || '') ? 'bad_class_code' : classer(error, {weak_password: 'weak_password', user_already_exists: 'signup_refused', email_exists: 'signup_refused'}));
     return data.session ? 'in' : 'confirm';
   },
   async _demo(name, niveau = 1) {
@@ -64,14 +111,20 @@ export const api = {
     emit('auth', 'in');
     return 'in';
   },
+  /** Demande de lien de réinitialisation. Ne se résout QUE si Supabase a accepté la demande. */
   async resetPassword(email) {
-    if (DEMO) return;
-    const { error } = await sb.auth.resetPasswordForEmail(email, {redirectTo: location.origin + location.pathname});
-    if (error) throw new Error(error.message);
+    if (!emailValide(email)) throw new AuthFail('invalid_email');
+    if (DEMO) throw new AuthFail('demo');
+    const { error } = await safe(() => sb.auth.resetPasswordForEmail(email.trim(), {redirectTo: redirectURL()}));
+    if (error) throw new AuthFail(classer(error));
+    return true;
   },
   async updatePassword(password) {
-    const { error } = await sb.auth.updateUser({password});
-    if (error) throw new Error(error.message);
+    const pe = motDePasseErreur(password); if (pe) throw new AuthFail('weak_password', pe);
+    if (DEMO) throw new AuthFail('demo');
+    const { error } = await safe(() => sb.auth.updateUser({password}));
+    if (error) throw new AuthFail(classer(error, {same_password: 'same_password', weak_password: 'weak_password', session_not_found: 'link_invalid', AuthSessionMissingError: 'link_invalid'}));
+    this.recovery = false;
   },
   async signOut() {
     if (DEMO) { localStorage.removeItem('ce:demo-profile'); this.user = null; this.profile = null; emit('auth', 'out'); return; }

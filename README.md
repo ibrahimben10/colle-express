@@ -34,8 +34,10 @@ Le site est **statique** (hébergé gratuitement par GitHub Pages). Les comptes,
 2. Dans le projet : menu **SQL Editor** → **New query** → colle **tout** le contenu du fichier [`supabase/schema.sql`](supabase/schema.sql) → **Run**. Tu dois voir « Success ».
 3. Menu **Authentication** → **URL Configuration** :
    - *Site URL* : `https://ibrahimben10.github.io/colle-express/`
-   - *Redirect URLs* : ajoute la même adresse.
-4. (Conseillé) **Authentication** → **Sign In / Providers** → **Email** : tu peux laisser « Confirm email » activé (l’élève confirme son adresse) ou le désactiver pour aller plus vite en classe.
+   - *Redirect URLs* : ajoute `https://ibrahimben10.github.io/colle-express/**` (le `**` autorise `index.html` : c'est là que pointent les liens de confirmation et de réinitialisation).
+4. **Indispensable pour les e-mails (mot de passe oublié, confirmation)** : **Authentication** → **Emails** → **SMTP Settings** → active *Custom SMTP* (Brevo, Resend… ont une offre gratuite). Sans cela, Supabase n'envoie les e-mails qu'aux membres de ton équipe Supabase, 2 par heure au plus : les élèves ne recevraient rien. Puis **Authentication** → **Rate Limits** pour régler le nombre d'e-mails par heure.
+5. **Authentication** → **Sign In / Providers** → **Email** : mets *Minimum password length* à **8** (comme le site) et laisse *Email OTP Expiration* à 3600 s (lien valable 1 h, à usage unique).
+6. (Conseillé) **Authentication** → **Sign In / Providers** → **Email** : tu peux laisser « Confirm email » activé (l’élève confirme son adresse) ou le désactiver pour aller plus vite en classe.
 
 ### Étape 3 — Relier le site à Supabase
 
@@ -111,6 +113,15 @@ Format d’un exercice dans `data/exercices.json` :
 - La clé Anthropic reste côté serveur (Edge Function) : elle n’apparaît jamais dans le site.
 - Chaque élève est limité à `LIMITE_JOUR` demandes IA par jour. Surveille ta consommation sur console.anthropic.com (tu peux y fixer une limite de dépense mensuelle).
 - Les corrections sont générées par IA : elles peuvent se tromper, encourage les élèves à vérifier avec leur cours.
+
+## Connexion, inscription et mot de passe oublié
+
+- Tout est géré par **Supabase Auth** : les mots de passe sont hachés (bcrypt) côté serveur, jamais stockés en clair, et les liens de réinitialisation sont signés, temporaires et à usage unique.
+- Le site vérifie le format de l'adresse **avant** tout envoi (`js/validation.js`) ; Supabase refait la vérification côté serveur.
+- « Mot de passe oublié » n'affiche la confirmation — neutre : « Si un compte est associé à cette adresse… » — qu'après acceptation par Supabase. Une erreur technique affiche un message d'erreur, jamais une fausse confirmation. En mode démonstration, aucun envoi n'est simulé.
+- Anti-abus : un seul envoi à la fois, 60 s entre deux demandes de lien, connexion bloquée 30 s (puis 1 min, 2 min…) après 5 échecs. Ces limites du navigateur complètent celles du serveur (Authentication → Rate Limits).
+- Lien expiré ou déjà utilisé : l'élève est ramené au formulaire « Mot de passe oublié » avec un message clair.
+- Code : `js/auth.js` (interface), `js/api.js` (appels Supabase et classement des erreurs), `js/validation.js` (règles).
 
 ## Modifier la présentation « À propos »
 

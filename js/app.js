@@ -5,8 +5,11 @@ import { ic, chapIcon } from './icons.js';
 import { FIG } from './figures.js';
 import { esc, rich, fmtEnonce, fmtCorrige, hintsHTML, hintLevels, correctionHTML } from './format.js';
 import { presentationCourte, presentationPage } from './apropos.js';
+import { initAuth, showAuth, MSG } from './auth.js';
+import { initTheme, syncTheme, reveal, toast, THEME_ICON } from './ui.js';
 
 const $ = s => document.querySelector(s);
+const SKEL = (n, cls = 'skel-item') => Array.from({length: n}, () => cls === 'skel-item' ? '<div class="skel-item" aria-hidden="true"><span class="skel"></span><span class="skel skel-l w80"></span><span class="skel skel-l w40"></span></div>' : `<span class="skel ${cls}" aria-hidden="true"></span>`).join('');
 const LV = {1: 'CCINP', 2: 'Mines-Centrale', 3: 'X-ENS'};
 const LVD = {1: 'Fondamentaux et applications directes du cours', 2: 'Oraux Mines-Ponts et Centrale-Supélec', 3: 'Oraux X-ENS : exercices ouverts'};
 const MAT_IC = {Maths: 'sigma', Physique: 'atom', Chimie: 'flask'};
@@ -63,9 +66,11 @@ const notice = h => { $('#notice').innerHTML = h || ''; };
 document.querySelectorAll('[data-site]').forEach(e => e.textContent = CONFIG.NOM_SITE);
 document.querySelectorAll('[data-prof]').forEach(e => e.textContent = CONFIG.NOM_PROF);
 $('#aboutMini').innerHTML = presentationCourte();
-$('#yr').textContent = new Date().getFullYear();
-$('#feat').innerHTML = [['users', 'Travaille en groupe : réponses sur l’honneur, notées sur 10 par tes pairs'], ['msg', 'Un fil de discussion sous chaque exercice'], ['bulb', 'Indices gradués et corrigés détaillés, du CCINP à l’X-ENS']]
-  .map(([i, t]) => `<div>${ic(i)}<span>${t}</span></div>`).join('');
+document.querySelectorAll('#yr, .yr').forEach(e => e.textContent = new Date().getFullYear());
+document.querySelectorAll('[data-ic]').forEach(e => { e.innerHTML = ic(e.dataset.ic); });
+initTheme();
+document.querySelectorAll('[data-theme-toggle]').forEach(b => b.innerHTML = THEME_ICON);
+reveal();
 $('#searchIc').outerHTML = ic('search');
 if (DEMO) $('#demo').hidden = false;
 
@@ -86,52 +91,21 @@ function lazyTypeset(d) {
 }
 
 /* ================= CONNEXION ================= */
-function showAuth(mode = 'in') {
-  $('#app').hidden = true; $('#auth').hidden = false;
-  $('#fIn').hidden = mode !== 'in'; $('#fUp').hidden = mode !== 'up'; $('#fNew').hidden = mode !== 'new';
-  $('#tIn').setAttribute('aria-pressed', mode === 'in'); $('#tUp').setAttribute('aria-pressed', mode === 'up');
-  $('.tabs2').hidden = mode === 'new';
-  $('#authTitle').textContent = mode === 'new' ? 'Nouveau mot de passe' : mode === 'up' ? 'Créer ton compte' : 'Bienvenue';
-}
-$('#tIn').onclick = () => showAuth('in');
-$('#tUp').onclick = () => showAuth('up');
-$('#fIn').onsubmit = async e => {
-  e.preventDefault(); $('#inErr').textContent = '';
-  const b = e.submitter; b.disabled = true;
-  try { await api.signIn($('#inMail').value.trim(), $('#inPass').value); } catch (x) { $('#inErr').textContent = x.message; }
-  b.disabled = false;
-};
-$('#fUp').onsubmit = async e => {
-  e.preventDefault(); $('#upErr').textContent = '';
-  const b = e.submitter; b.disabled = true;
-  try {
-    const r = await api.signUp({name: $('#upName').value.trim(), email: $('#upMail').value.trim(), password: $('#upPass').value, code: $('#upCode').value.trim(), niveau: +$('#upLvl').value});
-    if (r === 'confirm') { $('#upErr').innerHTML = '<span class="ok">Compte créé ! Ouvre l’e-mail de confirmation reçu, puis connecte-toi.</span>'; }
-  } catch (x) { $('#upErr').textContent = x.message; }
-  b.disabled = false;
-};
-$('#forgot').onclick = async () => {
-  const m = $('#inMail').value.trim();
-  if (!m) { $('#inErr').textContent = 'Saisis d’abord ton adresse e-mail.'; return; }
-  try { await api.resetPassword(m); $('#inErr').innerHTML = '<span class="ok">Un lien de réinitialisation t’a été envoyé.</span>'; } catch (x) { $('#inErr').textContent = x.message; }
-};
-$('#fNew').onsubmit = async e => {
-  e.preventDefault();
-  try { await api.updatePassword($('#newPass').value); start(); } catch (x) { $('#newErr').textContent = x.message; }
-};
+initAuth({onSignedIn: () => start()});
 on('auth', ev => { if (ev === 'in') start(); else if (ev === 'out') { api.stopLive(); showAuth('in'); } else if (ev === 'recovery') showAuth('new'); });
 
 /* ================= DÉMARRAGE APPLICATION ================= */
 let started = false;
 async function start() {
   if (!api.user) return showAuth('in');
-  $('#auth').hidden = true; $('#app').hidden = false;
+  $('#auth').hidden = true; $('#app').hidden = false; document.body.classList.remove('on-landing');
   renderMe();
   return afterLogin2();
 }
 function renderMe() {
   const p = api.profile;
-  $('#me').innerHTML = `<button class="avbtn" id="mePhoto" title="Changer ma photo de profil" aria-label="Changer ma photo de profil">${avatar(p.id, p.full_name)}</button><span class="small" style="color:var(--ink);font-weight:600">${esc(p.full_name || 'Moi')}</span><span class="dot" id="conn"></span>${!standalone() && (installEvt || isIOS() || matchMedia('(max-width: 820px)').matches) ? `<button class="btn ghost" id="inst" title="Installer l’application">${ic('download')}<span class="lbl-inst">Installer</span></button>` : ''}<button class="btn ghost" id="out" title="Se déconnecter" aria-label="Se déconnecter">${ic('logout')}</button>`;
+  $('#me').innerHTML = `<button class="avbtn" id="mePhoto" title="Changer ma photo de profil" aria-label="Changer ma photo de profil">${avatar(p.id, p.full_name)}</button><span class="small" style="color:var(--ink);font-weight:600">${esc(p.full_name || 'Moi')}</span><span class="dot" id="conn"></span>${!standalone() && (installEvt || isIOS() || matchMedia('(max-width: 820px)').matches) ? `<button class="btn ghost" id="inst" title="Installer l’application">${ic('download')}<span class="lbl-inst">Installer</span></button>` : ''}<button class="themebtn" type="button" data-theme-toggle aria-label="Changer de thème">${THEME_ICON}</button><button class="btn ghost" id="out" title="Se déconnecter" aria-label="Se déconnecter">${ic('logout')}</button>`;
+  syncTheme();
   $('#inst') && ($('#inst').onclick = installApp);
   $('#out').onclick = () => api.signOut();
   $('#mePhoto').onclick = pickPhoto;
@@ -322,7 +296,7 @@ async function shareEx(ex, withCorr) {
   try {
     if (navigator.share) { await navigator.share({title, text: `${title} (${CONFIG.NOM_SITE})`, url}); return; }
   } catch (e) { if (e?.name === 'AbortError') return; }
-  try { await navigator.clipboard.writeText(url); notice(`Lien copié : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`); }
+  try { await navigator.clipboard.writeText(url); toast('Lien du corrigé copié dans le presse-papiers.', 'ok'); }
   catch { notice(`Lien à partager : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`); }
 }
 
@@ -392,7 +366,7 @@ function renderCopy() {
 
     <section class="co co-grp" id="grpSec">
       <div class="co-h"><span class="co-e" aria-hidden="true">👥</span>Réponses du groupe<span class="co-meta" id="grpMeta"></span></div>
-      <div id="repList">${G ? '<p class="small"><span class="spin"></span> Chargement…</p>' : '<p class="small">Les réponses des membres de ton groupe s’afficheront ici.</p>'}</div>
+      <div id="repList">${G ? `<div role="status" aria-label="Chargement des réponses">${SKEL(2, 'skel-card')}</div>` : '<p class="small">Les réponses des membres de ton groupe s’afficheront ici.</p>'}</div>
     </section>
 
     <section class="co co-disc" id="discSec">
@@ -683,7 +657,7 @@ async function renderGroupes() {
 }
 async function renderGroupeDetail(gid) {
   const box = $('#gDetail'), g = gById(gid); if (!box || !g) return;
-  box.innerHTML = '<p class="small"><span class="spin"></span> Chargement du groupe…</p>';
+  box.innerHTML = `<div role="status" aria-label="Chargement du groupe" style="display:grid;gap:12px">${SKEL(1, 'skel-h')}${SKEL(2, 'skel-card')}</div>`;
   let membres = [], recent = [];
   try { [membres, recent] = await Promise.all([api.membres(gid), api.recentes(gid)]); MEMB[gid] = membres; } catch (e) { box.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
   if (GV !== gid) return;
@@ -712,7 +686,7 @@ async function renderGroupeDetail(gid) {
   box.querySelectorAll('[data-role]').forEach(s => s.onchange = async () => { try { await api.definirRole(gid, s.dataset.role, s.value); await reload(); } catch (x) { err(x.message); renderGroupeDetail(gid); } });
   box.querySelectorAll('[data-kick]').forEach(b => b.onclick = async () => { const m = membres.find(x => x.user_id === b.dataset.kick);
     if (!confirm(`Exclure ${m.full_name} du groupe ? Ses réponses restent visibles.`)) return; try { await api.exclure(gid, m.user_id); await reload(); } catch (x) { err(x.message); } });
-  $('#gCopy') && ($('#gCopy').onclick = async () => { try { await navigator.clipboard.writeText(g.code); $('#gCopy').innerHTML = `${ic('check')} Copié`; } catch { err('Copie impossible : note le code à la main.'); } });
+  $('#gCopy') && ($('#gCopy').onclick = async () => { try { await navigator.clipboard.writeText(g.code); $('#gCopy').innerHTML = `${ic('check')} Copié`; toast('Code du groupe copié dans le presse-papiers.', 'ok'); } catch { err('Copie impossible : note le code à la main.'); } });
   $('#gRegen') && ($('#gRegen').onclick = async () => { if (!confirm('Générer un nouveau code ? L’ancien ne permettra plus de rejoindre le groupe.')) return; try { await api.regenererCode(gid); await reload(); } catch (x) { err(x.message); } });
   $('#gEdit') && ($('#gEdit').onclick = async () => { const nom = prompt('Nom du groupe', g.nom); if (nom == null) return; const desc = prompt('Description', g.description || ''); if (desc == null) return;
     if (nom.trim().length < 2) return err('Nom trop court.'); try { await api.majGroupe(gid, {nom: nom.trim().slice(0, 60), description: desc.trim().slice(0, 300)}); await reload(); } catch (x) { err(x.message); } });
@@ -986,7 +960,10 @@ async function importPhoto(file) {
 (async function boot() {
   try { BASE = await (await fetch('data/exercices.json')).json(); } catch { BASE = []; }
   fetch('data/corriges.json').then(r => r.json()).then(d => { CORR = d || {}; if (api.user) rerender(); }).catch(() => {});
+  document.querySelectorAll('[data-nbex]').forEach(e => e.textContent = BASE.length || e.textContent);
   try { await api.init(); }
-  catch { showAuth('in'); $('#inErr').textContent = navigator.onLine ? 'Connexion au serveur impossible : réessaie dans un instant.' : 'Tu es hors connexion : reconnecte-toi à Internet pour accéder à ton compte.'; return; }
+  catch { showAuth('in', {alert: navigator.onLine ? 'Connexion au serveur impossible pour le moment. Réessayez dans un instant.' : 'Vous êtes hors connexion : reconnectez-vous à Internet pour accéder à votre compte.'}); return; }
+  if (api.linkError) return showAuth('forgot', {alert: MSG[api.linkError]});
+  if (api.recovery && api.user) return showAuth('new');
   if (api.user) start(); else showAuth('in');
 })();
