@@ -558,3 +558,6 @@ textarea.note.big{min-height:140px;font-family:inherit;line-height:1.5}
 .gmore{margin-top:18px;border:1px dashed var(--line);border-radius:14px;padding:4px 14px}
 .gmore summary{cursor:pointer;min-height:48px;display:flex;align-items:center;gap:8px;font-weight:600;color:var(--blue)}
 .gmore[open]{padding-bottom:14px}
+.steps-ios{padding-left:1.2em;display:grid;gap:8px;line-height:1.5}
+.lbl-inst{font-size:14px;font-weight:600}
+@media(max-width:420px){.lbl-inst{display:none}}

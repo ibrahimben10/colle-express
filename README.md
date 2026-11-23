@@ -149,6 +149,15 @@ Règles garanties par la base (et non seulement par l’interface) :
 
 Dans le suivi, un exercice est marqué **réussi** quand la réponse a reçu au moins 2 notes et une moyenne d’au moins 6/10.
 
+## Application installable (téléphone et ordinateur)
+
+Le site est une **application web installable** (PWA) : `manifest.webmanifest`, icônes dans `icons/`, et `sw.js` qui garde en mémoire l’interface, les énoncés, les indices et les corrigés (consultables hors connexion ; les données des comptes ne sont jamais mises en cache).
+- **Android / Chrome / Edge** : bouton « Installer » en haut du site, ou menu ⋮ → *Installer l’application*.
+- **iPhone / iPad** : dans Safari, *Partager* → *Sur l’écran d’accueil*.
+- Pour la publier sur le **Google Play Store** : https://www.pwabuilder.com → saisir l’adresse du site → *Package for stores* → *Android*, puis déposer le fichier `.aab` dans la Play Console. Pour l’App Store, PWABuilder fournit aussi un projet iOS, à compiler avec Xcode sur un Mac.
+
+Après une modification du site, incrémente `VERSION` dans `sw.js` pour forcer le renouvellement du cache hors connexion.
+
 ## Ajouter des exercices en lot
 
 Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 indices, corrigé). Pour régénérer les fichiers de données : `python3 tools/build_new.py`, puis `python3 tools/build_bilan.py`.

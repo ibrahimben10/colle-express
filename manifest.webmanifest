@@ -1,0 +1,23 @@
+{
+  "name": "Colle express — Prépa MP",
+  "short_name": "Colle express",
+  "description": "Colles de maths et physique-chimie pour la prépa MP : groupes, réponses sur l’honneur, notation entre pairs, indices et corrigés détaillés.",
+  "lang": "fr",
+  "id": "./",
+  "start_url": "./index.html#exercices",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbfcfe",
+  "theme_color": "#13213f",
+  "categories": ["education"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Exercices", "url": "./index.html#exercices", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]},
+    {"name": "Mes groupes", "url": "./index.html#groupes", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]}
+  ]
+}

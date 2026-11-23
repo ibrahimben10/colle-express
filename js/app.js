@@ -21,6 +21,22 @@ const avatar = (id, name) => { const ph = photoOf(id);
   return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(ph) ? `<img class="avatar" src="${ph}" alt="">` : `<span class="avatar" style="background:${hue(id)}">${esc(initials(name))}</span>`; };
 const store = { get(k, d) { try { const v = localStorage.getItem('ce:' + k); return v ? JSON.parse(v) : d; } catch { return d; } }, set(k, v) { try { localStorage.setItem('ce:' + k, JSON.stringify(v)); } catch {} } };
 
+/* ---------- application installable (PWA) ---------- */
+if ('serviceWorker' in navigator && location.protocol !== 'file:') addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+let installEvt = null;
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (api.user) renderMe(); });
+addEventListener('appinstalled', () => { installEvt = null; if (api.user) renderMe(); });
+async function installApp() {
+  if (installEvt) { installEvt.prompt(); await installEvt.userChoice.catch(() => {}); installEvt = null; renderMe(); return; }
+  $('#dlgT').textContent = 'Installer l’application';
+  $('#dlgB').innerHTML = isIOS()
+    ? `<ol class="steps-ios"><li>Ouvre ce site dans <b>Safari</b>.</li><li>Touche le bouton <b>Partager</b> (carré avec une flèche vers le haut).</li><li>Choisis <b>« Sur l’écran d’accueil »</b>, puis <b>Ajouter</b>.</li></ol><p class="small">L’icône Colle express apparaît alors sur ton écran d’accueil et s’ouvre en plein écran, comme une application.</p>`
+    : `<ol class="steps-ios"><li>Ouvre ce site dans <b>Chrome</b> (ou Edge).</li><li>Menu <b>⋮</b> → <b>« Installer l’application »</b> (ou « Ajouter à l’écran d’accueil »).</li></ol><p class="small">Sur ordinateur, l’icône d’installation apparaît aussi à droite de la barre d’adresse.</p>`;
+  $('#dlg').showModal();
+}
+
 /* ---------- état ---------- */
 let BASE = [], BANK = [], CORR = {};
 const all = () => BASE.concat(BANK);
@@ -115,7 +131,8 @@ async function start() {
 }
 function renderMe() {
   const p = api.profile;
-  $('#me').innerHTML = `<button class="avbtn" id="mePhoto" title="Changer ma photo de profil" aria-label="Changer ma photo de profil">${avatar(p.id, p.full_name)}</button><span class="small" style="color:var(--ink);font-weight:600">${esc(p.full_name || 'Moi')}</span><span class="dot" id="conn"></span><button class="btn ghost" id="out" title="Se déconnecter" aria-label="Se déconnecter">${ic('logout')}</button>`;
+  $('#me').innerHTML = `<button class="avbtn" id="mePhoto" title="Changer ma photo de profil" aria-label="Changer ma photo de profil">${avatar(p.id, p.full_name)}</button><span class="small" style="color:var(--ink);font-weight:600">${esc(p.full_name || 'Moi')}</span><span class="dot" id="conn"></span>${!standalone() && (installEvt || isIOS() || matchMedia('(max-width: 820px)').matches) ? `<button class="btn ghost" id="inst" title="Installer l’application">${ic('download')}<span class="lbl-inst">Installer</span></button>` : ''}<button class="btn ghost" id="out" title="Se déconnecter" aria-label="Se déconnecter">${ic('logout')}</button>`;
+  $('#inst') && ($('#inst').onclick = installApp);
   $('#out').onclick = () => api.signOut();
   $('#mePhoto').onclick = pickPhoto;
 }
@@ -969,6 +986,7 @@ async function importPhoto(file) {
 (async function boot() {
   try { BASE = await (await fetch('data/exercices.json')).json(); } catch { BASE = []; }
   fetch('data/corriges.json').then(r => r.json()).then(d => { CORR = d || {}; if (api.user) rerender(); }).catch(() => {});
-  await api.init();
+  try { await api.init(); }
+  catch { showAuth('in'); $('#inErr').textContent = navigator.onLine ? 'Connexion au serveur impossible : réessaie dans un instant.' : 'Tu es hors connexion : reconnecte-toi à Internet pour accéder à ton compte.'; return; }
   if (api.user) start(); else showAuth('in');
 })();

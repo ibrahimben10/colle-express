@@ -70,3 +70,5 @@ $('#bShare').onclick = async () => {
 };
 
 load().catch(() => { $('#sheet').innerHTML = '<p>Impossible de charger l’exercice.</p>'; });
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
