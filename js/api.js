@@ -32,8 +32,8 @@ function classer(e, map = {}) {
   // Trace minimale pour le diagnostic (code et statut, jamais l'adresse ni le mot de passe).
   try { console.warn('[auth]', code || '-', st, m.slice(0, 120)); } catch {}
   if (map[code]) return map[code];
-  if (/sending .*email|smtp|send.*mail/i.test(code + ' ' + m)) return 'email_send';
   if (st === 429 || /rate.?limit|too many/i.test(code + ' ' + m)) return 'rate_limit';
+  if (/error sending|smtp|sending .*email/i.test(code + ' ' + m)) return 'email_send';
   if (/email_address_invalid|validation_failed/.test(code) || /invalid format|validate email|email address .* invalid/i.test(m)) return 'invalid_email';
   if (/Invalid login credentials/i.test(m)) return map.invalid_credentials || 'invalid_credentials';
   if (/Email not confirmed/i.test(m)) return map.email_not_confirmed || 'email_not_confirmed';
