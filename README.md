@@ -94,7 +94,7 @@ Chaque élève crée son compte (nom, e-mail, mot de passe, niveau visé) et ret
 Format d’un exercice dans `data/exercices.json` :
 ```json
 {"id":"p-meca-1","mat":"Physique","chap":"Mécanique","niveau":1,"concours":"CCINP/CCS",
- "titre":"Sismographe","enonce":"Texte avec formules LaTeX entre $...$","source":"…","duree":20}
+ "titre":"Sismographe","enonce":"Texte avec formules LaTeX entre $...$","duree":20}
 ```
 `niveau` : 1 = CCINP, 2 = Mines-Centrale, 3 = X-ENS.
 
@@ -107,6 +107,10 @@ Format d’un exercice dans `data/exercices.json` :
 - Chaque élève est limité à `LIMITE_JOUR` demandes IA par jour. Surveille ta consommation sur console.anthropic.com (tu peux y fixer une limite de dépense mensuelle).
 - Les corrections sont générées par IA : elles peuvent se tromper, encourage les élèves à vérifier avec leur cours.
 
-## Sources des énoncés
+## Modifier la présentation « À propos »
 
-Recueils fournis par le professeur : *LYDEX MP2\* — Préparation aux oraux de physique-chimie 2024-2025*, *Retour sur les oraux — édition CCMP-CCS*, *Oraux X-ENS* (Algèbre 1-2, Analyse 1-2). Les énoncés sont repris pour un usage pédagogique en classe ; aucun corrigé de ces ouvrages n’est reproduit.
+Le texte de présentation, le parcours et le contact se trouvent dans `js/config.js`, rubrique `PRESENTATION`. Modifie-les directement sur GitHub (icône crayon), puis « Commit changes » : le site est mis à jour en une minute.
+
+## Partager un corrigé en PDF
+
+Chaque exercice a une page publique `correction.html?id=…` (énoncé, schéma, indices, corrigé), lisible sans compte. Le bouton « PDF / Imprimer » ouvre l’export du navigateur : « Enregistrer au format PDF » sur ordinateur et Android, « Imprimer » puis « Partager » sur iPhone.

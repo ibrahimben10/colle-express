@@ -11,7 +11,7 @@ r"Pour 3(b), compte les dimensions : $\operatorname{rg}V=k$, $\dim(\operatorname
 r"""
 **1.** $M\,\operatorname{com}(M)^T=\det(M)I_n$, donc $M^{-1}=\frac1{\det M}\operatorname{com}(M)^T$ sur $GL_n(\mathbb R)$. Chaque coefficient de $M^{-1}$ est un quotient de polynômes en les coefficients de $M$, à dénominateur $\det M$ non nul : $M\mapsto M^{-1}$ est continue.
 
-**2.** Les tailles des blocs recueillis sont incompatibles ; une version cohérente (et classique) est $M_{V,W}=\begin{pmatrix}0_k&W^T\\V&I_p\end{pmatrix}\in\mathcal M_{k+p}(\mathbb R)$. Par élimination de Gauss par blocs,
+**2.** On a $M_{V,W}=\begin{pmatrix}0_k&W^T\\V&I_p\end{pmatrix}\in\mathcal M_{k+p}(\mathbb R)$. Par élimination de Gauss par blocs,
 $$\begin{pmatrix}I_k&-W^T\\0&I_p\end{pmatrix}\begin{pmatrix}0_k&W^T\\V&I_p\end{pmatrix}=\begin{pmatrix}-W^TV&0\\V&I_p\end{pmatrix},$$
 donc $\det M_{V,W}=\det(-W^TV)=(-1)^k\det(W^TV)$ : si $W^TV$ est inversible, $M_{V,W}$ l'est.
 

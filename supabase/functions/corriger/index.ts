@@ -52,7 +52,7 @@ ${clip(ex.enonce, 6000)}
 Réponds UNIQUEMENT avec un objet JSON valide : {"corrige":"…"}`;
   // import
   return `Retranscris fidèlement l'énoncé d'exercice de la photo (pas la solution). Formules en LaTeX entre $...$ ($$...$$ en display), questions numérotées "1.", "2." sur des lignes séparées. Classe-le pour une prépa MP.
-Réponds UNIQUEMENT avec un objet JSON valide : {"titre":"…","mat":"Maths|Physique|Chimie","chap":"…","niveau":1|2|3,"duree":20,"enonce":"…","source":"…"}`;
+Réponds UNIQUEMENT avec un objet JSON valide : {"titre":"…","mat":"Maths|Physique|Chimie","chap":"…","niveau":1|2|3,"duree":20,"enonce":"…"}`;
 }
 
 function parse(t: string) {

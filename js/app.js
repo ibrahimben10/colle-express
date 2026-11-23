@@ -3,9 +3,10 @@ import { CONFIG } from './config.js';
 import { api, on, DEMO } from './api.js';
 import { ic, chapIcon } from './icons.js';
 import { FIG } from './figures.js';
+import { esc, rich, fmtEnonce, fmtCorrige } from './format.js';
+import { presentationCourte, presentationPage } from './apropos.js';
 
 const $ = s => document.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const LV = {1: 'CCINP', 2: 'Mines-Centrale', 3: 'X-ENS'};
 const LVD = {1: 'Fondamentaux et applications directes du cours', 2: 'Oraux Mines-Ponts et Centrale-Supélec', 3: 'Oraux X-ENS : exercices ouverts'};
 const MAT_IC = {Maths: 'sigma', Physique: 'atom', Chimie: 'flask'};
@@ -30,6 +31,7 @@ const notice = h => { $('#notice').innerHTML = h || ''; };
 /* ---------- textes fixes ---------- */
 document.querySelectorAll('[data-site]').forEach(e => e.textContent = CONFIG.NOM_SITE);
 document.querySelectorAll('[data-prof]').forEach(e => e.textContent = CONFIG.NOM_PROF);
+$('#aboutMini').innerHTML = presentationCourte();
 $('#yr').textContent = new Date().getFullYear();
 $('#feat').innerHTML = [['camera', 'Photographie ta copie : correction étape par étape'], ['bulb', 'Des indices gradués, du plus vague au plus précis'], ['chart', 'Ton suivi par chapitre, du CCINP à l’X-ENS']]
   .map(([i, t]) => `<div>${ic(i)}<span>${t}</span></div>`).join('');
@@ -41,7 +43,6 @@ function typeset(el) {
   if (window.MathJax?.typesetPromise) { MathJax.typesetClear?.([el]); MathJax.typesetPromise([el]).catch(() => {}); }
   else setTimeout(() => typeset(el), 400);
 }
-const rich = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[\s(])\*([^*\n$]+?)\*(?=[\s.,:;)]|$)/g, '$1<i>$2</i>').split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 
 /* ================= CONNEXION ================= */
 function showAuth(mode = 'in') {
@@ -88,7 +89,9 @@ async function start() {
   $('#me').innerHTML = `${avatar(p.id, p.full_name)}<span class="small" style="color:var(--ink);font-weight:600">${esc(p.full_name || 'Moi')}</span><span class="dot" id="conn"></span><button class="btn ghost" id="out" title="Se déconnecter" aria-label="Se déconnecter">${ic('logout')}</button>`;
   $('#out').onclick = () => api.signOut();
   $('#nav').innerHTML = `<a href="#exercices" data-v="exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#suivi" data-v="suivi">${ic('chart')}<span class="lbl">Mon suivi</span></a>` +
-    (api.isProf ? `<a href="#prof" data-v="prof">${ic('users')}<span class="lbl">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '');
+    (api.isProf ? `<a href="#prof" data-v="prof">${ic('users')}<span class="lbl">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '') +
+    `<a href="#apropos" data-v="apropos">${ic('cap')}<span class="lbl">À propos</span></a>`;
+  $('#bnav').innerHTML = $('#nav').innerHTML;
   if (!store.get('filters', null)) F.lvl = p.niveau || 1;
   [SUIVI, CONF, BANK] = await Promise.all([api.loadSuivi(), api.config(), api.banque()]);
   SUIVI = SUIVI && typeof SUIVI === 'object' ? SUIVI : {};
@@ -97,7 +100,7 @@ async function start() {
     on('config', async () => { CONF = await api.config(); rerender(); });
     on('banque', async () => { BANK = await api.banque(); rerender(); });
     on('classe', debounce(async () => { CLASS = await api.classe(); rerender(); }, 800));
-    on('presence', st => { PRES = st; const n = Object.keys(PRES).length; const el = $('#liveN'); if (el) el.textContent = n; $('#conn')?.classList.add('on'); rerenderProf(); });
+    on('presence', st => { PRES = st; const n = Object.keys(PRES).length; document.querySelectorAll('#liveN').forEach(el => el.textContent = n); $('#conn')?.classList.add('on'); rerenderProf(); });
     on('activity', a => { if (!api.isProf || !a) return; LIVE.unshift({...a, d: now()}); LIVE = LIVE.slice(0, 60); rerenderProf(); });
   }
   if (api.isProf) CLASS = await api.classe();
@@ -119,13 +122,15 @@ function route() {
   if (!api.user) return;
   let h = location.hash.slice(1) || 'exercices';
   if (h.startsWith('ex-')) { const e = byId(h.slice(3)); if (e) { CUR = e.id; F.lvl = e.niveau; } h = 'exercices'; }
+  document.body.classList.toggle('detail', h === 'exercices' && !!CUR);
   if (h === 'prof' && !api.isProf) h = 'exercices';
-  if (!['exercices', 'suivi', 'prof'].includes(h)) h = 'exercices';
+  if (!['exercices', 'suivi', 'prof', 'apropos'].includes(h)) h = 'exercices';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + h));
-  document.querySelectorAll('#nav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   if (h === 'exercices') { renderStrip(); renderList(); renderCopy(); }
   if (h === 'suivi') renderSuivi();
   if (h === 'prof') renderProf(true);
+  if (h === 'apropos') $('#v-apropos').innerHTML = presentationPage();
   if (pres.v !== h) presence({v: h});
 }
 addEventListener('hashchange', route);
@@ -146,10 +151,23 @@ function renderStrip() {
       ${CONF.message ? `<p class="msg">${ic('msg')} ${esc(CONF.message)}</p>` : `<p>Niveau ${LV[lvl]} : ${esc(LVD[lvl])}. Choisis un exercice, rédige, photographie, fais corriger.</p>`}</div>
     <div class="mini"><div><b>${ok}</b><span>réussis</span></div><div><b>${atL.length}</b><span>exercices</span></div><div><b>${Object.values(SUIVI.ex || {}).reduce((a, x) => a + (x.e || 0), 0)}</b><span>copies</span></div></div>`;
 }
+const favs = () => Array.isArray(SUIVI.fav) ? SUIVI.fav : [];
+const isFav = id => favs().includes(id);
+async function toggleFav(id) {
+  SUIVI.fav = isFav(id) ? favs().filter(x => x !== id) : [id, ...favs()].slice(0, 300);
+  renderList(); if (CUR === id) renderFavBtn();
+  await api.saveSuivi(SUIVI);
+}
+function renderFavBtn() {
+  const b = $('#bFav'); if (!b || !CUR) return;
+  const on = isFav(CUR); b.setAttribute('aria-pressed', on); b.title = on ? 'Retirer des favoris' : 'Enregistrer dans mes favoris';
+  b.querySelector('.lbl') && (b.querySelector('.lbl').textContent = on ? 'Enregistré' : 'Enregistrer');
+}
 function filtered() {
   const q = F.q.trim().toLowerCase();
+  if (F.fav) return favs().map(byId).filter(Boolean).filter(e => !q || (e.titre + ' ' + e.chap + ' ' + e.enonce).toLowerCase().includes(q));
   return all().filter(e => e.niveau === F.lvl && (!F.mat || e.mat === F.mat) && (!F.chap || e.chap === F.chap) &&
-    (!q || (e.titre + ' ' + e.chap + ' ' + e.enonce + ' ' + e.concours).toLowerCase().includes(q)));
+    (!q || (e.titre + ' ' + e.chap + ' ' + e.enonce).toLowerCase().includes(q)));
 }
 const statusOf = id => SUIVI.ex?.[id]?.s || '';
 function renderList() {
@@ -159,6 +177,8 @@ function renderList() {
   if (F.chap && !chaps.includes(F.chap)) F.chap = '';
   $('#fChap').innerHTML = `<option value="">Tous les chapitres (${chaps.length})</option>` + chaps.map(c => `<option ${c === F.chap ? 'selected' : ''}>${esc(c)}</option>`).join('');
   if (document.activeElement !== $('#fQ')) $('#fQ').value = F.q;
+  $('#fFav').setAttribute('aria-pressed', !!F.fav); $('#fFav').innerHTML = `${ic('heart')} Mes favoris <span class="nb">${favs().length}</span>`;
+  document.querySelector('.filters').classList.toggle('favmode', !!F.fav);
   const sel = new Set(CONF.sel?.[F.lvl] || []), order = ['Maths', 'Physique', 'Chimie'];
   const list = filtered().sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || order.indexOf(a.mat) - order.indexOf(b.mat) || a.chap.localeCompare(b.chap, 'fr'));
   $('#items').innerHTML = list.length ? list.map(e => {
@@ -167,8 +187,8 @@ function renderList() {
       <span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span>
       <span class="t">${sel.has(e.id) ? `<span style="color:var(--gold)">★</span> ` : ''}${esc(e.titre)}</span>
       <span class="st ${s === 'reussi' ? 'ok' : s ? 'go' : ''}" title="${s === 'reussi' ? 'Réussi' : s ? 'En cours' : 'À faire'}">${s === 'reussi' ? ic('check') : s ? '•' : ''}</span>
-      <span class="m">${esc(e.chap)} · ${e.duree} min${FIG[e.id] ? ' · schéma' : ''}</span></button>`;
-  }).join('') : `<div class="empty">Aucun exercice pour ces filtres.</div>`;
+      <span class="m">${F.fav ? LV[e.niveau] + ' · ' : ''}${esc(e.chap)} · ${e.duree} min${FIG[e.id] ? ' · schéma' : ''}${isFav(e.id) ? ' · <span class="fv">♥</span>' : ''}</span></button>`;
+  }).join('') : `<div class="empty">${F.fav ? 'Aucun favori pour l’instant : touche le cœur d’un exercice pour l’enregistrer.' : 'Aucun exercice pour ces filtres.'}</div>`;
   const done = list.filter(e => statusOf(e.id) === 'reussi').length;
   $('#count').textContent = `${list.length} exercice${list.length > 1 ? 's' : ''} · ${done} réussi${done > 1 ? 's' : ''}`;
   store.set('filters', F);
@@ -177,13 +197,30 @@ $('#fLvl').onclick = e => { const b = e.target.closest('button'); if (b) { F.lvl
 $('#fMat').onclick = e => { const b = e.target.closest('button'); if (b) { F.mat = b.dataset.m; renderList(); } };
 $('#fChap').onchange = e => { F.chap = e.target.value; renderList(); };
 $('#fQ').oninput = e => { F.q = e.target.value; renderList(); };
+$('#fFav').onclick = () => { F.fav = !F.fav; renderList(); };
 $('#items').onclick = e => { const b = e.target.closest('.item'); if (b) openEx(b.dataset.id); };
 function openEx(id) {
   CUR = id; const ex = byId(id);
   history.replaceState(null, '', '#ex-' + id);
   renderList(); renderCopy();
   presence({v: 'exercices', ex: id, t: ex?.titre?.slice(0, 90) || '', n: ex?.niveau || 0, st: 'lit', since: now()});
-  if (innerWidth < 820) $('#copy').scrollIntoView({behavior: 'smooth', block: 'start'});
+  document.body.classList.add('detail');
+  scrollTo({top: innerWidth < 820 ? 0 : scrollY});
+}
+function closeEx() {
+  CUR = null; document.body.classList.remove('detail');
+  history.replaceState(null, '', '#exercices');
+  renderList(); renderCopy(); presence({v: 'exercices', ex: null, t: null, st: null});
+}
+const correctionURL = id => new URL('correction.html?id=' + encodeURIComponent(id), location.href).href;
+async function shareEx(ex, withCorr) {
+  const url = correctionURL(ex.id) + (withCorr ? '' : '&enonce=1');
+  const title = (withCorr ? 'Corrigé — ' : 'Exercice — ') + ex.titre;
+  try {
+    if (navigator.share) { await navigator.share({title, text: `${title} (${CONFIG.NOM_SITE})`, url}); return; }
+  } catch (e) { if (e?.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(url); notice(`Lien copié : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`); }
+  catch { notice(`Lien à partager : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`); }
 }
 
 const sess = id => SESS[id] ||= {imgs: [], tours: [], hint: 0, start: now(), solution: '', busy: false, note: ''};
@@ -212,26 +249,32 @@ function renderCopy() {
   const canReveal = S.tours.some(t => t.verdict === 'juste') || nCopies >= 2 || st?.s === 'reussi' || (K && S.hint >= 3);
   const hintsLeft = K ? 3 - S.hint : 3;
   el.innerHTML = `
+    <button class="back" id="bBack">${ic('back')} Exercices</button>
     <div class="kicker"><span class="stamp n${ex.niveau}">${LV[ex.niveau]}</span><span class="pill">${ic(MAT_IC[ex.mat])}${esc(ex.mat)}</span><span class="pill">${ic(chapIcon(ex.mat, ex.chap))}${esc(ex.chap)}</span>
-      <span style="margin-left:auto" class="pill">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree}:00</span></div>
-    <h2>${esc(ex.titre)}</h2>
+      <span class="pill tm">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree}:00</span></div>
+    <div class="titlerow"><h2>${esc(ex.titre)}</h2>
+      <div class="tools"><button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
+      <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button></div></div>
+    ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Déjà réussi' : 'En cours'} · ${st.e || 0} copie${(st.e || 0) > 1 ? 's' : ''} corrigée${(st.e || 0) > 1 ? 's' : ''}</div>` : ''}
     <div class="ex-body ${fig ? 'withfig' : ''}">
-      <div class="enonce">${rich(ex.enonce)}</div>
+      <div class="enonce">${fmtEnonce(ex.enonce)}</div>
       ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}
     </div>
-    <div class="src">${ic('book')} ${esc(ex.source)} · ${esc(ex.concours)}${st ? ` · <b>${st.s === 'reussi' ? 'déjà réussi' : 'en cours'}</b> (${st.e || 0} copie${(st.e || 0) > 1 ? 's' : ''})` : ''}</div>
     <div class="drop" id="drop">
       <label class="pick"><input type="file" id="file" accept="image/*" multiple>${ic('camera', 'lg')} Ajouter la photo de ma copie <span class="small" style="font-weight:400">(4 pages max., glisser-déposer possible)</span></label>
       ${S.imgs.length ? `<div class="thumbs" id="thumbs">${S.imgs.map((im, i) => `<div class="thumb"><img src="${im.url}" alt="Page ${i + 1}"><button data-rm="${i}" aria-label="Retirer la page ${i + 1}">${ic('x')}</button></div>`).join('')}</div>` : ''}
       <textarea class="note" id="note" placeholder="Facultatif : où bloques-tu ? que veux-tu faire vérifier ?">${esc(S.note)}</textarea>
     </div>
-    <div class="actions">
+    <div class="actions" id="actions">
       <button class="btn primary" id="bCorr" ${S.busy || !S.imgs.length ? 'disabled' : ''}>${S.busy === 'copie' ? '<span class="spin"></span> Lecture de la copie…' : ic('pen') + ' Faire corriger ma copie'}</button>
       <button class="btn" id="bHint" ${S.busy || hintsLeft <= 0 ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + (hintsLeft <= 0 ? ' Tous les indices sont donnés' : ` Indice ${Math.min(S.hint + 1, 3)}/3`)}</button>
       <button class="btn" id="bSol" ${S.busy || !canReveal ? 'disabled' : ''} title="${canReveal ? '' : 'Disponible après 2 copies corrigées, une réussite ou les 3 indices'}">${S.busy === 'solution' ? '<span class="spin"></span> Rédaction…' : ic('eye') + ' Voir le corrigé'}</button>
     </div>
     <div class="feed">${S.tours.map(tourHTML).join('')}</div>
-    ${S.solution ? `<div class="sol"><h3 class="sec" style="margin-top:0">${ic('book')} Corrigé détaillé</h3>${S.reponse ? `<div class="hint" style="margin:0 0 12px">${ic('target')}<div><span class="lab">Résultat</span><div>${rich(S.reponse)}</div></div></div>` : ''}<div class="enonce">${rich(S.solution)}</div><p class="small">${K ? 'Corrigé de référence de la colle.' : 'Corrigé rédigé par IA : vérifie-le avec ton cours.'}</p></div>` : ''}`;
+    ${S.solution ? `<div class="sol" id="sol"><div class="solhead"><h3>${ic('book')} Corrigé détaillé</h3>
+        ${K ? `<div class="soltools"><a class="btn" href="${esc(correctionURL(ex.id))}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="btn" id="bShareCorr">${ic('share')} Partager</button></div>` : ''}</div>
+      ${S.reponse ? `<div class="result">${ic('target')}<div><span class="lab">Résultat</span><div>${rich(S.reponse)}</div></div></div>` : ''}
+      <div class="corrige">${fmtCorrige(S.solution)}</div><p class="small">${K ? 'Corrigé de référence de la colle.' : 'Corrigé rédigé par IA : vérifie-le avec ton cours.'}</p></div>` : ''}`;
   typeset(el);
   const tm = $('#timer'); const upd = () => { const s = (now() - S.start) / 1000; tm.textContent = mmss(s); tm.classList.toggle('late', s > ex.duree * 60); };
   upd(); tick = setInterval(upd, 1000);
@@ -245,6 +288,10 @@ function renderCopy() {
   $('#bCorr').onclick = () => ask(ex, 'copie');
   $('#bHint').onclick = () => ask(ex, 'indice');
   $('#bSol').onclick = () => ask(ex, 'solution');
+  $('#bBack').onclick = closeEx;
+  $('#bFav').onclick = () => toggleFav(ex.id);
+  $('#bShareEx').onclick = () => shareEx(ex, false);
+  $('#bShareCorr') && ($('#bShareCorr').onclick = () => shareEx(ex, true));
 }
 function tourHTML(t) {
   const vlab = {juste: 'Juste', partiel: 'Partiel', faux: 'Erreur', illisible: 'Illisible', bloque: 'Coup de pouce'}[t.verdict] || t.verdict;
@@ -253,7 +300,7 @@ function tourHTML(t) {
     ${t.resume ? `<div>${rich(t.resume)}</div>` : ''}
     ${t.points?.length ? `<ul class="pts">${t.points.map(p => `<li><span class="mk ${esc(p.statut)}">${p.statut === 'ok' ? ic('check') : p.statut === 'erreur' ? ic('x') : '·'}</span><span><b>${esc(p.etape)}</b>${p.note ? ' — ' + esc(p.note) : ''}</span></li>`).join('')}</ul>` : ''}
     ${t.retour ? `<div>${rich(t.retour)}</div>` : ''}
-    ${t.indice ? `<div class="hint">${ic('bulb')}<div><span class="lab">Indice ${t.hint || ''}</span><div>${esc(t.indice)}</div></div></div>` : ''}
+    ${t.indice ? `<div class="hint">${ic('bulb')}<div><span class="lab">Indice ${t.hint || ''}</span><div>${rich(t.indice)}</div></div></div>` : ''}
     ${t.question ? `<div class="q">« ${esc(t.question)} »</div>` : ''}</div>`;
 }
 
@@ -372,6 +419,8 @@ function renderSuivi() {
         <p class="small"><span style="color:var(--green)">■</span> réussi · <span style="color:var(--amber)">■</span> en cours</p></div>
       <div><h3 class="sec">${ic('target')} À travailler ensuite</h3><div class="panel" style="padding:8px">${rec.map(e => `<button class="item" data-open="${esc(e.id)}"><span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span><span class="t">${(CONF.sel?.[lvl] || []).includes(e.id) ? '★ ' : ''}${esc(e.titre)}</span><span></span><span class="m">${esc(e.chap)} · ${e.duree} min</span></button>`).join('') || '<div class="empty">Tout est réussi à ce niveau : passe au suivant !</div>'}</div></div>
     </div>
+    <h3 class="sec">${ic('heart')} Mes exercices enregistrés</h3>
+    <div class="panel" style="padding:8px">${favs().map(byId).filter(Boolean).map(e => `<button class="item" data-open="${esc(e.id)}"><span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span><span class="t">${esc(e.titre)}</span><span></span><span class="m">${LV[e.niveau]} · ${esc(e.chap)} · ${e.duree} min</span></button>`).join('') || `<div class="empty">Aucun exercice enregistré. Appuie sur ${ic('heart')} dans un exercice pour le retrouver ici.</div>`}</div>
     <h3 class="sec">${ic('clock')} Historique</h3>
     <div class="panel scroll"><table class="stack"><thead><tr><th>Date</th><th>Exercice</th><th>Action</th><th class="r">Avancement</th></tr></thead><tbody>
     ${(s.journal || []).map(j => `<tr><td>${fmtDate(j.d)}</td><td>${esc(byId(j.id)?.titre || j.id)}</td><td>${j.k === 'copie' ? 'Copie : ' + esc({juste: 'juste', partiel: 'partielle', faux: 'erreur', illisible: 'illisible'}[j.v] || j.v) : j.k === 'indice' ? 'Indice' : 'Corrigé consulté'}</td><td class="r">${j.sc != null ? j.sc + ' %' : ''}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Pas encore d’activité.</td></tr>'}
@@ -407,7 +456,6 @@ function buildProf() {
           <div class="row"><label class="field">Titre<input id="aT"></label><label class="field">Matière<select id="aM"><option>Maths</option><option>Physique</option><option>Chimie</option></select></label></div>
           <div class="row"><label class="field">Chapitre<input id="aC"></label><label class="field">Niveau<select id="aN"><option value="1">CCINP</option><option value="2">Mines-Centrale</option><option value="3">X-ENS</option></select></label><label class="field">Durée (min)<input id="aD" type="number" value="20" min="5" max="60"></label></div>
           <label class="field">Énoncé (formules en LaTeX entre $…$)<textarea id="aE"></textarea></label>
-          <label class="field">Source<input id="aS" placeholder="ex. Oral CCINP 2025"></label>
           <button class="btn primary" id="aSave">${ic('plus')} Ajouter à la banque</button><span class="small" id="aOk"></span>
         </div>
         <div id="pBank"></div>
@@ -491,9 +539,9 @@ $('#dlgX').onclick = () => $('#dlg').close();
 async function addExercise() {
   const n = +$('#aN').value;
   const e = {titre: $('#aT').value.trim(), mat: $('#aM').value, chap: $('#aC').value.trim() || 'Divers', niveau: n, duree: Math.max(5, Math.min(60, +$('#aD').value || 20)),
-    enonce: $('#aE').value.trim(), source: $('#aS').value.trim() || 'Ajouté par ' + CONFIG.NOM_PROF, concours: LV[n]};
+    enonce: $('#aE').value.trim(), source: '', concours: LV[n]};
   if (!e.titre || !e.enonce) { $('#aOk').textContent = 'Titre et énoncé sont requis.'; return; }
-  try { await api.addBanque(e); BANK = await api.banque(); $('#aOk').textContent = 'Exercice ajouté.'; ['#aT', '#aC', '#aE', '#aS'].forEach(s => $(s).value = ''); updateProf(); }
+  try { await api.addBanque(e); BANK = await api.banque(); $('#aOk').textContent = 'Exercice ajouté.'; ['#aT', '#aC', '#aE'].forEach(s => $(s).value = ''); updateProf(); }
   catch { $('#aOk').textContent = 'Échec de l’ajout.'; }
 }
 async function importPhoto(file) {
@@ -503,7 +551,7 @@ async function importPhoto(file) {
     const im = await shrink(file);
     const r = await api.ia({mode: 'import', images: [im.data]});
     $('#aT').value = r.titre || ''; $('#aM').value = ['Maths', 'Physique', 'Chimie'].includes(r.mat) ? r.mat : 'Maths'; $('#aC').value = r.chap || '';
-    $('#aN').value = [1, 2, 3].includes(+r.niveau) ? r.niveau : 2; $('#aD').value = r.duree || 20; $('#aE').value = r.enonce || ''; $('#aS').value = r.source || '';
+    $('#aN').value = [1, 2, 3].includes(+r.niveau) ? r.niveau : 2; $('#aD').value = r.duree || 20; $('#aE').value = r.enonce || '';
     $('#impSt').textContent = 'Énoncé retranscrit : relis-le puis clique sur « Ajouter ».';
   } catch (e) { $('#impSt').textContent = e.message; }
 }

@@ -35,6 +35,7 @@ window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$
     </div>
     <div class="feat" id="feat"></div>
     <div class="sign"><small>Professeur</small><span data-prof></span></div>
+    <div id="aboutMini"></div>
   </div>
   <div class="authside">
     <div class="authcard">
@@ -88,7 +89,8 @@ window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$
             <div class="seg" role="group" aria-label="Niveau" id="fLvl"></div>
             <div class="seg" role="group" aria-label="Matière" id="fMat"></div>
             <select id="fChap" aria-label="Chapitre"></select>
-            <div class="searchbox"><span id="searchIc"></span><input id="fQ" type="search" placeholder="Rechercher un exercice" aria-label="Rechercher"></div>
+            <div class="searchrow"><div class="searchbox"><span id="searchIc"></span><input id="fQ" type="search" placeholder="Rechercher un exercice" aria-label="Rechercher"></div>
+            <button class="favtoggle" id="fFav" aria-pressed="false">Mes favoris</button></div>
           </div>
           <div class="items" id="items"></div>
           <div class="count" id="count"></div>
@@ -98,8 +100,10 @@ window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$
     </section>
     <section class="view" id="v-suivi"></section>
     <section class="view" id="v-prof"></section>
+    <section class="view" id="v-apropos"></section>
   </main>
-  <footer><span>© <span id="yr"></span> <b data-prof></b> — <span data-site></span>, colles de prépa MP</span><span>Énoncés : recueils d’oraux CCINP, CCMP, CCS, X-ENS · corrections générées par IA, à vérifier</span></footer>
+  <footer><span>© <span id="yr"></span> <a href="#apropos"><b data-prof></b></a> — <span data-site></span>, colles de prépa MP</span><span>Exercices de type oral · CCINP, Mines-Centrale, X-ENS</span></footer>
+  <nav class="bottombar" id="bnav" aria-label="Navigation"></nav>
 </div>
 
 <dialog id="dlg"><div class="dh"><h3 id="dlgT"></h3><button class="btn" id="dlgX">Fermer</button></div><div class="db" id="dlgB"></div></dialog>
