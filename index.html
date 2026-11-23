@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colle express — Prépa MP</title>
+<meta name="description" content="Colles courtes de maths et physique-chimie pour la prépa MP, corrigées sur ta copie.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='23' fill='%2313213f'/%3E%3Ctext x='24' y='33' text-anchor='middle' font-family='Georgia' font-size='26' fill='white'%3E%E2%88%AE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>
+window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="demo" id="demo" hidden>Mode démonstration : les données restent dans ce navigateur et la correction par l’IA est désactivée. Configure Supabase (voir le README).</div>
+
+<!-- ============ ACCUEIL / CONNEXION ============ -->
+<section class="auth" id="auth" hidden>
+  <div class="board">
+    <div class="brand">
+      <svg class="crest" viewBox="0 0 48 48" aria-hidden="true"><circle class="ring" cx="24" cy="24" r="23"/><circle class="in" cx="24" cy="24" r="19.5"/><text x="24" y="33" text-anchor="middle">∮</text></svg>
+      <h1 data-site></h1>
+    </div>
+    <p class="tag">Des colles courtes de maths et de physique-chimie, comme à l’oral. Tu rédiges, tu photographies ta copie, ton correcteur pointe l’erreur et te donne un indice — jamais la solution d’emblée.</p>
+    <div class="chalk" aria-hidden="true">
+      <span style="left:2%;top:4%">∮ E·dℓ = − dΦ/dt</span>
+      <span style="left:46%;top:0%">Σ 1/n² = π²/6</span>
+      <span style="left:12%;top:34%">det(A − λIₙ) = 0</span>
+      <span style="left:52%;top:30%">ΔT = (1/D) ∂T/∂t</span>
+      <span style="left:0%;top:64%">∫ e^(−x²) dx = √π</span>
+      <span style="left:56%;top:62%">m a = Σ F</span>
+    </div>
+    <div class="feat" id="feat"></div>
+    <div class="sign"><small>Professeur</small><span data-prof></span></div>
+  </div>
+  <div class="authside">
+    <div class="authcard">
+      <h2 id="authTitle">Bienvenue</h2>
+      <p class="small">Connecte-toi pour retrouver ton suivi, ou crée ton compte avec le code donné en classe.</p>
+      <div class="tabs2" role="group"><button id="tIn" aria-pressed="true">Connexion</button><button id="tUp" aria-pressed="false">Créer un compte</button></div>
+      <form id="fIn">
+        <label class="field">Adresse e-mail<input type="email" id="inMail" autocomplete="email" required></label>
+        <label class="field">Mot de passe<input type="password" id="inPass" autocomplete="current-password" required minlength="6"></label>
+        <div class="err" id="inErr"></div>
+        <button class="btn primary wide" type="submit">Se connecter</button>
+        <p style="text-align:center"><button type="button" class="btn ghost" id="forgot">Mot de passe oublié ?</button></p>
+      </form>
+      <form id="fUp" hidden>
+        <label class="field">Prénom et nom<input id="upName" autocomplete="name" required maxlength="80"></label>
+        <label class="field">Adresse e-mail<input type="email" id="upMail" autocomplete="email" required></label>
+        <label class="field">Mot de passe (6 caractères min.)<input type="password" id="upPass" autocomplete="new-password" required minlength="6"></label>
+        <div class="row">
+          <label class="field">Code de la classe<input id="upCode" required autocomplete="off"></label>
+          <label class="field">Niveau visé<select id="upLvl"><option value="1">CCINP</option><option value="2">Mines-Centrale</option><option value="3">X-ENS</option></select></label>
+        </div>
+        <div class="err" id="upErr"></div>
+        <button class="btn primary wide" type="submit">Créer mon compte</button>
+      </form>
+      <form id="fNew" hidden>
+        <label class="field">Nouveau mot de passe<input type="password" id="newPass" autocomplete="new-password" required minlength="6"></label>
+        <div class="err" id="newErr"></div>
+        <button class="btn primary wide" type="submit">Enregistrer</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APPLICATION ============ -->
+<div id="app" hidden>
+  <header class="top"><div class="in">
+    <a class="brand" href="#exercices">
+      <svg class="crest" viewBox="0 0 48 48" aria-hidden="true"><circle class="ring" cx="24" cy="24" r="23"/><circle class="in" cx="24" cy="24" r="19.5"/><text x="24" y="33" text-anchor="middle">∮</text></svg>
+      <span><b data-site></b><small>Prépa MP · <em data-prof></em></small></span>
+    </a>
+    <nav class="tabs" aria-label="Sections" id="nav"></nav>
+    <div class="me" id="me"></div>
+  </div></header>
+  <main>
+    <div class="notice" id="notice"></div>
+    <section class="view" id="v-exercices">
+      <div class="strip" id="strip"></div>
+      <div class="work">
+        <aside class="panel list" aria-label="Liste des exercices">
+          <div class="filters">
+            <div class="seg" role="group" aria-label="Niveau" id="fLvl"></div>
+            <div class="seg" role="group" aria-label="Matière" id="fMat"></div>
+            <select id="fChap" aria-label="Chapitre"></select>
+            <div class="searchbox"><span id="searchIc"></span><input id="fQ" type="search" placeholder="Rechercher un exercice" aria-label="Rechercher"></div>
+          </div>
+          <div class="items" id="items"></div>
+          <div class="count" id="count"></div>
+        </aside>
+        <article class="panel copy" id="copy" aria-live="polite"></article>
+      </div>
+    </section>
+    <section class="view" id="v-suivi"></section>
+    <section class="view" id="v-prof"></section>
+  </main>
+  <footer><span>© <span id="yr"></span> <b data-prof></b> — <span data-site></span>, colles de prépa MP</span><span>Énoncés : recueils d’oraux CCINP, CCMP, CCS, X-ENS · corrections générées par IA, à vérifier</span></footer>
+</div>
+
+<dialog id="dlg"><div class="dh"><h3 id="dlgT"></h3><button class="btn" id="dlgX">Fermer</button></div><div class="db" id="dlgB"></div></dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
