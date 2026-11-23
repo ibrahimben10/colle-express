@@ -2,6 +2,8 @@
 {
   "name": "colle-express",
   "compatibility_date": "2026-11-01",
+  // Adresse publique gratuite : https://colle-express.<compte>.workers.dev
+  "workers_dev": true,
   "assets": {
     "directory": "./",
     "not_found_handling": "single-page-application"
