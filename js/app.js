@@ -3,7 +3,7 @@ import { CONFIG } from './config.js';
 import { api, on, DEMO } from './api.js';
 import { ic, chapIcon } from './icons.js';
 import { FIG } from './figures.js';
-import { esc, rich, fmtEnonce, fmtCorrige } from './format.js';
+import { esc, rich, fmtEnonce, fmtCorrige, hintsHTML, hintLevels, correctionHTML } from './format.js';
 import { presentationCourte, presentationPage } from './apropos.js';
 
 const $ = s => document.querySelector(s);
@@ -41,9 +41,19 @@ $('#searchIc').outerHTML = ic('search');
 if (DEMO) $('#demo').hidden = false;
 
 /* ---------- MathJax ---------- */
+// Accepte un élément ou une liste. Le contenu des accordéons fermés est composé à leur ouverture
+// (MathJax a besoin de la largeur réelle pour couper les formules longues).
 function typeset(el) {
-  if (window.MathJax?.typesetPromise) { MathJax.typesetClear?.([el]); MathJax.typesetPromise([el]).catch(() => {}); }
-  else setTimeout(() => typeset(el), 400);
+  const els = (Array.isArray(el) ? el : [el]).filter(Boolean);
+  if (!els.length) return;
+  if (window.MathJax?.typesetPromise) { MathJax.typesetClear?.(els); MathJax.typesetPromise(els).catch(() => {}); }
+  else setTimeout(() => typeset(els), 400);
+}
+const visibleParts = el => [...el.children].flatMap(c => c.matches('details:not([open])') ? [c.querySelector('summary')] : c.querySelectorAll('details:not([open])').length
+  ? [...c.querySelectorAll(':scope > :not(details), :scope details[open] > .acc-body, summary')] : [c]);
+function lazyTypeset(d) {
+  d.addEventListener('toggle', () => { const b = d.querySelector(':scope > .acc-body'); if (d.open && b && !b.dataset.ty) { b.dataset.ty = 1; typeset(b); } });
+  if (d.open) { const b = d.querySelector(':scope > .acc-body'); if (b) b.dataset.ty = 1; }
 }
 
 /* ================= CONNEXION ================= */
@@ -288,59 +298,109 @@ function renderCopy() {
       <h2>Une colle courte, maintenant ?</h2>
       <p class="enonce">${esc(LVD[F.lvl])}. Choisis un exercice dans la liste.</p>
       <div class="steps">
-        <div><b>${ic('pen')} 1. Rédige</b><span class="small">Sur papier, comme au tableau, en surveillant le chrono.</span></div>
-        <div><b>${ic('camera')} 2. Photographie</b><span class="small">Une ou plusieurs pages, bien éclairées.</span></div>
-        <div><b>${ic('bulb')} 3. Progresse</b><span class="small">Étapes validées, première erreur, un indice.</span></div>
+        <div><b>${ic('pen')} 1. Cherche</b><span class="small">Sur papier, comme au tableau, en surveillant le chrono.</span></div>
+        <div><b>${ic('bulb')} 2. Débloque-toi</b><span class="small">Deux indices cachés : piste globale, puis méthode précise.</span></div>
+        <div><b>${ic('book')} 3. Compare</b><span class="small">Correction détaillée, théorèmes utilisés et réflexes à retenir.</span></div>
       </div>
       ${sel.length ? `<h3 class="sec">${ic('star')} La sélection du professeur</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}</div>`;
     el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openEx(b.dataset.open));
     return;
   }
   const S = sess(ex.id), st = SUIVI.ex?.[ex.id], fig = FIG[ex.id];
+  S.openH ||= [];
   const nCopies = S.tours.filter(t => t.kind === 'copie').length;
   const K = CORR[ex.id];
-  const canReveal = S.tours.some(t => t.verdict === 'juste') || nCopies >= 2 || st?.s === 'reussi' || (K && S.hint >= 3);
-  const hintsLeft = K ? 3 - S.hint : 3;
+  const nH = K ? hintLevels(K).length : 2;
+  const locked = !(S.tours.some(t => t.verdict === 'juste') || nCopies >= 1 || st?.s === 'reussi' || S.hint >= nH);
+  const sol = K || (S.solution ? {corrige: S.solution, reponse: S.reponse, theoremes: S.theoremes, astuces: S.astuces} : null);
+  const aiHints = S.tours.filter(t => t.kind === 'indice' && t.indice);
   el.innerHTML = `
     <button class="back" id="bBack">${ic('back')} Exercices</button>
-    <div class="kicker"><span class="stamp n${ex.niveau}">${LV[ex.niveau]}</span><span class="pill">${ic(MAT_IC[ex.mat])}${esc(ex.mat)}</span><span class="pill">${ic(chapIcon(ex.mat, ex.chap))}${esc(ex.chap)}</span>
-      <span class="pill tm">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree}:00</span></div>
+    <div class="kicker"><span class="stamp n${ex.niveau}">${LV[ex.niveau]}</span><span class="pill">${ic(MAT_IC[ex.mat])}${esc(ex.mat)}</span><span class="pill">${ic(chapIcon(ex.mat, ex.chap))}${esc(ex.chap)}</span></div>
     <div class="titlerow"><h2>${esc(ex.titre)}</h2>
       <div class="tools"><button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
       <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button></div></div>
     ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Déjà réussi' : 'En cours'} · ${st.e || 0} copie${(st.e || 0) > 1 ? 's' : ''} corrigée${(st.e || 0) > 1 ? 's' : ''}</div>` : ''}
-    <div class="ex-body ${fig ? 'withfig' : ''}">
-      <div class="enonce">${fmtEnonce(ex.enonce)}</div>
-      ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}
-    </div>
-    <div class="drop" id="drop">
-      <label class="pick"><input type="file" id="file" accept="image/*" multiple>${ic('camera', 'lg')} Ajouter la photo de ma copie <span class="small" style="font-weight:400">(4 pages max., glisser-déposer possible)</span></label>
-      ${S.imgs.length ? `<div class="thumbs" id="thumbs">${S.imgs.map((im, i) => `<div class="thumb"><img src="${im.url}" alt="Page ${i + 1}"><button data-rm="${i}" aria-label="Retirer la page ${i + 1}">${ic('x')}</button></div>`).join('')}</div>` : ''}
-      <textarea class="note" id="note" placeholder="Facultatif : où bloques-tu ? que veux-tu faire vérifier ?">${esc(S.note)}</textarea>
-    </div>
+
+    <section class="co co-enonce">
+      <div class="co-h"><span class="co-e" aria-hidden="true">📘</span>Énoncé<span class="co-meta">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree} min</span></div>
+      <div class="ex-body ${fig ? 'withfig' : ''}"><div class="enonce">${fmtEnonce(ex.enonce)}</div>
+      ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}</div>
+    </section>
+
+    <section class="co co-copie">
+      <div class="co-h"><span class="co-e" aria-hidden="true">✍️</span>Ta copie<span class="co-meta">facultatif</span></div>
+      <div class="drop" id="drop">
+        <label class="pick"><input type="file" id="file" accept="image/*" multiple>${ic('camera', 'lg')} Photographier ma copie <span class="small" style="font-weight:400">(4 pages max.)</span></label>
+        ${S.imgs.length ? `<div class="thumbs" id="thumbs">${S.imgs.map((im, i) => `<div class="thumb"><img src="${im.url}" alt="Page ${i + 1}"><button data-rm="${i}" aria-label="Retirer la page ${i + 1}">${ic('x')}</button></div>`).join('')}</div>` : ''}
+        ${S.imgs.length ? `<textarea class="note" id="note" placeholder="Facultatif : où bloques-tu ? que veux-tu faire vérifier ?">${esc(S.note)}</textarea>
+        <button class="btn primary wide" id="bCorr" ${S.busy ? 'disabled' : ''}>${S.busy === 'copie' ? '<span class="spin"></span> Lecture de la copie…' : ic('pen') + ' Faire corriger ma copie'}</button>` : ''}
+      </div>
+      <div class="feed">${S.tours.filter(t => t.kind === 'copie').map(tourHTML).join('')}</div>
+    </section>
+
+    <section class="co co-indices" id="hintsSec">
+      <div class="co-h"><span class="co-e" aria-hidden="true">💡</span>Indices<span class="co-meta">ouvre-les seulement si tu bloques</span></div>
+      ${K ? hintsHTML(K, S.openH) : `${aiHints.map((t, i) => `<div class="acc-static"><span class="hn">${i + 1}</span><div>${rich(t.indice)}${t.question ? `<p class="q">« ${esc(t.question)} »</p>` : ''}</div></div>`).join('')}
+        ${S.hint < 2 ? `<button class="btn wide" id="bHintAI" ${S.busy ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + ` Demander l’indice ${S.hint + 1} · ${['Piste globale', 'Méthode précise'][S.hint]}`}</button>` : ''}`}
+    </section>
+
+    <section class="co co-corr" id="corrSec">
+      <details class="acc corr-acc" id="corrAcc" ${S.openC && !locked && sol ? 'open' : ''} ${locked ? 'data-locked="1"' : ''}>
+        <summary><span class="co-e" aria-hidden="true">${locked ? '🔒' : '📝'}</span><span class="acc-t"><b>Correction détaillée</b><small id="corrHint">${locked ? `Disponible après ${nH > 1 ? 'les deux indices' : 'l’indice'} ou une copie corrigée` : 'Touche pour afficher la correction'}</small></span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">${S.busy === 'solution' ? '<p><span class="spin"></span> Rédaction du corrigé…</p>' : sol ? `${correctionHTML(sol)}
+          <div class="soltools">${K ? `<a class="btn" href="${esc(correctionURL(ex.id))}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="btn" id="bShareCorr">${ic('share')} Partager</button>` : ''}</div>
+          <p class="small">${K ? 'Corrigé de référence de la colle.' : 'Corrigé rédigé par IA : vérifie-le avec ton cours.'}</p>` : ''}</div>
+      </details>
+    </section>
+
     <div class="actions" id="actions">
-      <button class="btn primary" id="bCorr" ${S.busy || !S.imgs.length ? 'disabled' : ''}>${S.busy === 'copie' ? '<span class="spin"></span> Lecture de la copie…' : ic('pen') + ' Faire corriger ma copie'}</button>
-      <button class="btn" id="bHint" ${S.busy || hintsLeft <= 0 ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + (hintsLeft <= 0 ? ' Tous les indices sont donnés' : ` Indice ${Math.min(S.hint + 1, 3)}/3`)}</button>
-      <button class="btn" id="bSol" ${S.busy || !canReveal ? 'disabled' : ''} title="${canReveal ? '' : 'Disponible après 2 copies corrigées, une réussite ou les 3 indices'}">${S.busy === 'solution' ? '<span class="spin"></span> Rédaction…' : ic('eye') + ' Voir le corrigé'}</button>
-    </div>
-    <div class="feed">${S.tours.map(tourHTML).join('')}</div>
-    ${S.solution ? `<div class="sol" id="sol"><div class="solhead"><h3>${ic('book')} Corrigé détaillé</h3>
-        ${K ? `<div class="soltools"><a class="btn" href="${esc(correctionURL(ex.id))}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="btn" id="bShareCorr">${ic('share')} Partager</button></div>` : ''}</div>
-      ${S.reponse ? `<div class="result">${ic('target')}<div><span class="lab">Résultat</span><div>${rich(S.reponse)}</div></div></div>` : ''}
-      <div class="corrige">${fmtCorrige(S.solution)}</div><p class="small">${K ? 'Corrigé de référence de la colle.' : 'Corrigé rédigé par IA : vérifie-le avec ton cours.'}</p></div>` : ''}`;
-  typeset(el);
+      <button class="btn" id="bGoCopy">${ic('camera')}<span>Ma copie</span></button>
+      <button class="btn" id="bHint">${ic('bulb')}<span>Indice</span></button>
+      <button class="btn ${locked ? '' : 'primary'}" id="bSol">${ic(locked ? 'lock' : 'book')}<span>Correction</span></button>
+    </div>`;
+  typeset(visibleParts(el));
+  el.querySelectorAll('details.acc').forEach(lazyTypeset);
   const tm = $('#timer'); const upd = () => { const s = (now() - S.start) / 1000; tm.textContent = mmss(s); tm.classList.toggle('late', s > ex.duree * 60); };
   upd(); tick = setInterval(upd, 1000);
   $('#file').onchange = e => addFiles(ex.id, e.target.files);
-  $('#note').oninput = e => { S.note = e.target.value; };
+  $('#note') && ($('#note').oninput = e => { S.note = e.target.value; });
   $('#thumbs') && ($('#thumbs').onclick = e => { const b = e.target.closest('[data-rm]'); if (b) { S.imgs.splice(+b.dataset.rm, 1); renderCopy(); } });
   const d = $('#drop');
   d.ondragover = e => { e.preventDefault(); d.classList.add('over'); };
   d.ondragleave = () => d.classList.remove('over');
   d.ondrop = e => { e.preventDefault(); d.classList.remove('over'); addFiles(ex.id, e.dataTransfer.files); };
-  $('#bCorr').onclick = () => ask(ex, 'copie');
-  $('#bHint').onclick = () => ask(ex, 'indice');
-  $('#bSol').onclick = () => ask(ex, 'solution');
+  $('#bCorr') && ($('#bCorr').onclick = () => ask(ex, 'copie'));
+  $('#bHintAI') && ($('#bHintAI').onclick = () => ask(ex, 'indice'));
+  // Indices préparés : ouvrir un accordéon compte comme un indice demandé.
+  el.querySelectorAll('.hint-acc').forEach(dd => dd.addEventListener('toggle', async () => {
+    const i = +dd.dataset.h; S.openH[i] = dd.open;
+    if (!dd.open || i + 1 <= S.hint) return;
+    S.hint = i + 1;
+    presence({st: 'indice'});
+    api.activity({uid: api.user.id, name: api.profile.full_name, id: ex.id, k: 'indice', v: 'bloque', sc: null});
+    record(ex, {kind: 'indice', verdict: 'bloque'});
+    if (S.hint >= nH) unlockCorr();
+  }));
+  const acc = $('#corrAcc');
+  acc.querySelector('summary').onclick = e => {
+    if (acc.dataset.locked) { e.preventDefault(); acc.classList.remove('shake'); void acc.offsetWidth; acc.classList.add('shake'); return; }
+    if (!sol && !S.busy) { e.preventDefault(); S.openC = true; ask(ex, 'solution'); }
+  };
+  acc.addEventListener('toggle', () => {
+    S.openC = acc.open;
+    if (acc.open && K && !S.seen) { S.seen = true; presence({st: 'corrige'}); record(ex, {kind: 'solution'}); }
+  });
+  function unlockCorr() {
+    delete acc.dataset.locked;
+    acc.querySelector('summary .co-e').textContent = '📝';
+    $('#corrHint').textContent = 'Touche pour afficher la correction';
+    $('#bSol').classList.add('primary'); $('#bSol').innerHTML = `${ic('book')}<span>Correction</span>`;
+  }
+  const go = (sec, f) => { f?.(); $(sec).scrollIntoView({behavior: 'smooth', block: 'start'}); };
+  $('#bGoCopy').onclick = () => go('.co-copie', () => !S.imgs.length && $('#file').click());
+  $('#bHint').onclick = () => go('#hintsSec', () => { const nx = [...el.querySelectorAll('.hint-acc')].find(x => !x.open); if (nx) nx.open = true; else $('#bHintAI')?.click(); });
+  $('#bSol').onclick = () => go('#corrSec', () => { if (acc.dataset.locked) { acc.classList.remove('shake'); void acc.offsetWidth; acc.classList.add('shake'); } else if (sol) acc.open = true; else ask(ex, 'solution'); });
   $('#bBack').onclick = closeEx;
   $('#bFav').onclick = () => toggleFav(ex.id);
   $('#bShareEx').onclick = () => shareEx(ex, false);
@@ -401,16 +461,20 @@ async function ask(ex, mode) {
   try {
     const hist = S.tours.map(t => `- ${t.kind === 'copie' ? 'Copie ' + t.n : 'Indice'} : ${t.verdict}. ${t.retour || ''} ${t.indice ? 'Indice : ' + t.indice : ''}`).join('\n');
     const r = await api.ia({mode, exercice: {titre: ex.titre, mat: ex.mat, chap: ex.chap, niveau: ex.niveau, enonce: ex.enonce},
-      images: mode === 'copie' ? S.imgs.map(i => i.data) : [], note: S.note, hint: Math.min(S.hint + 1, 3), historique: hist,
+      images: mode === 'copie' ? S.imgs.map(i => i.data) : [], note: S.note, hint: Math.min(S.hint + 1, 2), historique: hist,
       reference: K ? `${K.corrige}\n\nRÉSULTAT ATTENDU : ${K.reponse}` : '', indices: K ? K.indices : []});
-    if (mode === 'solution') { S.solution = String(r.corrige || ''); await record(ex, {kind: 'solution'}); }
+    if (mode === 'solution') {
+      const arr = v => Array.isArray(v) ? v.slice(0, 5).map(String) : [];
+      S.solution = String(r.corrige || ''); S.reponse = String(r.reponse || ''); S.theoremes = arr(r.theoremes); S.astuces = arr(r.astuces);
+      S.openC = true; S.seen = true; await record(ex, {kind: 'solution'});
+    }
     else {
-      const t = {kind: mode, n: S.tours.filter(t => t.kind === 'copie').length + 1, hint: r.indice ? Math.min(S.hint + 1, 3) : 0,
+      const t = {kind: mode, n: S.tours.filter(t => t.kind === 'copie').length + 1, hint: r.indice ? Math.min(S.hint + 1, 2) : 0,
         verdict: ['juste', 'partiel', 'faux', 'illisible', 'bloque'].includes(r.verdict) ? r.verdict : (mode === 'copie' ? 'partiel' : 'bloque'),
         score: r.score != null && Number.isFinite(+r.score) ? Math.max(0, Math.min(100, Math.round(+r.score))) : null,
         resume: String(r.resume || ''), retour: String(r.retour || ''), indice: String(r.indice || ''), question: String(r.question || ''),
         points: Array.isArray(r.points) ? r.points.slice(0, 8).map(p => ({etape: String(p.etape || ''), statut: ['ok', 'erreur', 'manquant'].includes(p.statut) ? p.statut : 'manquant', note: String(p.note || '')})) : []};
-      if (t.indice) S.hint = Math.min(S.hint + 1, 3);
+      if (t.indice) S.hint = Math.min(S.hint + 1, 2);
       S.tours.push(t); if (mode === 'copie') S.imgs = [];
       await record(ex, t);
       presence({st: t.verdict === 'juste' ? 'reussi' : 'redige'});

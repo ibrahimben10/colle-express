@@ -2,7 +2,7 @@
 import { CONFIG } from './config.js';
 import { ic, chapIcon } from './icons.js';
 import { FIG } from './figures.js';
-import { esc, rich, fmtEnonce, fmtCorrige } from './format.js';
+import { esc, fmtEnonce, hintsHTML, hintLevels, correctionHTML } from './format.js';
 
 const $ = s => document.querySelector(s);
 const LV = {1: 'CCINP', 2: 'Mines-Centrale', 3: 'X-ENS'};
@@ -35,17 +35,23 @@ async function load() {
       <div class="lvl"><span class="stamp n${EX.niveau}">${LV[EX.niveau]}</span><br>${esc(EX.mat)} · ${esc(EX.chap)}</div>
     </header>
     <h1>${esc(EX.titre)}</h1>
-    <h2 class="part">Énoncé</h2>
-    <div class="enonce">${fmtEnonce(EX.enonce)}</div>
-    ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}
+    <section class="co co-enonce"><div class="co-h"><span class="co-e" aria-hidden="true">📘</span>Énoncé<span class="co-meta">${EX.duree} min</span></div>
+      <div class="enonce">${fmtEnonce(EX.enonce)}</div>
+      ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}</section>
     ${!enonceOnly && K ? `
-      <h2 class="part">Indices</h2>
-      <ol class="hints">${K.indices.map((h, i) => `<li><span class="n">${i + 1}</span><div>${rich(h)}</div></li>`).join('')}</ol>
-      <h2 class="part">Corrigé</h2>
-      ${K.reponse ? `<div class="result">${ic('target')}<div><span class="lab">Résultat</span><div>${rich(K.reponse)}</div></div></div>` : ''}
-      <div class="corrige">${fmtCorrige(K.corrige)}</div>` : ''}
+      <section class="co co-indices"><div class="co-h"><span class="co-e" aria-hidden="true">💡</span>Indices<span class="co-meta">cherche d’abord !</span></div>
+        ${hintsHTML(K, hintLevels(K).map(() => true))}</section>
+      <section class="co co-corr"><details class="acc corr-acc" open>
+        <summary><span class="co-e" aria-hidden="true">📝</span><span class="acc-t"><b>Correction détaillée</b><small>Touche pour afficher ou masquer</small></span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">${correctionHTML(K)}</div></details></section>` : ''}
+    <div class="noprint openall">${!enonceOnly && K ? `<button class="btn" id="bAll">Tout afficher</button>` : ''}</div>
     <footer class="sh-foot"><span>${esc(CONFIG.NOM_SITE)} — ${esc(CONFIG.NOM_PROF)}</span><span>${esc(location.href.split('&pdf')[0])}</span></footer>`;
+  // Tout est composé ouvert (largeur réelle pour MathJax), puis replié pour laisser chercher l'élève.
   await typeset($('#sheet'));
+  const accs = [...document.querySelectorAll('#sheet details.acc')];
+  if (q.get('pdf') !== '1') accs.forEach(d => d.open = false);
+  $('#bAll') && ($('#bAll').onclick = () => { const o = accs.some(d => !d.open); accs.forEach(d => d.open = o); $('#bAll').textContent = o ? 'Tout masquer' : 'Tout afficher'; });
+  window.addEventListener('beforeprint', () => accs.forEach(d => d.open = true));
   if (q.get('pdf') === '1') { toast('Choisis « Enregistrer au format PDF » dans la fenêtre qui s’ouvre.', 6000); setTimeout(makePdf, 400); }
 }
 

@@ -127,4 +127,14 @@ Chaque élève peut ajouter une photo (onglet « Mon suivi » ou clic sur son av
 
 ## Ajouter des exercices en lot
 
-Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 indices, corrigé). Pour régénérer les fichiers de données : `python3 tools/build_new.py`.
+Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 indices, corrigé). Pour régénérer les fichiers de données : `python3 tools/build_new.py`, puis `python3 tools/build_bilan.py`.
+
+## Structure pédagogique de chaque exercice
+
+- **Énoncé** (encadré bleu), **Ta copie** (photo corrigée par l'IA, facultatif).
+- **Indices** (encadré orange, fermés par défaut) : Indice 1 = piste globale, Indice 2 = méthode précise.
+- **Correction détaillée** (encadré vert, accordéon) : déverrouillée après les deux indices ou une copie corrigée ; elle se termine par le **Bilan** (encadré violet) : 📜 théorèmes & définitions utilisés, 💡 astuces & réflexes à retenir.
+
+Les bilans sont rédigés dans `tools/bilan_*.py` (énoncés de référence communs dans `tools/bilan_lib.py`). Pour les exercices ajoutés par le professeur depuis le site, l'IA produit le même format (corrigé, résultat, théorèmes, astuces).
+
+Les formules sont rendues par MathJax 4 (police New Computer Modern, identique à LaTeX), avec retour à la ligne automatique des formules trop longues sur téléphone.

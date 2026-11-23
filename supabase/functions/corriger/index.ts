@@ -17,7 +17,7 @@ function regles(ex: any, hint: number) {
   return `Tu es examinateur de colle en classe préparatoire MP (niveau visé : ${LV[ex.niveau] ?? "MP"}). Matière : ${ex.mat}, chapitre : ${ex.chap}.
 Règles impératives :
 - Ne donne JAMAIS la solution complète ni le résultat final tant que l'élève ne l'a pas obtenu lui-même.
-- Indices gradués : niveau 1 = piste générale ; niveau 2 = méthode ou théorème précis ; niveau 3 = étape concrète. Donne UN seul indice, au niveau ${hint}.
+- Indices gradués : niveau 1 = piste globale (idée clé, concept de départ) ; niveau 2 = méthode précise (étape intermédiaire, outil ou théorème à employer). Donne UN seul indice, au niveau ${hint}.
 - Exige la rigueur de l'oral : hypothèses des théorèmes, justifications, quantificateurs ; en physique : système, référentiel, bilan des forces, homogénéité, unités, ordres de grandeur.
 - Français, phrases courtes, bienveillant mais exigeant. Toute formule en LaTeX entre $...$.
 - Garde des étapes ("points") stables d'un retour à l'autre, formulées sans révéler les résultats.`;
@@ -25,10 +25,12 @@ Règles impératives :
 
 function prompt(mode: string, b: any) {
   const ex = b.exercice ?? {};
-  const hint = Math.max(1, Math.min(3, Number(b.hint) || 1));
+  const hint = Math.max(1, Math.min(2, Number(b.hint) || 1));
   const hist = clip(b.historique, 4000) || "(aucun)";
   const ref = clip(b.reference, 9000);
-  const ind = Array.isArray(b.indices) ? b.indices.slice(0, 3).map((t: unknown, i: number) => `Niveau ${i + 1} : ${clip(t, 600)}`).join("\n") : "";
+  // Indices préparés : niveau 1 = piste globale ; niveau 2 = méthode précise (les indices 2 et 3 du professeur, regroupés).
+  const ip = Array.isArray(b.indices) ? b.indices.map((t: unknown) => clip(t, 600)) : [];
+  const ind = ip.length ? [`Niveau 1 (piste globale) : ${ip[0]}`, ip.length > 1 ? `Niveau 2 (méthode précise) : ${ip.slice(1).join(" ")}` : ""].filter(Boolean).join("\n") : "";
   const base = `${regles(ex, hint)}\n\nÉNONCÉ :\n${clip(ex.enonce, 6000)}` +
     (ref ? `\n\nCORRIGÉ DE RÉFÉRENCE DU PROFESSEUR (confidentiel : sers-t'en pour juger la copie, ne le recopie jamais et ne révèle pas les résultats) :\n${ref}` : "") +
     (ind ? `\n\nINDICES PRÉPARÉS PAR LE PROFESSEUR (reprends de préférence celui du niveau demandé, adapté à la copie) :\n${ind}` : "") +
@@ -44,12 +46,17 @@ Réponds UNIQUEMENT avec un objet JSON valide :
 TÂCHE : l'élève bloque${note} et n'a pas envoyé de copie. Donne un indice de niveau ${hint} et une question qui le fait avancer.
 Réponds UNIQUEMENT avec un objet JSON valide :
 {"verdict":"bloque","score":null,"resume":"","points":[],"retour":"une phrase de méthode","indice":"…","question":"…"}`;
-  if (mode === "solution") return `Tu es professeur en classe préparatoire MP. Rédige un corrigé complet, rigoureux et concis de l'exercice suivant, comme attendu à l'oral (${LV[ex.niveau] ?? "MP"}). Structure par questions, justifie les théorèmes, termine par une remarque de méthode. Formules en LaTeX entre $...$. Pas de titre.
+  if (mode === "solution") return `Tu es professeur en classe préparatoire MP. Rédige un corrigé complet et rigoureux de l'exercice suivant, comme attendu à l'oral (${LV[ex.niveau] ?? "MP"}).
+- Corrigé étape par étape : un paragraphe par question, commençant par **1.**, **2.**, etc. ; explicite chaque transition logique (« donc », « car », hypothèse utilisée), sans saut d'étape.
+- Formules en LaTeX entre $...$ ($$...$$ pour les formules centrées). Pas de titre.
+- "reponse" : les résultats finaux, en une ou deux lignes.
+- "theoremes" : 1 à 4 théorèmes, définitions ou propriétés utilisés, chacun sous la forme "**Nom.** énoncé précis avec ses hypothèses".
+- "astuces" : 2 ou 3 réflexes à retenir pour des exercices similaires (« Penser à … quand … »).
 
 ÉNONCÉ :
 ${clip(ex.enonce, 6000)}
 
-Réponds UNIQUEMENT avec un objet JSON valide : {"corrige":"…"}`;
+Réponds UNIQUEMENT avec un objet JSON valide : {"corrige":"…","reponse":"…","theoremes":["…"],"astuces":["…"]}`;
   // import
   return `Retranscris fidèlement l'énoncé d'exercice de la photo (pas la solution). Formules en LaTeX entre $...$ ($$...$$ en display), questions numérotées "1.", "2." sur des lignes séparées. Classe-le pour une prépa MP.
 Réponds UNIQUEMENT avec un objet JSON valide : {"titre":"…","mat":"Maths|Physique|Chimie","chap":"…","niveau":1|2|3,"duree":20,"enonce":"…"}`;
@@ -95,7 +102,7 @@ Deno.serve(async (req) => {
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: mode === "solution" ? 3000 : 1500, messages: [{ role: "user", content }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: mode === "solution" ? 4000 : 1500, messages: [{ role: "user", content }] }),
   });
   if (!r.ok) return json({ error: "Le service de correction a refusé la demande.", detail: (await r.text()).slice(0, 300) }, 502);
   const out = await r.json();
