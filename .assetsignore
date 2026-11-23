@@ -1,0 +1,9 @@
+# Fichiers du dépôt qui ne doivent pas être publiés sur Cloudflare
+.git
+.github
+tools
+supabase
+README.md
+wrangler.jsonc
+.assetsignore
+node_modules
