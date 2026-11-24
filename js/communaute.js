@@ -185,16 +185,16 @@ export function openSignalement(type, id) {
 export async function renderModeration(box) {
   if (!box) return;
   let L; try { L = await api.moderationFile(); } catch (x) { box.innerHTML = `<p class="small">Modération indisponible : ${esc(x.message)}</p>`; return; }
-  const lib = {commentaire: 'Commentaire', solution: 'Solution d’élève', solution_commentaire: 'Commentaire de solution', profil: 'Profil', carnet: 'Page de carnet', collection: 'Collection'};
-  const motif = {spam: 'spam', insulte: 'propos blessants', inapproprie: 'inapproprié', donnees: 'données personnelles', autre: 'autre'};
+  const lib = {commentaire: 'Commentaire', solution: 'Solution d’élève', solution_commentaire: 'Commentaire de solution', profil: 'Profil', carnet: 'Page de carnet', collection: 'Collection', corrige: 'Erreur dans une correction'};
+  const motif = {spam: 'spam', insulte: 'propos blessants', inapproprie: 'inapproprié', donnees: 'données personnelles', autre: 'autre', erreur: 'erreur scientifique'};
   box.innerHTML = L.length ? `<ul class="mod-list">${L.map(s => { const ex = s.exercice && D.byId(s.exercice);
     const voir = s.cible_type === 'profil' ? `#u/${esc(s.cible_id)}` : s.cible_type === 'collection' ? `#c/${esc(s.cible_id)}` : ex ? `#ex-${esc(ex.id)}` : '';
     return `<li class="mod"><div><b>${lib[s.cible_type] || s.cible_type}</b> <span class="lab-err">${plural(s.n, 'signalement')}</span> <span class="small">${(s.motifs || []).map(m => motif[m] || m).join(', ')} · ${ago(s.dernier)}</span>
-      ${s.extrait ? `<blockquote class="cm-ex">${esc(s.extrait)}</blockquote>` : '<p class="small">Contenu déjà supprimé.</p>'}${(s.details || []).length ? `<p class="small">Précisions : ${s.details.map(esc).join(' · ')}</p>` : ''}</div>
+      ${s.cible_type === 'corrige' ? `<p class="small">Exercice : ${esc(ex?.titre || s.cible_id)}</p>` : s.extrait ? `<blockquote class="cm-ex">${esc(s.extrait)}</blockquote>` : '<p class="small">Contenu déjà supprimé.</p>'}${(s.details || []).length ? `<p class="small">Précisions : ${s.details.map(esc).join(' · ')}</p>` : ''}</div>
       <div class="mod-act">${voir ? `<a class="btn ghost" href="${voir}">${ic('eye')} Voir</a>` : ''}
         ${s.cible_type === 'solution' ? `<button class="btn" data-mod="${esc(s.cible_type)}|${esc(s.cible_id)}|retablir">Rétablir</button>` : ''}
-        <button class="btn red" data-mod="${esc(s.cible_type)}|${esc(s.cible_id)}|supprimer">${s.cible_type === 'profil' ? 'Rendre privé et vider' : 'Supprimer'}</button>
-        <button class="btn ghost" data-mod="${esc(s.cible_type)}|${esc(s.cible_id)}|classer">Classer sans suite</button></div></li>`; }).join('')}</ul>`
+        ${s.cible_type === 'corrige' ? '' : `<button class="btn red" data-mod="${esc(s.cible_type)}|${esc(s.cible_id)}|supprimer">`}${s.cible_type === 'corrige' ? '' : `${s.cible_type === 'profil' ? 'Rendre privé et vider' : 'Supprimer'}</button>`}
+        <button class="btn ghost" data-mod="${esc(s.cible_type)}|${esc(s.cible_id)}|classer">${s.cible_type === 'corrige' ? 'Traité' : 'Classer sans suite'}</button></div></li>`; }).join('')}</ul>`
     : '<p class="small">Aucun signalement en attente.</p>';
   box.onclick = async e => { const b = e.target.closest('[data-mod]'); if (!b) return;
     const [t, id, a] = b.dataset.mod.split('|');

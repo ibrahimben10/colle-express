@@ -111,12 +111,39 @@ export function hintsHTML(K, open = []) {
 export function bilanHTML(K) {
   const th = K?.theoremes || [], as = K?.astuces || [];
   if (!th.length && !as.length) return '';
-  return `<div class="co co-bilan"><div class="co-h"><span class="co-e" aria-hidden="true">📌</span>Bilan de l'exercice</div>
-    ${th.length ? `<h5>📜 Théorèmes &amp; définitions utilisés</h5><ul class="thm">${th.map(t => `<li>${inline(t)}</li>`).join('')}</ul>` : ''}
-    ${as.length ? `<h5>💡 Astuces &amp; réflexes à retenir</h5><ul class="tips">${as.map(t => `<li>${inline(t)}</li>`).join('')}</ul>` : ''}</div>`;
+  return `<div class="co co-bilan"><div class="co-h">Bilan de l'exercice</div>
+    ${th.length ? `<h5>Théorèmes &amp; définitions utilisés</h5><ul class="thm">${th.map(t => `<li>${inline(t)}</li>`).join('')}</ul>` : ''}
+    ${as.length ? `<h5>Réflexes à retenir</h5><ul class="tips">${as.map(t => `<li>${inline(t)}</li>`).join('')}</ul>` : ''}</div>`;
 }
 
 export function correctionHTML(K) {
-  return `${K.reponse ? `<div class="result"><span class="lab">🎯 Résultat</span><div>${rich(K.reponse)}</div></div>` : ''}
+  return `${K.reponse ? `<div class="result"><span class="lab">Résultat</span><div>${rich(K.reponse)}</div></div>` : ''}
     <div class="corrige">${fmtCorrige(K.corrige)}</div>${bilanHTML(K)}`;
+}
+
+/* ---------- Découpage d'un corrigé en étapes (mode guidé, outils par étape) ---------- */
+// Même règle que fmtCorrige : un paragraphe « **Titre.** … » ouvre une étape, sauf les sous-parties « **4.2 …** ».
+export function stepChunks(text) {
+  const out = [];
+  for (const p of String(text ?? '').split(/\n{2,}/)) {
+    const m = !/^>/.test(p) && p.match(/^\*\*(.+?)\*\*/);
+    const head = m && m[1].length < 90 ? m[1].replace(/\s*[.:]\s*$/, '') : '';
+    if (head && !/^\d+\.\d+\s/.test(head)) {
+      const et = head.match(/^Étape\s+(\d)\s*[—–-]\s*(.+)$/);
+      out.push({title: et ? et[2] : /^\d+(\.?\([a-z]\))?$/.test(head) ? 'Question ' + head.replace('.(', '(') : head, n: et ? +et[1] : null, md: p});
+    } else if (out.length) out.at(-1).md += '\n\n' + p;
+    else out.push({title: 'Mise en place', n: null, md: p});
+  }
+  return out;
+}
+// Question posée à l'élève avant de dévoiler une étape : elle l'invite à la chercher lui-même.
+export function guideQuestion(c) {
+  const t = (c?.title || '').toLowerCase();
+  if (/analyse/.test(t)) return 'Avant de lire : qu’est-ce qui est donné, et qu’est-ce qu’on te demande exactement ? Écris-le en une ligne.';
+  if (/rappel|cours/.test(t)) return 'Quels théorèmes ou définitions pourraient servir ici ? Note-les avec leurs hypothèses.';
+  if (/stratégie|méthode|idée/.test(t)) return 'Quelle méthode envisages-tu ? Essaie de la formuler en une phrase avant de comparer.';
+  if (/résolution|calcul/.test(t)) return 'Mène le calcul sur ta feuille, au moins jusqu’au premier résultat intermédiaire.';
+  if (/vérification|contrôle/.test(t)) return 'Comment pourrais-tu contrôler ton résultat ? Un cas particulier, une limite, l’homogénéité…';
+  if (/conclusion/.test(t)) return 'Écris ta conclusion avant de la comparer à celle du corrigé.';
+  return 'Cherche cette partie sur ta feuille, puis dévoile-la pour comparer.';
 }

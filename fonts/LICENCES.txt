@@ -1,0 +1,6 @@
+Polices auto-hébergées (fichiers woff2 issus des paquets @fontsource-variable), toutes sous licence SIL Open Font License 1.1 :
+- Fraunces — Undercase Type (titres, numéros d'étapes)
+- Source Sans 3 — Adobe (texte)
+- JetBrains Mono — JetBrains (repères techniques)
+- Caveat — Impallari Type (annotations manuscrites)
+Texte de la licence : https://openfontlicense.org

@@ -10,6 +10,7 @@ import { initTheme, syncTheme, reveal, toast, THEME_ICON } from './ui.js';
 import { initProfil, renderProfil, renderEdition, profilURL } from './profil.js';
 import { initCarnet, renderCarnet, openNote } from './carnet.js';
 import { initBiblio, renderCollection, openCollectionsPicker } from './biblio.js';
+import { renderCorrection } from './modes.js';
 import { initCommunaute, renderCommunaute, renderSolutions, openSignalement, renderModeration } from './communaute.js';
 
 const $ = s => document.querySelector(s);
@@ -78,6 +79,7 @@ document.querySelectorAll('[data-ic]').forEach(e => { e.innerHTML = ic(e.dataset
 initTheme();
 document.querySelectorAll('[data-theme-toggle]').forEach(b => b.innerHTML = THEME_ICON);
 reveal();
+typeset($('#auth'));
 $('#searchIc').outerHTML = ic('search');
 if (DEMO) $('#demo').hidden = false;
 
@@ -338,13 +340,13 @@ function renderCopy() {
     const sel = (CONF.sel?.[F.lvl] || []).map(byId).filter(Boolean);
     el.innerHTML = `<div class="welcome">
       <div class="kicker"><span class="stamp n${F.lvl}">${LV[F.lvl]}</span></div>
-      <h2>Une colle courte, maintenant ?</h2>
+      <h2>Une colle courte, maintenant&nbsp;?</h2>
       <p class="enonce">${esc(LVD[F.lvl])}. Choisis un exercice dans la liste.</p>
       <div class="steps">
         <div><b>${ic('pen')} 1. Cherche</b><span class="small">Sur papier, comme au tableau, en surveillant le chrono.</span></div>
-        <div><b>${ic('bulb')} 2. Débloque-toi</b><span class="small">Deux indices cachés : piste globale, puis méthode précise.</span></div>
+        <div><b>${ic('bulb')} 2. Débloque-toi</b><span class="small">Un indice pour avancer ? Puis la correction, une étape à la fois si tu préfères.</span></div>
         <div><b>${ic('users')} 3. Soumets</b><span class="small">Ta réponse, sur l’honneur, devient visible par ton groupe.</span></div>
-        <div><b>${ic('msg')} 4. Évalue</b><span class="small">Note les réponses des autres sur 10, discute, puis compare au corrigé.</span></div>
+        <div><b>${ic('msg')} 4. Évalue</b><span class="small">Note les réponses des autres sur 10, puis compare avec une rédaction de concours.</span></div>
       </div>
       ${sel.length ? `<h3 class="sec">${ic('star')} Sélection recommandée</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}</div>`;
     el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openEx(b.dataset.open));
@@ -356,7 +358,7 @@ function renderCopy() {
   const K = CORR[ex.id];
   const nH = K ? hintLevels(K).length : 2;
   const G = GSEL();
-  const locked = !(mine(ex.id) || st?.s === 'reussi' || S.hint >= nH);
+  const locked = !(S.unlocked || mine(ex.id) || st?.s === 'reussi' || S.hint >= nH);
   const sol = K || (S.solution ? {corrige: S.solution, reponse: S.reponse, theoremes: S.theoremes, astuces: S.astuces} : null);
   const aiHints = S.tours.filter(t => t.kind === 'indice' && t.indice);
   el.innerHTML = `
@@ -387,14 +389,7 @@ function renderCopy() {
         ${S.hint < 2 ? `<button class="btn wide" id="bHintAI" ${S.busy ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + ` Demander l’indice ${S.hint + 1} · ${['Piste globale', 'Méthode précise'][S.hint]}`}</button>` : ''}`}
     </section>
 
-    <section class="co co-corr" id="corrSec">
-      <details class="acc corr-acc" id="corrAcc" ${S.openC && !locked && sol ? 'open' : ''} ${locked ? 'data-locked="1"' : ''}>
-        <summary><span class="co-e" aria-hidden="true">${locked ? '🔒' : '📝'}</span><span class="acc-t"><b>Correction détaillée</b><small id="corrHint">${locked ? `Disponible après l’envoi de ta réponse ou ${nH > 1 ? 'les deux indices' : 'l’indice'}` : 'Touche pour afficher la correction'}</small></span><span class="chev" aria-hidden="true"></span></summary>
-        <div class="acc-body">${S.busy === 'solution' ? '<p><span class="spin"></span> Rédaction du corrigé…</p>' : sol ? `${correctionHTML(sol)}
-          <div class="soltools">${K ? `<a class="btn" href="${esc(correctionURL(ex.id))}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="btn" id="bShareCorr">${ic('share')} Partager</button>` : ''}</div>
-          <p class="corr-src">${K ? `<span class="lab-ok">${ic('check')} Correction officielle de la plateforme</span>` : `<span class="lab-warn">${ic('bulb')} Correction générée par IA · non vérifiée par un professeur</span> <span class="small">${S.relu ? 'Relue par une seconde passe automatique indépendante' + (S.verif?.statut === 'corrige' ? ', qui a corrigé des erreurs du premier jet' : S.verif?.statut === 'incertain' ? ', qui signale des points incertains' : '') + '.' : 'Non relue.'} Vérifie-la avec ton cours.</span>`}${!K && S.verif?.remarques?.length && S.verif.statut !== 'conforme' ? `<details class="nprev"><summary>Remarques de la relecture</summary><ul>${S.verif.remarques.map(x => `<li>${rich(x)}</li>`).join('')}</ul></details>` : ''}</p>` : ''}</div>
-      </details>
-    </section>
+    <section class="co co-corr" id="corrSec" aria-label="Correction"></section>
 
     <section class="co co-grp" id="grpSec">
       <div class="co-h"><span class="co-e" aria-hidden="true">👥</span>Réponses du groupe<span class="co-meta" id="grpMeta"></span></div>
@@ -441,29 +436,29 @@ function renderCopy() {
     presence({st: 'indice'});
     api.activity({uid: api.user.id, name: api.profile.full_name, id: ex.id, k: 'indice', v: 'bloque', sc: null});
     record(ex, {kind: 'indice', verdict: 'bloque'});
-    if (S.hint >= nH) unlockCorr();
+    if (S.hint >= nH) { unlockCorr(); S.cmode !== 'guide' && !S.forceOpen && $('#corrSec') && cctx.redraw?.(); }
   }));
-  const acc = $('#corrAcc');
-  acc.querySelector('summary').onclick = e => {
-    if (acc.dataset.locked) { e.preventDefault(); acc.classList.remove('shake'); void acc.offsetWidth; acc.classList.add('shake'); return; }
-    if (!sol && !S.busy) { e.preventDefault(); S.openC = true; ask(ex, 'solution'); }
-  };
-  acc.addEventListener('toggle', () => {
-    S.openC = acc.open;
-    if (acc.open && K && !S.seen) { S.seen = true; presence({st: 'corrige'}); record(ex, {kind: 'solution'}); }
-  });
+  const isLocked = () => !(S.unlocked || mine(ex.id) || st?.s === 'reussi' || S.hint >= nH);
+  const nextHint = () => go('#hintsSec', () => { const nx = [...el.querySelectorAll('.hint-acc')].find(x => !x.open); if (nx) nx.open = true; else if ($('#bHintAI')) $('#bHintAI').click(); else toast('Tu as déjà vu tous les indices.', 'ok'); });
+  const cctx = {ex, K, S, shareURL: correctionURL(ex.id),
+    sol: () => K || (S.solution ? {corrige: S.solution, reponse: S.reponse, theoremes: S.theoremes, astuces: S.astuces} : null),
+    locked: isLocked, typeset, share: () => shareEx(ex, true), nextHint,
+    ensureSolution: () => ask(ex, 'solution'),
+    unlock: () => { if (S.unlocked) return; S.unlocked = true; unlockCorr(); },
+    record: kind => {
+      if (kind === 'guide') { presence({st: 'indice'}); return; }
+      if (S.seen) return; S.seen = true; presence({st: 'corrige'}); record(ex, {kind: 'solution'});
+    }};
+  renderCorrection($('#corrSec'), cctx);
   function unlockCorr() {
     renderSolutions($('#solList'), ex, {locked: false, admin: api.isProf, me: api.user.id});
-    delete acc.dataset.locked;
-    acc.querySelector('summary .co-e').textContent = '📝';
-    $('#corrHint').textContent = 'Touche pour afficher la correction';
     $('#bSol').classList.add('primary'); $('#bSol').innerHTML = `${ic('book')}<span>Correction</span>`;
   }
   const go = (sec, f) => { f?.(); $(sec).scrollIntoView({behavior: 'smooth', block: 'start'}); };
   $('#bGoCopy').onclick = () => go('#repSec', () => $('#repTxt')?.focus({preventScroll: true}));
   $('#bDisc').onclick = () => go('#discSec', () => $('#comTxt')?.focus({preventScroll: true}));
-  $('#bHint').onclick = () => go('#hintsSec', () => { const nx = [...el.querySelectorAll('.hint-acc')].find(x => !x.open); if (nx) nx.open = true; else $('#bHintAI')?.click(); });
-  $('#bSol').onclick = () => go('#corrSec', () => { if (acc.dataset.locked) { acc.classList.remove('shake'); void acc.offsetWidth; acc.classList.add('shake'); } else if (sol) acc.open = true; else ask(ex, 'solution'); });
+  $('#bHint').onclick = nextHint;
+  $('#bSol').onclick = () => go('#corrSec');
   $('#bBack').onclick = closeEx;
   $('#bFav').onclick = () => toggleFav(ex.id);
   $('#bColl').onclick = () => openCollectionsPicker(ex.id);

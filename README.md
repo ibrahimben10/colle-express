@@ -214,3 +214,28 @@ Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 in
 Les bilans sont rédigés dans `tools/bilan_*.py` (énoncés de référence communs dans `tools/bilan_lib.py`). Pour les exercices ajoutés par le professeur depuis le site, l'IA produit le même format (corrigé, résultat, théorèmes, astuces).
 
 Les formules sont rendues par MathJax 4 (police New Computer Modern, identique à LaTeX), avec retour à la ligne automatique des formules trop longues sur téléphone.
+
+## Correction en trois modes
+
+Sous chaque exercice, la section « Correction » propose trois lectures :
+
+- **Guidée** : la correction se dévoile une étape à la fois. Avant chaque étape, une question invite l'élève à la chercher (« Quelle méthode envisages-tu ? »). Les boutons « Voir l'étape suivante » et « Afficher un indice » font avancer, « Voir toute la correction » passe au mode détaillé.
+- **Détaillée** : la correction en 6 étapes, avec les outils « Pourquoi cette méthode ? » (extrait de l'étape Stratégie, ou explication générée), « Autre méthode », « Expliquer davantage » sur chaque étape, replier/déplier, copier, PDF, partager, « Signaler une erreur ».
+- **Rigoureuse** : une rédaction de type copie de concours, générée par l'IA à partir de la correction de la plateforme, contrôlée par une relecture indépendante, puis mise en cache et partagée.
+
+Le bouton « Vérifier ma réponse » analyse le résultat ou la démarche de l'élève : il trouve la première erreur (calcul, méthode, raisonnement, rédaction) et propose une piste, sans donner la solution.
+
+Tant que l'élève n'a ni soumis sa réponse ni consulté les indices, les modes détaillé et rigoureux affichent d'abord une invitation à chercher, avec un bouton « Voir quand même ».
+
+Le sélecteur « Programme » (MPSI, MP, PC, PSI…) est transmis à l'IA pour qu'elle reste dans le programme de la filière.
+
+**Côté Supabase, deux actions sont nécessaires :**
+
+1. Relancer `supabase/schema.sql` dans l'éditeur SQL. Il crée la table `corrections_ia` (le cache des contenus générés, accessible uniquement par la fonction) et autorise les signalements d'erreurs dans les corrections.
+2. Redéployer la fonction `corriger` (Edge Functions → `corriger` → coller le nouveau `index.ts` → Deploy). Elle gère les nouveaux modes `rigoureux`, `autre`, `expliquer`, `pourquoi` et `analyse`.
+
+Les contenus partagés sont mis en cache par une empreinte SHA-256 de toutes leurs entrées : une deuxième demande identique ne coûte rien et ne compte pas dans la limite quotidienne. Une réponse coupée par la limite de longueur est refusée au lieu d'être affichée tronquée. Un contenu que la relecture juge faux n'est pas mis en cache. Les signalements d'erreurs arrivent dans la file de modération du tableau de bord.
+
+## Identité visuelle
+
+Le site suit une direction « carnet de colle » : papier chaud, encre, vert académique `#235347`, terracotta `#D97952`, et la ligne de marge comme signature. Les polices sont auto-hébergées dans `fonts/` (licence OFL) : Fraunces pour les titres, Source Sans 3 pour le texte, JetBrains Mono pour les repères, Caveat pour les annotations. Les couleurs et les polices sont réglées par les variables en tête de `css/style.css`. Le mode sombre (graphite, ivoire, sauge, cuivre) suit automatiquement le système ou le bouton lune/soleil. Toutes les paires texte/fond passent le niveau AA du WCAG.

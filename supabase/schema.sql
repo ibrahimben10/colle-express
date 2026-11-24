@@ -1451,6 +1451,7 @@ language sql stable security definer set search_path = public as $$
         when 'collection' then (select c.titre from public.collections c where c.id::text = s.cible_id)
         when 'profil' then (select coalesce(p.username, '') || ' — ' || left(p.bio, 200) from public.profils p where p.user_id::text = s.cible_id) end,
       'exercice', case s.cible_type
+        when 'corrige' then s.cible_id
         when 'commentaire' then (select c.exercice_id from public.commentaires c where c.id::text = s.cible_id)
         when 'solution' then (select x.exercice_id from public.solutions x where x.id::text = s.cible_id)
         when 'solution_commentaire' then (select x.exercice_id from public.solution_commentaires c join public.solutions x on x.id = c.solution_id where c.id::text = s.cible_id) end) x
@@ -1549,3 +1550,31 @@ $$;
 --  update public.profiles set role = 'prof'
 --  where id = (select id from auth.users where email = 'ton.email@exemple.fr');
 -- =====================================================================
+
+
+-- =====================================================================
+--  CORRECTION EN TROIS MODES (guidé, détaillé, rigoureux)
+--  * signalement des erreurs dans les corrections (cible 'corrige', motif 'erreur') ;
+--  * cache des contenus générés par l'IA (rédaction rigoureuse, autre méthode, explications),
+--    partagé entre élèves pour éviter de payer deux fois la même génération.
+--    La clé est l'empreinte SHA-256 de toutes les entrées du prompt : un contenu mis en cache
+--    correspond toujours exactement aux données qui l'ont produit. Écriture réservée à la
+--    fonction « corriger » (clé service_role) : aucune politique RLS n'autorise le client.
+-- =====================================================================
+alter table public.signalements drop constraint if exists signalements_cible_type_check;
+alter table public.signalements add constraint signalements_cible_type_check
+  check (cible_type in ('commentaire','solution','solution_commentaire','profil','carnet','collection','corrige'));
+alter table public.signalements drop constraint if exists signalements_motif_check;
+alter table public.signalements add constraint signalements_motif_check
+  check (motif in ('spam','insulte','inapproprie','donnees','autre','erreur'));
+
+create table if not exists public.corrections_ia (
+  cle         text primary key check (cle ~ '^[0-9a-f]{64}$'),
+  exercice_id text not null check (char_length(exercice_id) between 1 and 80),
+  type        text not null check (type in ('rigoureux','autre','expliquer','pourquoi')),
+  contenu     jsonb not null,
+  created_at  timestamptz not null default now()
+);
+create index if not exists corrections_ia_ex on public.corrections_ia(exercice_id, type);
+alter table public.corrections_ia enable row level security;
+revoke all on public.corrections_ia from anon, authenticated;

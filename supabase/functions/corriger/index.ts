@@ -1,4 +1,5 @@
-// Supabase Edge Function « corriger » : correction de copie, indice, corrigé, import d'énoncé.
+// Supabase Edge Function « corriger » : indice, corrigé, import d'énoncé, et les outils des trois modes de correction
+// (rédaction rigoureuse, autre méthode, « expliquer davantage », « pourquoi cette méthode », analyse de la réponse de l'élève).
 // Secrets à définir dans Supabase : ANTHROPIC_API_KEY (obligatoire), CLAUDE_MODEL (facultatif), LIMITE_JOUR (facultatif)
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -93,6 +94,95 @@ Réponds UNIQUEMENT avec un objet JSON valide : {"corrige":"…","reponse":"…"
 Réponds UNIQUEMENT avec un objet JSON valide : {"titre":"…","mat":"Maths|Physique|Chimie","chap":"…","niveau":1|2|3,"duree":20,"enonce":"…"}`;
 }
 
+
+// ---------- Outils des trois modes de correction ----------
+const FILIERES = ["MPSI", "MP", "MP*", "PCSI", "PC", "PSI", "MP2I", "MPI", "PTSI", "PT", "TSI", "BCPST"];
+function contexte(b: any) {
+  const ex = b.exercice ?? {};
+  const fil = FILIERES.includes(String(b.filiere)) ? String(b.filiere) : "MP";
+  const ref = clip(b.reference, 12000);
+  return {
+    ex, fil,
+    tete: `Tu es professeur de classe préparatoire (filière ${fil}). Exercice de ${ex.mat ?? "?"}, chapitre ${ex.chap ?? "?"}, niveau ${LV[ex.niveau] ?? "MP"}.
+PROGRAMME : reste dans le programme officiel de la filière ${fil}. Si un outil hors programme est indispensable, annonce-le dans un encadré « > **Attention — hors programme.** » et justifie son emploi.
+HONNÊTETÉ : n'invente jamais un théorème, une hypothèse, une source ou un résultat. Si l'énoncé est ambigu ou incomplet, dis-le explicitement. Si tu ne peux pas établir un point avec certitude, écris-le dans un encadré « > **Point non démontré — …** ».
+Toute formule en LaTeX ($…$, $$…$$ ; environnement aligned pour aligner des calculs). Français, phrases claires. Jamais « il est évident que » ou « on trouve facilement » quand une justification est nécessaire.
+
+ÉNONCÉ :
+${clip(ex.enonce, 6000)}` + (ref ? `\n\nCORRIGÉ DE RÉFÉRENCE (vérifié par l'équipe ; appuie-toi sur ses résultats et ne les modifie que si tu y trouves une erreur certaine, que tu signales alors) :\n${ref}` : ""),
+  };
+}
+
+function promptOutil(mode: string, b: any) {
+  const { tete } = contexte(b);
+  if (mode === "rigoureux") return `${tete}
+
+TÂCHE : rédige la solution comme une EXCELLENTE COPIE DE CONCOURS (CCINP, CentraleSupélec, Mines-Ponts, X-ENS).
+- Une section par question, ouverte par une ligne en gras « **1.** », « **2.(a)** »… (ou « **Solution.** » s'il n'y a qu'une question).
+- Définis les objets introduits et annonce les notations. Quantificateurs explicites (« Soit $\\varepsilon>0$. Il existe… »).
+- Pour chaque théorème : nomme-le et vérifie ses hypothèses AU MOMENT où tu l'appliques.
+- Démontre toute implication non triviale ; distingue condition nécessaire et condition suffisante ; traite les cas particuliers et les cas limites.
+- Physique et chimie : système, référentiel, lois et leurs conditions de validité, conventions de signe, homogénéité, application numérique avec unités.
+- Informatique : spécification, invariant de boucle (initialisation, conservation), terminaison, complexité.
+- Chaque question se termine par une phrase de conclusion explicite ; le résultat principal est encadré par $$\\boxed{…}$$.
+- Style concis de copie : pas de rappels de cours séparés, pas de commentaires pédagogiques.
+Réponds UNIQUEMENT avec un objet JSON valide : {"redaction":"…","reponse":"résultats finaux en une ou deux lignes"}`;
+  if (mode === "autre") return `${tete}
+
+TÂCHE : propose une MÉTHODE DE RÉSOLUTION RÉELLEMENT DIFFÉRENTE de celle du corrigé de référence (autre outil, autre point de vue ; pas une simple reformulation). Rédige-la complètement et rigoureusement, avec des sous-parties « **1. Titre.** », « **2. Titre.** »…, et le résultat final dans $$\\boxed{…}$$, qui doit coïncider avec celui de la référence.
+S'il n'existe pas d'autre méthode raisonnable au programme, dis-le simplement (existe = false) au lieu d'en inventer une.
+Réponds UNIQUEMENT avec un objet JSON valide : {"existe":true,"titre":"nom court de la méthode","methode":"…","comparaison":"2 ou 3 phrases : avantages, limites, quand préférer chaque méthode"}`;
+  if (mode === "expliquer") return `${tete}
+
+ÉTAPE DU CORRIGÉ QUE L'ÉLÈVE VEUT MIEUX COMPRENDRE :
+${clip(b.etape, 5000)}
+${b.question ? `\nQUESTION DE L'ÉLÈVE : « ${clip(b.question, 500)} »\n` : ""}
+TÂCHE : explique cette étape plus lentement, pour un élève de prépa qui bloque : chaque transformation ou calcul intermédiaire, pourquoi il est légitime (quelle hypothèse, quel théorème), et l'idée qui guide l'étape. Ne traite pas les étapes suivantes. Si tu vois une erreur dans l'étape, signale-la clairement au lieu de la justifier.
+Réponds UNIQUEMENT avec un objet JSON valide : {"explication":"…"}`;
+  if (mode === "pourquoi") return `${tete}
+
+TÂCHE : explique POURQUOI la méthode employée dans le corrigé de référence est adaptée : quels indices de l'énoncé y conduisent, quelles autres pistes viendraient à l'esprit et pourquoi elles sont moins efficaces, et le réflexe à retenir. 6 à 10 phrases, sans refaire la résolution.
+Réponds UNIQUEMENT avec un objet JSON valide : {"pourquoi":"…"}`;
+  // analyse de la réponse de l'élève
+  return `${tete}
+
+RÉPONSE OU DÉMARCHE DE L'ÉLÈVE :
+${clip(b.reponse_eleve, 4000)}
+
+TÂCHE : analyse cette réponse SANS donner la solution complète ni recopier le corrigé.
+- Si elle est juste : dis-le, puis signale ce qui manque éventuellement en rigueur ou en justification.
+- Sinon : identifie précisément la PREMIÈRE erreur (cite le passage), classe-la (calcul, méthode, raisonnement, rédaction), explique pourquoi la démarche devient incorrecte à cet endroit, et donne une piste pour reprendre à partir de là.
+- Si la réponse est trop courte ou illisible pour juger, dis-le (verdict "incomplet") et demande ce qu'il faudrait préciser.
+- Ne sois jamais plus affirmatif que ce que tu peux vérifier.
+Réponds UNIQUEMENT avec un objet JSON valide : {"verdict":"juste|partiel|faux|incomplet","resume":"une phrase","points_justes":["…"],"premiere_erreur":{"citation":"…","type":"calcul|methode|raisonnement|redaction","explication":"…"},"piste":"…"} (premiere_erreur = null si aucune erreur).`;
+}
+
+// Relecture indépendante courte : un second appel contrôle le contenu produit et renvoie un verdict, sans le réécrire.
+function promptControle(b: any, contenu: string) {
+  const { tete } = contexte(b);
+  return `${tete}
+
+Un collègue a rédigé le texte ci-dessous. Tu ne l'as pas écrit. Contrôle-le de façon INDÉPENDANTE : refais chaque calcul (signes, facteurs, bornes, unités), vérifie les hypothèses de chaque théorème appliqué et la logique de chaque implication, compare les résultats à la référence s'il y en a une.
+
+TEXTE À CONTRÔLER :
+${clip(contenu, 20000)}
+
+Réponds UNIQUEMENT avec un objet JSON valide : {"statut":"conforme|incertain|erreur","remarques":["chaque problème précis trouvé, ou point que tu n'as pas pu vérifier"]}`;
+}
+const OUTILS: Record<string, { max: number; controle: boolean; cache: boolean }> = {
+  rigoureux: { max: 7000, controle: true, cache: true },
+  autre: { max: 5000, controle: true, cache: true },
+  expliquer: { max: 2500, controle: false, cache: true },
+  pourquoi: { max: 1500, controle: false, cache: true },
+  analyse: { max: 1800, controle: false, cache: false },
+};
+async function empreinte(mode: string, b: any) {
+  const ex = b.exercice ?? {};
+  const txt = JSON.stringify([mode, MODEL, String(ex.enonce ?? ""), String(b.reference ?? ""), String(b.filiere ?? ""), String(b.etape ?? ""), String(b.question ?? "")]);
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+  return [...new Uint8Array(h)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+
 function parse(t: string) {
   const a = t.indexOf("{"), b = t.lastIndexOf("}");
   if (a < 0 || b < a) throw new Error("Réponse illisible");
@@ -118,7 +208,18 @@ Deno.serve(async (req) => {
   const mode = String(body.mode);
   // L'évaluation automatique des copies est remplacée par la soumission sur l'honneur et la notation entre pairs.
   if (mode === "copie") return json({ error: "La correction automatique des copies est désactivée : soumets ta réponse à ton groupe." }, 410);
-  if (!["indice", "solution", "import"].includes(mode)) return json({ error: "Mode inconnu." }, 400);
+  const outil = Object.hasOwn(OUTILS, mode) ? OUTILS[mode] : undefined;
+  if (!outil && !["indice", "solution", "import"].includes(mode)) return json({ error: "Mode inconnu." }, 400);
+  if (mode === "analyse" && !String(body.reponse_eleve ?? "").trim()) return json({ error: "Écris d'abord ta réponse ou ta démarche." }, 400);
+  if (outil && !String(body.exercice?.enonce ?? "").trim()) return json({ error: "Énoncé manquant." }, 400);
+
+  // Contenus partagés déjà générés : renvoyés sans nouvel appel à l'IA (ni décompte du quota).
+  let cle = "";
+  if (outil?.cache) {
+    cle = await empreinte(mode, body);
+    const { data: c } = await admin.from("corrections_ia").select("contenu").eq("cle", cle).maybeSingle();
+    if (c?.contenu) return json({ ...c.contenu, cache: true });
+  }
   if (mode === "import" && !isProf) return json({ error: "Réservé au professeur." }, 403);
 
   if (!isProf) {
@@ -140,8 +241,32 @@ Deno.serve(async (req) => {
     });
     if (!r.ok) throw new Error((await r.text()).slice(0, 300));
     const out = await r.json();
+    if (out.stop_reason === "max_tokens") throw new Error("Réponse tronquée");
     return (out.content ?? []).filter((c: any) => c.type === "text").map((c: any) => c.text).join("\n");
   };
+
+  if (outil) {
+    let res: any;
+    try { res = parse(await appel([{ type: "text", text: promptOutil(mode, body) }], outil.max)); }
+    catch (e) {
+      const trop = String(e).includes("tronquée");
+      return json({ error: trop ? "La réponse était trop longue et a été coupée : réessaie, ou utilise le mode détaillé." : "Le service de correction n'a pas pu répondre. Réessaie dans un instant." }, 502);
+    }
+    await admin.from("ia_usage").insert({ user_id: uid, mode });
+    const texte = mode === "rigoureux" ? res.redaction : mode === "autre" ? res.methode : mode === "expliquer" ? res.explication : mode === "pourquoi" ? res.pourquoi : "ok";
+    if (!texte || typeof texte !== "string") { if (!(mode === "autre" && res.existe === false)) return json({ error: "Réponse de l'IA incomplète, réessaie." }, 502); }
+    if (outil.controle && texte && !(mode === "autre" && res.existe === false)) {
+      try {
+        const v = parse(await appel([{ type: "text", text: promptControle(body, texte) }], 1500));
+        res.verification = { statut: ["conforme", "incertain", "erreur"].includes(v.statut) ? v.statut : "incertain", remarques: Array.isArray(v.remarques) ? v.remarques.slice(0, 8).map(String) : [] };
+      } catch { res.verification = { statut: "non_relu", remarques: [] }; }
+    }
+    // On ne met en cache que ce qui n'a pas été jugé faux par la relecture : une nouvelle demande pourra faire mieux.
+    if (cle && res.verification?.statut !== "erreur" && res.verification?.statut !== "non_relu") {
+      await admin.from("corrections_ia").upsert({ cle, exercice_id: clip(body.exercice?.id || "?", 80), type: mode, contenu: res }, { onConflict: "cle", ignoreDuplicates: true });
+    }
+    return json(res);
+  }
   let text: string;
   try { text = await appel(content, mode === "solution" ? 8000 : 1500); }
   catch (e) { return json({ error: "Le service de correction a refusé la demande.", detail: String(e).slice(0, 300) }, 502); }
