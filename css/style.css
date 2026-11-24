@@ -1346,3 +1346,14 @@ blockquote.cit{margin:6px 0;padding:4px 12px;border-left:2px solid var(--red);fo
 }
 .ianote{display:block}.ianote .ic{vertical-align:-2px;margin-right:2px}
 .rig-src{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin:0 0 12px}
+/* logo (fichier fourni) : version claire et version sombre */
+img.logo{display:block;width:auto}
+.logo-d{display:none!important}
+:root[data-theme=dark] .logo-l{display:none!important}:root[data-theme=dark] .logo-d{display:block!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .logo-l{display:none!important}:root:not([data-theme=light]) .logo-d{display:block!important}}
+.lbrand::before,.top .brand .wm::before{display:none}
+.lbrand img.logo{height:40px}
+.lfoot .lbrand img.logo{height:44px}
+.top .brand img.logo{height:38px}
+@media(max-width:820px){.top .brand img.logo{height:32px}}
+@media(max-width:560px){.lbrand img.logo{height:32px}}
