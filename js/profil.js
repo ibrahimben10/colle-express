@@ -5,6 +5,8 @@ import { api } from './api.js';
 import { ic } from './icons.js';
 import { esc, rich } from './format.js';
 import { toast } from './ui.js';
+import { collectionsHTML, nouvelleCollection } from './biblio.js';
+import { TYPES } from './carnet.js';
 
 let D = {};   // dépendances fournies par app.js : byId, all, LV, MAT_IC, typeset, pickPhoto, ensurePhoto
 export const initProfil = deps => { D = deps; };
@@ -56,7 +58,10 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
   if (p.travailles) sec('stats', 'En chiffres', statsHTML(S, p), 'activité réelle, comptée depuis l’inscription');
   if (p.jours) sec('activite', 'Carte d’activité', heatHTML(p.jours), 'jours où des exercices ont été travaillés');
   if (p.travailles) sec('parcours', 'Parcours scientifique', parcoursHTML(p), 'couverture des chapitres, pas un niveau de maîtrise');
-  if (p.favoris) sec('favoris', 'Bibliothèque', favorisHTML(p.favoris, p.self));
+  if (p.favoris || p.collections) sec('favoris', 'Bibliothèque', (p.collections ? `<h3 class="pf-h3">Collections ${p.self ? `<button class="btn ghost" type="button" id="pfNewColl">${ic('plus')} Nouvelle collection</button>` : ''}</h3>${collectionsHTML(p.collections, p.self)}` : '')
+    + (p.favoris ? `<h3 class="pf-h3">Exercices favoris</h3>${favorisHTML(p.favoris, p.self)}` : ''));
+  if (p.carnet && (p.carnet.length || p.self)) sec('carnet', 'Pages du carnet', carnetPublicHTML(p.carnet, p.self), 'notes publiées volontairement');
+  if (p.badges && (p.badges.length || p.self)) sec('badges', 'Réalisations', badgesHTML(p.badges, p.self), 'critères publics et vérifiables');
   if (p.commentaires) sec('paroles', 'Commentaires publics', parolesHTML(p.commentaires));
 
   el.innerHTML = `
@@ -76,13 +81,16 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
         <div class="pf-side">
           ${p.etoiles ? starsHTML(p) : ''}
           ${p.objectif ? `<div class="pf-goal"><span>Objectif du moment</span><p>${esc(p.objectif)}</p></div>` : ''}
+          ${(p.objectifs || []).slice(0, 3).map(o => { const v = Math.min(o.progression || 0, o.cible);
+            return `<div class="pf-goal pf-goal2"><span>Objectif · jusqu’au ${dateFR(o.fin + 'T12:00', {day: 'numeric', month: 'short'})}</span><p>${esc(o.titre)}</p>
+              <div class="obj-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${o.cible}" aria-valuenow="${v}" aria-label="${esc(o.titre)}"><i style="width:${Math.round(100 * v / o.cible)}%"></i></div><small>${o.progression || 0}/${o.cible}${(o.progression || 0) >= o.cible ? ' · atteint' : ''}</small></div>`; }).join('')}
           ${p.contributions ? `<div class="pf-contrib">${ic('upload')} ${plural(p.contributions, 'sujet envoyé', 'sujets envoyés')} pour enrichir la plateforme</div>` : ''}
         </div>
       </header>
       <div class="pf-bar">
         ${p.self ? `<span class="pf-vis ${p.public ? 'on' : ''}">${ic(p.public ? 'users' : 'lock')} ${p.public ? 'Visible par les membres connectés' : 'Privé : visible par toi seul'}</span>
           <a class="btn primary" href="#profil/modifier">${ic('pen')} Modifier</a>
-          <a class="btn" href="#profil/apercu">${ic('eye')} Voir comme les autres</a>` : ''}
+          <a class="btn" href="#profil/apercu">${ic('eye')} Voir comme les autres</a><a class="btn ghost" href="#carnet">${ic('pen')} Carnet</a><a class="btn ghost" href="#suivi">${ic('chart')} Suivi détaillé</a>` : ''}
         <button class="btn ghost" type="button" id="pfShare">${ic('link')} Copier le lien</button>
       </div>
       ${sections.join('<div class="pf-rule" aria-hidden="true">∎</div>') || `<div class="panel empty">${p.self ? 'Tout est masqué pour l’instant.' : 'Ce membre n’affiche pas encore d’activité.'}</div>`}
@@ -181,6 +189,24 @@ function favorisHTML(ids, self) {
       <span class="stamp n${e.niveau}">${esc(D.LV[e.niveau] || '')}</span></a></li>`).join('')}</ol>`;
 }
 
+/* ---------- carnet public ---------- */
+function carnetPublicHTML(L, self) {
+  if (!L.length) return `<p class="pf-emptyline">Aucune note publiée. Dans ton <a href="#carnet">carnet</a>, coche « Publier » sur une note pour la montrer ici.</p>`;
+  return `<div class="cn-pages">${L.map(n => { const t = TYPES[n.type] || TYPES.note, e = n.ex && D.byId(n.ex);
+    return `<article class="cn-page t-${t.c}"><div class="cn-tag">${ic(t.i)} ${t.l}</div><h3>${esc(n.titre)}</h3>${n.contenu ? `<div class="cn-rich pf-quote-like">${rich(n.contenu)}</div>` : ''}
+      <footer><span class="small">${dateFR(n.d)}${e ? ` · <a href="#ex-${esc(e.id)}">${esc(e.titre)}</a>` : ''}</span></footer></article>`; }).join('')}</div>`;
+}
+
+/* ---------- badges ---------- */
+const BADGE_IC = {premier_pas: 'pen', regularite: 'clock', explorateur: 'search', polyvalent: 'atom', autonome: 'key', reconnu: 'users', perseverant: 'target', specialiste: 'star', contributeur: 'upload'};
+function badgesHTML(L, self) {
+  const ok = L.filter(b => b.val >= b.cible), ko = L.filter(b => b.val < b.cible);
+  const one = (b, got) => `<li class="bdg ${got ? 'got' : ''}"><span class="bdg-m" aria-hidden="true">${ic(BADGE_IC[b.id] || 'trophy')}</span>
+    <span><b>${esc(b.titre)}</b><span class="small">${esc(b.critere)}</span>${got ? '' : `<span class="bdg-p"><i style="width:${Math.round(100 * Math.min(b.val, b.cible) / b.cible)}%"></i></span><span class="small">${Math.min(b.val, b.cible)}/${b.cible}</span>`}</span></li>`;
+  if (!ok.length && !self) return `<p class="pf-emptyline">Pas encore de badge.</p>`;
+  return `<ul class="bdgs">${ok.map(b => one(b, true)).join('')}${self ? ko.map(b => one(b, false)).join('') : ''}</ul>${self ? '<p class="small">Seuls les badges obtenus sont visibles des autres membres. Aucun badge ne récompense le simple fait d’ouvrir un corrigé.</p>' : ''}`;
+}
+
 /* ---------- commentaires publics ---------- */
 function parolesHTML(list) {
   if (!list.length) return `<div class="pf-emptyline">Aucun commentaire public.</div>`;
@@ -202,6 +228,7 @@ function starsHTML(p) {
 }
 
 function bindProfil(el, p) {
+  el.querySelector('#pfNewColl')?.addEventListener('click', async () => { const c = await nouvelleCollection(); if (c) location.hash = '#c/' + c.id; });
   el.querySelector('#pfShare')?.addEventListener('click', async () => {
     const url = location.href.split('#')[0] + profilURL(p);
     try { await navigator.clipboard.writeText(url); toast('Lien du profil copié. Il s’ouvre pour les membres connectés.', 'ok'); }
@@ -290,7 +317,7 @@ export async function renderEdition(el) {
       ${tog('public', 'Profil visible par les membres connectés', 'Désactivé : personne d’autre que toi (et l’administrateur) ne voit ton profil. Ton e-mail n’est jamais affiché.')}
       <div class="pe-vis" id="peVis">
         ${tog('vis_stats', 'Statistiques')}${tog('vis_activite', 'Carte d’activité')}${tog('vis_parcours', 'Parcours scientifique')}
-        ${tog('vis_favoris', 'Exercices favoris')}${tog('vis_commentaires', 'Commentaires publics')}${tog('vis_etoiles', 'Étoiles', 'Les membres peuvent te noter de 1 à 5 ; leurs notes restent anonymes.')}
+        ${tog('vis_favoris', 'Exercices favoris')}${tog('vis_collections', 'Collections', 'Seules les collections que tu partages apparaissent.')}${tog('vis_carnet', 'Pages du carnet', 'Seules les notes que tu publies apparaissent.')}${tog('vis_badges', 'Badges obtenus')}${tog('vis_commentaires', 'Commentaires publics')}${tog('vis_etoiles', 'Étoiles', 'Les membres peuvent te noter de 1 à 5 ; leurs notes restent anonymes.')}
       </div>
       <p class="small">Si tu as moins de 18 ans, parles-en avec un parent avant de rendre ton profil visible. Tu peux tout masquer à tout moment.</p>
     </fieldset>
@@ -322,7 +349,7 @@ export async function renderEdition(el) {
       if (v(n) && !re.test(v(n))) return showErr(`Lien ${lab} invalide : colle l’adresse complète de ta page, commençant par https://.`, f[n]);
     const champs = {username: u.value, bio: v('bio'), filiere: v('filiere'), annee: v('annee') ? +v('annee') : null, etablissement: v('etablissement'), objectif: v('objectif'),
       matieres: mats.filter(x => x.checked).map(x => x.value), lien_github: v('lien_github'), lien_linkedin: v('lien_linkedin'), lien_site: v('lien_site'),
-      public: f.public.checked, ...Object.fromEntries(['vis_stats', 'vis_activite', 'vis_parcours', 'vis_favoris', 'vis_commentaires', 'vis_etoiles'].map(k => [k, f[k].checked]))};
+      public: f.public.checked, ...Object.fromEntries(['vis_stats', 'vis_activite', 'vis_parcours', 'vis_favoris', 'vis_commentaires', 'vis_etoiles', 'vis_collections', 'vis_carnet', 'vis_badges'].filter(k => f[k]).map(k => [k, f[k].checked]))};
     busy = true; const b = el.querySelector('#peSave'); b.disabled = true; b.textContent = 'Enregistrement…';
     try { await api.majProfil(champs); D.setUsername?.(champs.username); toast('Profil enregistré.', 'ok'); location.hash = '#profil'; }
     catch (x) { showErr(x.message || 'Enregistrement impossible.'); }

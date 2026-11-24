@@ -738,7 +738,7 @@ begin
     r := r || jsonb_build_object('etoiles', jsonb_build_object('n', et.n, 'moy', case when et.n >= 3 or admin then et.moy end,
       'mienne', mine, 'peut_noter', (u <> me and pr.public and pr.vis_etoiles)));
   end if;
-  return r;
+  return r || public._profil_extras(u, tout);
 end $$;
 
 -- Nom, identifiant et photo des auteurs de commentaires publics (rien d'autre)
@@ -757,6 +757,523 @@ language sql stable security definer set search_path = public as $$
   select e.auteur_id, p.full_name, e.note, e.updated_at from public.etoiles e join public.profiles p on p.id = e.auteur_id
   where public.is_prof() and e.cible_id = p_cible order by e.updated_at desc;
 $$;
+
+-- =====================================================================
+--  PHASE 3 : collections, carnet de progression, objectifs, badges
+--  Badges et progression des objectifs sont CALCULÉS par le serveur à partir
+--  de l'activité réelle : ils ne peuvent pas être saisis ni gonflés depuis le site.
+-- =====================================================================
+-- 16. Métadonnées des exercices du site (matière, chapitre, niveau), pour que le serveur
+--     calcule lui-même badges et objectifs. Régénérée par tools/build_meta.py.
+create table if not exists public.exercices_meta (
+  id text primary key, mat text not null, chap text not null, niveau int not null
+);
+insert into public.exercices_meta (id, mat, chap, niveau) values
+  ('m-ccmp-01a','Maths','Topologie & convexité',2),
+  ('m-ccmp-01b','Maths','Probabilités',2),
+  ('m-ccmp-02a','Maths','Équations différentielles',1),
+  ('m-ccmp-02b','Maths','Réduction',2),
+  ('m-ccmp-03a','Maths','Algèbre & arithmétique',3),
+  ('m-ccmp-03b','Maths','Séries',2),
+  ('m-ccmp-04a','Maths','Séries entières',2),
+  ('m-ccmp-04b','Maths','Groupes',3),
+  ('m-ccmp-04c','Maths','Probabilités',1),
+  ('m-ccmp-05a','Maths','Probabilités',2),
+  ('m-ccmp-05b','Maths','Algèbre linéaire',2),
+  ('m-ccmp-06a','Maths','Réduction',1),
+  ('m-ccmp-06b','Maths','Probabilités',2),
+  ('m-ccmp-07a','Maths','Séries',2),
+  ('m-ccmp-07b','Maths','Algèbre euclidienne',2),
+  ('m-ccmp-08a','Maths','Arithmétique',2),
+  ('m-ccmp-08b','Maths','Séries',1),
+  ('m-ccmp-09','Maths','Intégration',2),
+  ('m-ccmp-10b','Maths','Réduction',2),
+  ('m-ccmp-11a','Maths','Algèbre euclidienne',2),
+  ('m-ccmp-11b','Maths','Approximation',3),
+  ('m-ccmp-12a','Maths','Intégration',2),
+  ('m-ccmp-12b','Maths','Réduction',2),
+  ('m-ccmp-13a','Maths','Réduction',1),
+  ('m-ccmp-13b','Maths','Intégration',2),
+  ('m-ccmp-14a','Maths','Algèbre euclidienne',2),
+  ('m-ccmp-14b','Maths','Intégrales à paramètre',1),
+  ('m-ccmp-15a','Maths','Réduction',3),
+  ('m-ccmp-15b','Maths','Topologie & convexité',1),
+  ('m-ccmp-17a','Maths','Probabilités',2),
+  ('m-ccmp-17b','Maths','Analyse asymptotique',2),
+  ('m-ccmp-17c','Maths','Réduction',2),
+  ('m-ccmp-19a','Maths','Algèbre linéaire',2),
+  ('m-ccmp-19b','Maths','Intégrales à paramètre',1),
+  ('m-ccmp-20a','Maths','Séries de fonctions',1),
+  ('m-ccmp-20b','Maths','Réduction',2),
+  ('m-ccmp-21b','Maths','Géométrie euclidienne',1),
+  ('m-ccmp-24b','Maths','Algèbre linéaire',3),
+  ('m-ccmp-25a','Maths','Intégration',3),
+  ('m-ccmp-26a','Maths','Polynômes',1),
+  ('m-ccmp-27a','Maths','Calcul différentiel',1),
+  ('m-ccmp-27b','Maths','Réduction',1),
+  ('m-ccmp-27c','Maths','Probabilités',1),
+  ('m-ccmp-28a','Maths','Groupes & représentations',2),
+  ('m-ccmp-28b','Maths','Intégrales à paramètre',2),
+  ('m-ccs-01','Maths','Topologie matricielle',2),
+  ('m-ccs-02','Maths','Séries de fonctions',1),
+  ('m-ccs-03','Maths','Probabilités',2),
+  ('m-ccs-05','Maths','Polynômes',3),
+  ('m-ccs-06','Maths','Séries entières',2),
+  ('m-ccs-07','Maths','Séries de Fourier & EDP',2),
+  ('m-ccs-10','Maths','Séries entières',2),
+  ('m-ccs-11','Maths','Intégrales à paramètre',2),
+  ('m-ccs-12','Maths','Probabilités',1),
+  ('m-ccs-14','Maths','Algèbre & arithmétique',3),
+  ('m-ccs-15','Maths','Calcul différentiel',2),
+  ('m-ccs-mi8','Maths','Séries entières',2),
+  ('x-g-1','Maths','Groupes',3),
+  ('x-g-2','Maths','Groupes',3),
+  ('x-a-1','Maths','Anneaux',3),
+  ('x-ar-1','Maths','Arithmétique',3),
+  ('x-ar-2','Maths','Arithmétique',3),
+  ('x-p-1','Maths','Polynômes',3),
+  ('x-al-1','Maths','Algèbre linéaire',3),
+  ('x-al-2','Maths','Déterminants',3),
+  ('x-al-3','Maths','Déterminants',3),
+  ('x-al-4','Maths','Déterminants',3),
+  ('x-r-1','Maths','Réduction',3),
+  ('x-r-2','Maths','Réduction',3),
+  ('x-r-3','Maths','Réduction',3),
+  ('x-r-4','Maths','Exponentielle de matrices',3),
+  ('x-r-5','Maths','Groupes de matrices',3),
+  ('x-an-1','Maths','Intégration',3),
+  ('x-an-2','Maths','Intégration',3),
+  ('x-an-3','Maths','Suites de fonctions',3),
+  ('x-s-1','Maths','Suites',3),
+  ('x-s-2','Maths','Suites',3),
+  ('x-s-3','Maths','Suites',3),
+  ('x-se-1','Maths','Séries',3),
+  ('x-se-2','Maths','Séries',3),
+  ('x-f-1','Maths','Fonctions d''une variable',3),
+  ('x-f-2','Maths','Fonctions d''une variable',3),
+  ('x-f-3','Maths','Fonctions d''une variable',3),
+  ('x-fo-1','Maths','Séries de Fourier',3),
+  ('c-thermo-1','Chimie','Thermochimie',1),
+  ('c-sol-2','Chimie','Solutions aqueuses',2),
+  ('c-redox-3','Chimie','Oxydoréduction',2),
+  ('c-thermo-4','Chimie','Thermochimie',2),
+  ('c-thermo-6','Chimie','Thermochimie',2),
+  ('c-electro-3','Chimie','Électrochimie',2),
+  ('c-electro-5','Chimie','Électrochimie',2),
+  ('c-cin-2','Chimie','Cinétique',1),
+  ('c-cristallo-1','Chimie','Cristallographie',1),
+  ('c-cristallo-2','Chimie','Cristallographie',2),
+  ('p-em-1','Physique','Électrostatique',1),
+  ('p-em-2','Physique','Électrostatique',2),
+  ('p-em-3','Physique','Magnétostatique',1),
+  ('p-max-1','Physique','Équations de Maxwell',1),
+  ('p-max-2','Physique','Équations de Maxwell',2),
+  ('p-max-3','Physique','Équations de Maxwell',2),
+  ('p-ind-2','Physique','Induction',2),
+  ('p-ind-3','Physique','Induction',1),
+  ('p-ondes-1','Physique','Ondes mécaniques',1),
+  ('p-ondes-2','Physique','Ondes mécaniques',2),
+  ('p-oem-2','Physique','Ondes électromagnétiques',1),
+  ('p-oem-3','Physique','Ondes électromagnétiques',2),
+  ('p-oem-4','Physique','Ondes électromagnétiques',2),
+  ('p-oem-5','Physique','Ondes électromagnétiques',2),
+  ('p-meca-1','Physique','Mécanique',1),
+  ('p-meca-2','Physique','Mécanique',2),
+  ('p-meca-3','Physique','Mécanique',2),
+  ('p-meca-4','Physique','Mécanique',3),
+  ('p-meca-5','Physique','Mécanique',3),
+  ('p-meca-6','Physique','Mécanique',2),
+  ('p-meca-7','Physique','Mécanique',2),
+  ('p-meca-8','Physique','Mécanique',2),
+  ('p-meca-9','Physique','Mécanique',3),
+  ('p-meca-10','Physique','Mécanique',3),
+  ('p-meca-ccmp2','Physique','Mécanique',2),
+  ('p-meca-ccmp13','Physique','Mécanique',2),
+  ('p-meca-ccs1','Physique','Mécanique',2),
+  ('p-meca-ccs3','Physique','Mécanique',2),
+  ('p-meca-ccs-ressort','Physique','Mécanique',1),
+  ('p-opt-2','Physique','Optique géométrique',2),
+  ('p-opt-3','Physique','Optique géométrique',1),
+  ('p-opt-4','Physique','Optique ondulatoire',2),
+  ('p-opt-5','Physique','Optique ondulatoire',1),
+  ('p-opt-6','Physique','Optique ondulatoire',1),
+  ('p-opt-7','Physique','Optique ondulatoire',2),
+  ('p-opt-8','Physique','Optique ondulatoire',3),
+  ('p-opt-ccmp1','Physique','Optique ondulatoire',1),
+  ('p-q-1','Physique','Mécanique quantique',1),
+  ('p-q-2','Physique','Mécanique quantique',2),
+  ('p-q-3','Physique','Mécanique quantique',2),
+  ('p-q-4','Physique','Mécanique quantique',2),
+  ('p-stat-1','Physique','Physique statistique',2),
+  ('p-stat-3','Physique','Physique statistique',3),
+  ('p-th-1','Physique','Thermodynamique',1),
+  ('p-th-4','Physique','Thermodynamique',2),
+  ('p-th-spe1','Physique','Diffusion thermique',2),
+  ('p-th-spe2','Physique','Rayonnement',1),
+  ('p-th-spe3','Physique','Rayonnement',3),
+  ('p-th-spe4','Physique','Rayonnement',3),
+  ('p-th-spe5','Physique','Diffusion thermique',2),
+  ('p-th-spe6','Physique','Diffusion thermique',1),
+  ('p-th-ccs4','Physique','Diffusion thermique',1),
+  ('p-th-ccmp4','Physique','Diffusion thermique',2),
+  ('p-th-ccmp15','Physique','Diffusion thermique',2),
+  ('p-chim-ccs6','Chimie','Thermochimie',1),
+  ('p-ccs-bulle','Physique','Mécanique des fluides',1),
+  ('p-ccs-plan','Physique','Électrostatique',2),
+  ('n-p1-rc','Physique','Électrocinétique',1),
+  ('n-p1-rlc','Physique','Électrocinétique',1),
+  ('n-p1-passebas','Physique','Électrocinétique',1),
+  ('n-p1-passebande','Physique','Électrocinétique',1),
+  ('n-p1-corde','Physique','Ondes mécaniques',1),
+  ('n-p1-ultrasons','Physique','Ondes mécaniques',1),
+  ('n-p1-fente','Physique','Optique ondulatoire',1),
+  ('n-p1-projecteur','Physique','Optique géométrique',1),
+  ('n-p1-lunette','Physique','Optique géométrique',1),
+  ('n-p1-prisme','Physique','Optique géométrique',1),
+  ('n-p1-photo','Physique','Mécanique quantique',1),
+  ('n-p1-debroglie','Physique','Mécanique quantique',1),
+  ('n-p1-puits','Physique','Mécanique quantique',1),
+  ('n-p1-chute','Physique','Mécanique',1),
+  ('n-p1-geostat','Physique','Mécanique',1),
+  ('n-p1-pendule','Physique','Mécanique',1),
+  ('n-p1-rails','Physique','Induction',1),
+  ('n-p1-transfo','Physique','Induction',1),
+  ('n-p1-adiab','Physique','Thermodynamique',1),
+  ('n-p1-frigo','Physique','Thermodynamique',1),
+  ('n-p1-glacon','Physique','Thermodynamique',1),
+  ('n-p1-atmo','Physique','Mécanique des fluides',1),
+  ('n-p1-bobine','Physique','Induction',1),
+  ('n-p2-ailette','Physique','Diffusion thermique',2),
+  ('n-p2-isolant','Physique','Diffusion thermique',2),
+  ('n-p2-peau','Physique','Équations de Maxwell',2),
+  ('n-p2-bohr','Physique','Mécanique quantique',2),
+  ('n-p2-marche','Physique','Mécanique quantique',2),
+  ('n-p2-doublet','Physique','Optique ondulatoire',2),
+  ('n-p2-reseau','Physique','Optique ondulatoire',2),
+  ('n-p2-tige','Physique','Mécanique',2),
+  ('n-p2-resonance','Physique','Mécanique',2),
+  ('n-p2-fourier','Physique','Électrocinétique',2),
+  ('n-p2-coax','Physique','Électrostatique',2),
+  ('n-p2-serre','Physique','Rayonnement',2),
+  ('n-p2-dipole','Physique','Électrostatique',2),
+  ('n-p2-plasma','Physique','Ondes électromagnétiques',2),
+  ('n-p2-roulement','Physique','Mécanique',2),
+  ('n-p2-beau','Physique','Thermodynamique',2),
+  ('n-p2-vdw','Physique','Thermodynamique',2),
+  ('n-p2-voile','Physique','Ondes électromagnétiques',2),
+  ('n-p2-alternateur','Physique','Induction',2),
+  ('n-p2-diffusion','Physique','Diffusion thermique',2),
+  ('n-p3-neutron','Physique','Mécanique quantique',3),
+  ('n-c-fer','Chimie','Atomistique',1),
+  ('n-c-vsepr','Chimie','Structure des molécules',1),
+  ('n-c-h2o2','Chimie','Cinétique',1),
+  ('n-c-arrhenius','Chimie','Cinétique',1),
+  ('n-c-vitinit','Chimie','Cinétique',1),
+  ('n-c-ethanoique','Chimie','Acide-base',1),
+  ('n-c-tampon','Chimie','Acide-base',1),
+  ('n-c-agcl','Chimie','Solubilité',1),
+  ('n-c-mgoh2','Chimie','Solubilité',2),
+  ('n-c-nacl','Chimie','Cristallographie',1),
+  ('n-c-daniell','Chimie','Oxydoréduction',1),
+  ('n-c-permanganate','Chimie','Oxydoréduction',1),
+  ('n-c-conducti','Chimie','Acide-base',1),
+  ('n-c-epH','Chimie','Oxydoréduction',2),
+  ('n-c-flamme','Chimie','Thermochimie',2),
+  ('n-c-ellingham','Chimie','Thermochimie',2),
+  ('n-c-electrolyse','Chimie','Électrochimie',2),
+  ('n-c-aeqs','Chimie','Cinétique',2),
+  ('n-m-max','Maths','Probabilités',1),
+  ('n-m-euler','Maths','Équations différentielles',1),
+  ('n-m-abb','Maths','Algèbre euclidienne',1),
+  ('n-m-antisym','Maths','Algèbre euclidienne',1),
+  ('n-m-phiX1','Maths','Réduction',1),
+  ('n-m-ln1t','Maths','Séries entières',1),
+  ('n-m-wallis','Maths','Séries',1),
+  ('n-m-arctanx2','Maths','Intégration',1),
+  ('n-m-symk','Maths','Réduction',1),
+  ('n-m-chth','Maths','Séries',1),
+  ('n-m-extrema','Maths','Calcul différentiel',2),
+  ('n-m-In','Maths','Séries entières',2),
+  ('n-m-double','Maths','Séries',2),
+  ('n-m-blocs','Maths','Réduction',2),
+  ('n-m-pieces','Maths','Probabilités',2),
+  ('n-m-Jn','Maths','Intégration',2),
+  ('n-m-sintx','Maths','Intégrales à paramètre',2),
+  ('n-m-arctantx','Maths','Intégrales à paramètre',2),
+  ('n-m-geodiff','Maths','Probabilités',2),
+  ('n-m-kerf2','Maths','Algèbre linéaire',2)
+on conflict (id) do update set mat = excluded.mat, chap = excluded.chap, niveau = excluded.niveau;
+alter table public.exercices_meta enable row level security;
+drop policy if exists "méta: lecture" on public.exercices_meta;
+create policy "méta: lecture" on public.exercices_meta for select using (auth.uid() is not null);
+
+-- Domaine scientifique d'un exercice (même règle que js/profil.js)
+create or replace function public.domaine(p_mat text, p_chap text) returns text
+language sql immutable as $$
+  select case
+    when p_mat = 'Chimie' then 'Chimie'
+    when p_mat = 'Maths' then case
+      when p_chap ~* 'proba' then 'Probabilités'
+      when p_chap ~* '(r[ée]duction|alg[èe]bre|groupe|arithm|polyn|d[ée]terminant|matric|espaces? vect)' then 'Algèbre'
+      else 'Analyse' end
+    else case
+      when p_chap ~* 'quantique' then 'Physique quantique'
+      when p_chap ~* '(thermo|diffusion|statistique)' then 'Thermodynamique'
+      when p_chap ~* '(optique|ondes m[ée]ca|interf|diffraction)' then 'Optique & ondes'
+      when p_chap ~* '(lectro|induction|maxwell|magn[ée]t|rayonnement)' then 'Électromagnétisme'
+      else 'Mécanique' end
+  end;
+$$;
+create or replace function public.ex_meta(p_id text) returns table(mat text, chap text, dom text)
+language sql stable security definer set search_path = public as $$
+  select m.mat, m.chap, public.domaine(m.mat, m.chap) from public.exercices_meta m where m.id = p_id
+  union all
+  select b.mat, b.chap, public.domaine(b.mat, b.chap) from public.banque b where b.id::text = p_id
+  limit 1;
+$$;
+
+alter table public.profils add column if not exists vis_collections boolean not null default true;
+alter table public.profils add column if not exists vis_carnet      boolean not null default true;
+alter table public.profils add column if not exists vis_badges      boolean not null default true;
+
+-- 17. Collections d'exercices ----------------------------------------------------
+create table if not exists public.collections (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  titre       text not null check (char_length(trim(titre)) between 1 and 80),
+  description text not null default '' check (char_length(description) <= 300),
+  public      boolean not null default false,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists collections_user on public.collections(user_id, created_at);
+create table if not exists public.collection_items (
+  collection_id uuid not null references public.collections(id) on delete cascade,
+  exercice_id   text not null check (char_length(exercice_id) between 1 and 80),
+  position      int  not null default 0,
+  added_at      timestamptz not null default now(),
+  primary key (collection_id, exercice_id)
+);
+create or replace function public.collection_avant_ecriture() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null then new.user_id := auth.uid(); new.created_at := now(); end if;
+    if (select count(*) from public.collections where user_id = new.user_id) >= 50 then raise exception 'Limite de 50 collections atteinte'; end if;
+  else new.user_id := old.user_id; new.created_at := old.created_at; end if;
+  new.titre := trim(new.titre); new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists collections_avant_ecriture on public.collections;
+create trigger collections_avant_ecriture before insert or update on public.collections
+  for each row execute function public.collection_avant_ecriture();
+create or replace function public.est_ma_collection(c uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.collections where id = c and user_id = auth.uid());
+$$;
+create or replace function public.item_avant_insert() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  new.added_at := now();
+  if (select count(*) from public.collection_items where collection_id = new.collection_id) >= 200 then raise exception 'Limite de 200 exercices par collection'; end if;
+  return new;
+end $$;
+drop trigger if exists items_avant_insert on public.collection_items;
+create trigger items_avant_insert before insert on public.collection_items
+  for each row execute function public.item_avant_insert();
+
+alter table public.collections enable row level security;
+alter table public.collection_items enable row level security;
+drop policy if exists "collections: lire les siennes" on public.collections;
+create policy "collections: lire les siennes" on public.collections for select using (user_id = auth.uid() or public.is_prof());
+drop policy if exists "collections: créer" on public.collections;
+create policy "collections: créer" on public.collections for insert with check (user_id = auth.uid());
+drop policy if exists "collections: modifier" on public.collections;
+create policy "collections: modifier" on public.collections for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "collections: supprimer" on public.collections;
+create policy "collections: supprimer" on public.collections for delete using (user_id = auth.uid() or public.is_prof());
+drop policy if exists "items: lire" on public.collection_items;
+create policy "items: lire" on public.collection_items for select using (public.est_ma_collection(collection_id) or public.is_prof());
+drop policy if exists "items: ajouter" on public.collection_items;
+create policy "items: ajouter" on public.collection_items for insert with check (public.est_ma_collection(collection_id));
+drop policy if exists "items: déplacer" on public.collection_items;
+create policy "items: déplacer" on public.collection_items for update using (public.est_ma_collection(collection_id)) with check (public.est_ma_collection(collection_id));
+drop policy if exists "items: retirer" on public.collection_items;
+create policy "items: retirer" on public.collection_items for delete using (public.est_ma_collection(collection_id));
+
+-- 18. Carnet de progression (privé par défaut ; certaines notes peuvent être publiées)
+create table if not exists public.carnet (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  type        text not null check (type in ('difficile','erreur','theoreme','demo','note','refaire','appris')),
+  titre       text not null check (char_length(trim(titre)) between 1 and 120),
+  contenu     text not null default '' check (char_length(contenu) <= 8000),
+  exercice_id text check (exercice_id is null or char_length(exercice_id) between 1 and 80),
+  public      boolean not null default false,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists carnet_user on public.carnet(user_id, created_at desc);
+create or replace function public.carnet_avant_ecriture() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null then new.user_id := auth.uid(); new.created_at := now(); end if;
+    if (select count(*) from public.carnet where user_id = new.user_id) >= 500 then raise exception 'Le carnet est plein (500 notes)'; end if;
+  else new.user_id := old.user_id; new.created_at := old.created_at; end if;
+  new.titre := trim(new.titre); new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists carnet_avant_ecriture on public.carnet;
+create trigger carnet_avant_ecriture before insert or update on public.carnet
+  for each row execute function public.carnet_avant_ecriture();
+alter table public.carnet enable row level security;
+-- Notes privées : lisibles par leur auteur SEUL (pas même l'administrateur)
+drop policy if exists "carnet: lire le sien" on public.carnet;
+create policy "carnet: lire le sien" on public.carnet for select using (user_id = auth.uid() or (public and public.is_prof()));
+drop policy if exists "carnet: écrire" on public.carnet;
+create policy "carnet: écrire" on public.carnet for insert with check (user_id = auth.uid());
+drop policy if exists "carnet: modifier" on public.carnet;
+create policy "carnet: modifier" on public.carnet for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "carnet: supprimer" on public.carnet;
+create policy "carnet: supprimer" on public.carnet for delete using (user_id = auth.uid() or (public and public.is_prof()));
+
+-- 19. Objectifs personnels (progression calculée sur l'activité réelle) ------------
+create table if not exists public.objectifs (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  type        text not null check (type in ('exercices','chapitres','refaire','autonomie')),
+  titre       text not null check (char_length(trim(titre)) between 1 and 140),
+  cible       smallint not null check (cible between 1 and 200),
+  domaine     text not null default '' check (domaine in ('','Analyse','Algèbre','Probabilités','Mécanique','Électromagnétisme','Thermodynamique','Optique & ondes','Physique quantique','Chimie')),
+  debut       date not null default (now() at time zone 'Europe/Paris')::date,
+  fin         date not null,
+  partage     boolean not null default false,
+  archive     boolean not null default false,
+  created_at  timestamptz not null default now(),
+  check (fin >= debut and fin <= debut + 180)
+);
+create or replace function public.objectif_avant_ecriture() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null then new.user_id := auth.uid(); new.created_at := now(); end if;
+    if (select count(*) from public.objectifs where user_id = new.user_id and not archive) >= 12 then raise exception 'Douze objectifs en cours au plus'; end if;
+  else new.user_id := old.user_id; new.created_at := old.created_at; new.debut := old.debut; new.type := old.type; end if;
+  return new;
+end $$;
+drop trigger if exists objectifs_avant_ecriture on public.objectifs;
+create trigger objectifs_avant_ecriture before insert or update on public.objectifs
+  for each row execute function public.objectif_avant_ecriture();
+alter table public.objectifs enable row level security;
+drop policy if exists "objectifs: les siens" on public.objectifs;
+create policy "objectifs: les siens" on public.objectifs for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create or replace function public.objectif_progression(o public.objectifs) returns int
+language sql stable security definer set search_path = public as $$
+  with trav as (   -- exercices travaillés (indice ou réponse) pendant la période
+    select distinct a.exercice_id, min(a.jour) j from public.activite a
+    where a.user_id = o.user_id and a.kind in ('indice','reponse') and a.jour between o.debut and o.fin
+    group by a.exercice_id),
+  m as (select t.exercice_id, t.j, x.chap, x.dom from trav t cross join lateral public.ex_meta(t.exercice_id) x)
+  select case o.type
+    when 'exercices' then (select count(*) from m where o.domaine = '' or m.dom = o.domaine)
+    when 'chapitres' then (select count(distinct chap) from m where o.domaine = '' or m.dom = o.domaine)
+    when 'autonomie' then (select count(distinct r.exercice_id) from public.reponses r cross join lateral public.ex_meta(r.exercice_id) x
+                           where r.user_id = o.user_id and not r.aide_consultee
+                             and (r.created_at at time zone 'Europe/Paris')::date between o.debut and o.fin
+                             and (o.domaine = '' or x.dom = o.domaine))
+    when 'refaire' then (select count(distinct c.exercice_id) from public.carnet c
+                         where c.user_id = o.user_id and c.type in ('refaire','difficile') and c.exercice_id is not null
+                           and exists (select 1 from public.activite a where a.user_id = o.user_id and a.exercice_id = c.exercice_id
+                                       and a.kind in ('indice','reponse') and a.created_at > c.created_at
+                                       and a.jour between o.debut and o.fin))
+  end::int;
+$$;
+create or replace function public.mes_objectifs() returns jsonb
+language sql stable security definer set search_path = public as $$
+  select coalesce(jsonb_agg(to_jsonb(o) || jsonb_build_object('progression', public.objectif_progression(o)) order by o.archive, o.fin), '[]')
+  from public.objectifs o where o.user_id = auth.uid();
+$$;
+
+-- 20. Badges : critères transparents, recalculés à chaque lecture -------------------
+create or replace function public.badges(u uuid) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare
+  termines int; sans_aide int; reussis int; chapitres int; domaines3 int; serie int; refaits int; contrib int; meilleur record;
+begin
+  select count(distinct exercice_id) into termines from public.reponses where user_id = u;
+  select count(distinct exercice_id) into sans_aide from public.reponses where user_id = u and not aide_consultee;
+  select count(distinct r.exercice_id) into reussis from public.reponses r
+    where r.user_id = u and (select count(*) from public.notes n where n.reponse_id = r.id) >= 2
+      and (select avg(n.note) from public.notes n where n.reponse_id = r.id) >= 6;
+  with t as (select distinct exercice_id from public.activite where user_id = u and kind in ('indice','reponse')
+             union select exercice_id from public.reponses where user_id = u)
+  select count(distinct x.chap), (select count(*) from (select x2.dom from t t2 cross join lateral public.ex_meta(t2.exercice_id) x2 group by x2.dom having count(*) >= 3) d)
+    into chapitres, domaines3 from t cross join lateral public.ex_meta(t.exercice_id) x;
+  with j as (select distinct jour from public.activite where user_id = u and kind in ('indice','reponse')),
+       g as (select jour, jour - (row_number() over (order by jour))::int grp from j)
+  select coalesce(max(n), 0) into serie from (select count(*) n from g group by grp) s;
+  select count(distinct c.exercice_id) into refaits from public.carnet c
+    where c.user_id = u and c.type in ('refaire','difficile') and c.exercice_id is not null
+      and exists (select 1 from public.activite a where a.user_id = u and a.exercice_id = c.exercice_id and a.kind in ('indice','reponse') and a.created_at > c.created_at + interval '1 day');
+  select count(*) into contrib from public.contributions where user_id = u;
+  select x.dom, count(distinct r.exercice_id) n into meilleur from public.reponses r cross join lateral public.ex_meta(r.exercice_id) x
+    where r.user_id = u group by x.dom order by 2 desc limit 1;
+  return jsonb_build_array(
+    jsonb_build_object('id','premier_pas','titre','Premier pas','critere','Soumettre sa première réponse sur l’honneur','val',termines,'cible',1),
+    jsonb_build_object('id','regularite','titre','Régularité','critere','Travailler 7 jours d’affilée (au moins un indice ou une réponse par jour)','val',serie,'cible',7),
+    jsonb_build_object('id','explorateur','titre','Explorateur','critere','Travailler des exercices dans 5 chapitres différents','val',chapitres,'cible',5),
+    jsonb_build_object('id','polyvalent','titre','Polyvalent','critere','Travailler au moins 3 exercices dans 3 domaines différents','val',domaines3,'cible',3),
+    jsonb_build_object('id','autonome','titre','Autonome','critere','Soumettre 10 réponses sans avoir consulté d’indice ni de corrigé','val',sans_aide,'cible',10),
+    jsonb_build_object('id','reconnu','titre','Reconnu par ses pairs','critere','5 exercices réussis : au moins 2 notes de camarades, moyenne ≥ 6/10','val',reussis,'cible',5),
+    jsonb_build_object('id','perseverant','titre','Persévérant','critere','Retravailler 5 exercices notés « à refaire » ou « difficile » dans son carnet, au moins un jour plus tard','val',refaits,'cible',5),
+    jsonb_build_object('id','specialiste','titre','Passionné · ' || coalesce(meilleur.dom, 'un domaine'),'critere','Terminer 15 exercices d’un même domaine','val',coalesce(meilleur.n, 0),'cible',15),
+    jsonb_build_object('id','contributeur','titre','Contributeur','critere','Envoyer un sujet d’oral en PDF pour enrichir la plateforme','val',contrib,'cible',1));
+end $$;
+
+-- 21. Sections publiques supplémentaires du profil -----------------------------------
+create or replace function public._profil_extras(u uuid, tout boolean) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare pr public.profils; r jsonb := '{}'::jsonb; b jsonb;
+begin
+  select * into pr from public.profils where user_id = u;
+  if tout then r := r || jsonb_build_object('vis3', jsonb_build_object('collections', pr.vis_collections, 'carnet', pr.vis_carnet, 'badges', pr.vis_badges)); end if;
+  if tout or pr.vis_collections then
+    r := r || jsonb_build_object('collections', (select coalesce(jsonb_agg(jsonb_build_object('id', c.id, 'titre', c.titre, 'description', c.description, 'public', c.public,
+        'n', (select count(*) from public.collection_items i where i.collection_id = c.id)) order by c.created_at), '[]')
+      from public.collections c where c.user_id = u and (tout or c.public)));
+  end if;
+  if tout or pr.vis_carnet then
+    r := r || jsonb_build_object('carnet', (select coalesce(jsonb_agg(jsonb_build_object('id', c.id, 'type', c.type, 'titre', c.titre, 'contenu', left(c.contenu, 1200), 'ex', c.exercice_id, 'd', c.created_at) order by c.created_at desc), '[]')
+      from (select * from public.carnet where user_id = u and public order by created_at desc limit 20) c));
+  end if;
+  r := r || jsonb_build_object('objectifs', (select coalesce(jsonb_agg(jsonb_build_object('titre', o.titre, 'type', o.type, 'cible', o.cible, 'domaine', o.domaine, 'debut', o.debut, 'fin', o.fin,
+      'progression', public.objectif_progression(o)) order by o.fin), '[]')
+    from public.objectifs o where o.user_id = u and o.partage and not o.archive and o.fin >= (now() at time zone 'Europe/Paris')::date - 7));
+  if tout or pr.vis_badges then
+    b := public.badges(u);
+    if not tout then b := (select coalesce(jsonb_agg(x), '[]') from jsonb_array_elements(b) x where (x->>'val')::int >= (x->>'cible')::int); end if;
+    r := r || jsonb_build_object('badges', b);
+  end if;
+  return r;
+end $$;
+
+-- Lecture d'une collection partagée : publique ET profil public, ou propriétaire, ou administrateur
+create or replace function public.collection_publique(p_id uuid) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare c public.collections; pr public.profils; nom text; me uuid := auth.uid();
+begin
+  if me is null then return null; end if;
+  select * into c from public.collections where id = p_id;
+  if c.id is null then return null; end if;
+  select * into pr from public.profils where user_id = c.user_id;
+  if not (c.user_id = me or public.is_prof() or (c.public and pr.public and pr.vis_collections)) then return jsonb_build_object('prive', true); end if;
+  select full_name into nom from public.profiles where id = c.user_id;
+  return jsonb_build_object('id', c.id, 'titre', c.titre, 'description', c.description, 'public', c.public, 'self', c.user_id = me,
+    'auteur', jsonb_build_object('id', c.user_id, 'nom', nom, 'username', pr.username),
+    'items', (select coalesce(jsonb_agg(i.exercice_id order by i.position, i.added_at), '[]') from public.collection_items i where i.collection_id = c.id));
+end $$;
 
 -- =====================================================================
 --  APRÈS avoir créé ton propre compte sur le site, exécute ceci

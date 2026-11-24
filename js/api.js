@@ -42,7 +42,25 @@ function demoProfil(ref, apercu, A) {
   if (vis('favoris')) o.favoris = Array.isArray(sv.fav) ? sv.fav : [];
   if (vis('commentaires')) o.commentaires = d.coms.filter(c => c.user_id === 'demo' && c.public).map(c => ({id: c.id, ex: c.exercice_id, contenu: c.contenu, d: c.created_at})).reverse();
   if (vis('etoiles')) o.etoiles = {n: 0, moy: null, mienne: null, peut_noter: false};
+  if (!apercu) o.vis3 = {collections: p.vis_collections !== false, carnet: p.vis_carnet !== false, badges: p.vis_badges !== false};
+  if (!apercu || p.vis_collections !== false) o.collections = ls.get('demo-coll', []).filter(c => !apercu || c.public).map(c => ({id: c.id, titre: c.titre, description: c.description, public: c.public, n: c.items.length}));
+  if (!apercu || p.vis_carnet !== false) o.carnet = ls.get('demo-carnet', []).filter(c => c.public).map(c => ({id: c.id, type: c.type, titre: c.titre, contenu: c.contenu, ex: c.exercice_id, d: c.created_at}));
+  o.objectifs = demoObjectifs().filter(x => x.partage && !x.archive);
+  if (!apercu || p.vis_badges !== false) {
+    const b = [['premier_pas', 'Premier pas', 'Soumettre sa première réponse sur l’honneur', o.termines?.length || 0, 1], ['explorateur', 'Explorateur', 'Travailler des exercices dans 5 chapitres différents', 0, 5], ['regularite', 'Régularité', 'Travailler 7 jours d’affilée', 0, 7]]
+      .map(([id, titre, critere, val, cible]) => ({id, titre, critere, val, cible}));
+    o.badges = apercu ? b.filter(x => x.val >= x.cible) : b;
+  }
   return o;
+}
+
+// Objectifs en mode démonstration : progression calculée sur l'activité locale (sans filtre de domaine)
+function demoObjectifs() {
+  const act = ls.get('demo-activite', []);
+  return ls.get('demo-obj', []).map(o => {
+    const ids = new Set(act.filter(a => (a.kind === 'indice' || a.kind === 'reponse') && a.jour >= o.debut && a.jour <= o.fin).map(a => a.exercice_id));
+    return {...o, progression: o.type === 'exercices' || o.type === 'chapitres' ? ids.size : 0};
+  });
 }
 
 /* ---------- erreurs d'authentification ---------- */
@@ -172,7 +190,7 @@ export const api = {
   // Profil éditable de l'utilisateur connecté (ligne de la table "profils")
   async monProfil() {
     if (DEMO) return ls.get('demo-profil', {user_id: 'demo', username: 'demo', bio: '', etablissement: '', filiere: '', annee: null, matieres: [], objectif: '',
-      lien_github: '', lien_linkedin: '', lien_site: '', public: false, vis_stats: true, vis_activite: true, vis_parcours: true, vis_favoris: true, vis_commentaires: true, vis_etoiles: true});
+      lien_github: '', lien_linkedin: '', lien_site: '', public: false, vis_stats: true, vis_activite: true, vis_parcours: true, vis_favoris: true, vis_commentaires: true, vis_etoiles: true, vis_collections: true, vis_carnet: true, vis_badges: true});
     const { data, error } = await sb.from('profils').select('*').eq('user_id', this.user.id).maybeSingle();
     if (error) throw new Error(errFr(error));
     return data;
@@ -224,6 +242,78 @@ export const api = {
   async contribution(titre) {   // enregistre le FAIT qu'un PDF a été envoyé (le fichier part par e-mail)
     if (DEMO) { ls.set('demo-contrib', (ls.get('demo-contrib', 0) || 0) + 1); return; }
     await sb.from('contributions').insert({titre: String(titre || '').slice(0, 120)});
+  },
+
+  /* ---------- collections ---------- */
+  async mesCollections() {
+    if (DEMO) return ls.get('demo-coll', []);
+    const { data, error } = await sb.from('collections').select('id, titre, description, public, created_at, collection_items(exercice_id, position, added_at)').eq('user_id', this.user.id).order('created_at');
+    if (error) throw new Error(errFr(error));
+    return (data || []).map(c => ({...c, items: (c.collection_items || []).sort((a, b) => a.position - b.position || a.added_at.localeCompare(b.added_at)).map(i => i.exercice_id)}));
+  },
+  async creerCollection({titre, description = '', pub = false}) {
+    if (DEMO) { const L = ls.get('demo-coll', []), c = {id: uid4(), titre, description, public: pub, items: [], created_at: new Date().toISOString()}; L.push(c); ls.set('demo-coll', L); return c; }
+    const { data, error } = await sb.from('collections').insert({titre, description, public: pub}).select('id, titre, description, public, created_at').single();
+    if (error) throw new Error(errFr(error)); return {...data, items: []};
+  },
+  async majCollection(id, champs) {
+    if (DEMO) { const L = ls.get('demo-coll', []); Object.assign(L.find(c => c.id === id) || {}, champs); ls.set('demo-coll', L); return; }
+    const { error } = await sb.from('collections').update(champs).eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  async supprimerCollection(id) {
+    if (DEMO) { ls.set('demo-coll', ls.get('demo-coll', []).filter(c => c.id !== id)); return; }
+    const { error } = await sb.from('collections').delete().eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  async collectionItem(cid, exId, ajouter, position = 0) {
+    if (DEMO) { const L = ls.get('demo-coll', []), c = L.find(x => x.id === cid); if (c) c.items = ajouter ? [...new Set([...c.items, exId])] : c.items.filter(x => x !== exId); ls.set('demo-coll', L); return; }
+    const r = ajouter ? await sb.from('collection_items').insert({collection_id: cid, exercice_id: exId, position})
+      : await sb.from('collection_items').delete().eq('collection_id', cid).eq('exercice_id', exId);
+    if (r.error && r.error.code !== '23505') throw new Error(/Limite/.test(r.error.message) ? r.error.message : errFr(r.error));
+  },
+  async ordonnerCollection(cid, ids) {
+    if (DEMO) { const L = ls.get('demo-coll', []), c = L.find(x => x.id === cid); if (c) c.items = ids; ls.set('demo-coll', L); return; }
+    await Promise.all(ids.map((id, i) => sb.from('collection_items').update({position: i}).eq('collection_id', cid).eq('exercice_id', id)));
+  },
+  async collectionPublique(id) {
+    if (DEMO) { const c = ls.get('demo-coll', []).find(x => x.id === id); return c ? {...c, self: true, auteur: {id: 'demo', nom: this.profile.full_name, username: 'demo'}} : null; }
+    const { data, error } = await sb.rpc('collection_publique', {p_id: id}); if (error) return null; return data;
+  },
+
+  /* ---------- carnet de progression ---------- */
+  async monCarnet() {
+    if (DEMO) return ls.get('demo-carnet', []);
+    const { data, error } = await sb.from('carnet').select('*').eq('user_id', this.user.id).order('created_at', {ascending: false}).limit(500);
+    if (error) throw new Error(errFr(error)); return data || [];
+  },
+  async noteCarnet(n) {   // création (sans id) ou modification (avec id)
+    const champs = {type: n.type, titre: n.titre, contenu: n.contenu || '', exercice_id: n.exercice_id || null, public: !!n.public};
+    if (DEMO) { const L = ls.get('demo-carnet', []); if (n.id) Object.assign(L.find(x => x.id === n.id), champs, {updated_at: new Date().toISOString()}); else L.unshift({id: uid4(), ...champs, created_at: new Date().toISOString(), updated_at: new Date().toISOString()}); ls.set('demo-carnet', L); return; }
+    const r = n.id ? await sb.from('carnet').update(champs).eq('id', n.id) : await sb.from('carnet').insert(champs);
+    if (r.error) throw new Error(/plein/.test(r.error.message) ? r.error.message : errFr(r.error));
+  },
+  async supprimerNote(id) {
+    if (DEMO) { ls.set('demo-carnet', ls.get('demo-carnet', []).filter(x => x.id !== id)); return; }
+    const { error } = await sb.from('carnet').delete().eq('id', id); if (error) throw new Error(errFr(error));
+  },
+
+  /* ---------- objectifs ---------- */
+  async mesObjectifs() {
+    if (DEMO) return demoObjectifs();
+    const { data, error } = await sb.rpc('mes_objectifs'); if (error) throw new Error(errFr(error)); return data || [];
+  },
+  async creerObjectif(o) {
+    const champs = {type: o.type, titre: o.titre, cible: o.cible, domaine: o.domaine || '', fin: o.fin, partage: !!o.partage};
+    if (DEMO) { const L = ls.get('demo-obj', []); L.push({id: uid4(), ...champs, debut: new Date().toISOString().slice(0, 10), archive: false, created_at: new Date().toISOString()}); ls.set('demo-obj', L); return; }
+    const { error } = await sb.from('objectifs').insert(champs);
+    if (error) throw new Error(/Douze/.test(error.message) ? error.message : error.code === '23514' ? 'Période invalide : la date de fin doit être après aujourd’hui, dans les 6 mois.' : errFr(error));
+  },
+  async majObjectif(id, champs) {
+    if (DEMO) { const L = ls.get('demo-obj', []); Object.assign(L.find(x => x.id === id) || {}, champs); ls.set('demo-obj', L); return; }
+    const { error } = await sb.from('objectifs').update(champs).eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  async supprimerObjectif(id) {
+    if (DEMO) { ls.set('demo-obj', ls.get('demo-obj', []).filter(x => x.id !== id)); return; }
+    const { error } = await sb.from('objectifs').delete().eq('id', id); if (error) throw new Error(errFr(error));
   },
 
   /* ---------- suivi ---------- */

@@ -124,6 +124,16 @@ Format d’un exercice dans `data/exercices.json` :
 - **Commentaires** : sous chaque exercice, l'auteur choisit *Groupe* (privé) ou *Public* (tous les membres + son profil). Une réponse à la réponse d'un camarade reste dans le groupe. La visibilité ne peut plus changer après publication.
 - **Contributions** : l'envoi d'un sujet PDF part toujours vers l'adresse fixe `ENVOI_EMAIL` de `js/config.js`, que les élèves ne peuvent pas modifier. Le profil affiche seulement le nombre de sujets envoyés.
 
+## Carnet, objectifs, collections et badges
+
+Recolle **tout** `supabase/schema.sql` après chaque mise à jour, comme pour les profils.
+
+- **Carnet de progression** (onglet *Carnet*, ou bouton *Carnet* sur un exercice) : exercices difficiles, à refaire, erreurs fréquentes, théorèmes à revoir, démonstrations, notes de révision, et « Ce que j'ai appris ». **Privé** : même l'administrateur ne lit que les notes publiées volontairement sur le profil.
+- **Objectifs** : 4 types (exercices travaillés, chapitres abordés, exercices du carnet refaits, réponses sans aide), avec domaine facultatif et date de fin (6 mois au plus). La progression est **calculée par le serveur** sur l'activité réelle : rien ne se coche à la main. Un objectif peut être affiché sur le profil. Une période terminée affiche un bilan neutre, sans message culpabilisant.
+- **Collections** (bouton *Collection* sur un exercice) : ordre modifiable, partage avec les membres (`#c/…`) si le profil est public.
+- **Badges** : Premier pas, Régularité (7 jours d'affilée), Explorateur (5 chapitres), Polyvalent (3 domaines), Autonome (10 réponses sans aide), Reconnu par ses pairs (5 réussites), Persévérant (5 exercices refaits), Passionné (15 exercices d'un domaine), Contributeur. Ils sont recalculés par le serveur à chaque affichage et ne peuvent pas être attribués depuis le site. Les autres membres ne voient que les badges obtenus.
+- Les métadonnées des exercices (matière, chapitre) sont copiées dans la base pour ces calculs. Après avoir ajouté des exercices dans `data/exercices.json`, lance `python3 tools/build_meta.py`, puis recolle `schema.sql`.
+
 ## Connexion, inscription et mot de passe oublié
 
 - Tout est géré par **Supabase Auth** : les mots de passe sont hachés (bcrypt) côté serveur, jamais stockés en clair, et les liens de réinitialisation sont signés, temporaires et à usage unique.
