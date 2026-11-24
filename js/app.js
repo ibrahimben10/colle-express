@@ -7,6 +7,7 @@ import { esc, rich, fmtEnonce, fmtCorrige, hintsHTML, hintLevels, correctionHTML
 import { presentationCourte, presentationPage } from './apropos.js';
 import { initAuth, showAuth, MSG } from './auth.js';
 import { initTheme, syncTheme, reveal, toast, THEME_ICON } from './ui.js';
+import { initProfil, renderProfil, renderEdition, profilURL } from './profil.js';
 
 const $ = s => document.querySelector(s);
 const SKEL = (n, cls = 'skel-item') => Array.from({length: n}, () => cls === 'skel-item' ? '<div class="skel-item" aria-hidden="true"><span class="skel"></span><span class="skel skel-l w80"></span><span class="skel skel-l w40"></span></div>' : `<span class="skel ${cls}" aria-hidden="true"></span>`).join('');
@@ -19,7 +20,8 @@ const fmtDate = t => t ? new Date(t).toLocaleString('fr-FR', {day: '2-digit', mo
 const ago = t => { if (!t) return '—'; const s = Math.round((now() - new Date(t)) / 1000); if (s < 60) return 'à l’instant'; if (s < 3600) return `il y a ${Math.round(s / 60)} min`; if (s < 86400) return `il y a ${Math.round(s / 3600)} h`; return `il y a ${Math.round(s / 86400)} j`; };
 const initials = n => (n || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
 const hue = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 42%)`; };
-const photoOf = id => (api.user && id === api.user.id ? SUIVI?.photo : (CLASS || []).find(c => c.id === id)?.data?.photo) || '';
+const CARTES = {};   // auteurs hors de mes groupes (commentaires publics) : nom, identifiant, photo
+const photoOf = id => (api.user && id === api.user.id ? SUIVI?.photo : (CLASS || []).find(c => c.id === id)?.data?.photo || CARTES[id]?.photo) || '';
 const avatar = (id, name) => { const ph = photoOf(id);
   return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(ph) ? `<img class="avatar" src="${ph}" alt="">` : `<span class="avatar" style="background:${hue(id)}">${esc(initials(name))}</span>`; };
 const store = { get(k, d) { try { const v = localStorage.getItem('ce:' + k); return v ? JSON.parse(v) : d; } catch { return d; } }, set(k, v) { try { localStorage.setItem('ce:' + k, JSON.stringify(v)); } catch {} } };
@@ -58,7 +60,9 @@ const myRole = g => gById(g)?.role || null;
 const canMod = g => api.isProf || ['responsable', 'moderateur'].includes(myRole(g));
 const moy = ns => ns?.length ? ns.reduce((a, n) => a + n.note, 0) / ns.length : null;
 const fmtNote = v => v == null ? '—' : String(Math.round(v * 10) / 10).replace('.', ',');
-const nameOf = (g, u) => u === api.user.id ? (api.profile.full_name || 'Moi') : (MEMB[g] || []).find(m => m.user_id === u)?.full_name || 'Ancien membre';
+const nameOf = (g, u) => u === api.user.id ? (api.profile.full_name || 'Moi') : (MEMB[g] || []).find(m => m.user_id === u)?.full_name || CARTES[u]?.nom || 'Ancien membre';
+const who = (g, u) => `<a class="who" href="#u/${esc(CARTES[u]?.username || (u === api.user.id ? MYUSER || u : u))}">${esc(nameOf(g, u))}</a>`;
+let MYUSER = '';
 const mine = (ex, g) => MES.find(r => r.exercice_id === ex && (!g || r.groupe_id === g));
 const notice = h => { $('#notice').innerHTML = h || ''; };
 
@@ -112,9 +116,11 @@ function renderMe() {
 }
 async function afterLogin2() {
   const p = api.profile;
-  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#groupes" data-v="groupes">${ic('users')}<span class="lbl">Groupes</span></a><a href="#suivi" data-v="suivi">${ic('chart')}<span class="lbl">Mon suivi</span></a>` +
+  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#groupes" data-v="groupes">${ic('users')}<span class="lbl">Groupes</span></a><a href="#suivi" data-v="suivi">${ic('chart')}<span class="lbl">Mon suivi</span></a><a href="#profil" data-v="profil">${ic('user')}<span class="lbl">Profil</span></a>` +
     (api.isProf ? `<a href="#prof" data-v="prof">${ic('live')}<span class="lbl">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '') +
-    `<a href="#apropos" data-v="apropos">${ic('cap')}<span class="lbl">À propos</span></a>`;
+    '';   // « À propos » et l'envoi de sujets restent accessibles par le pied de page et « Mon suivi »
+  initProfil({byId, all, LV, typeset, pickPhoto, ref: () => PREF, myAvatar: () => avatar(api.user.id, api.profile.full_name).replace('class="avatar"', 'class="avatar pe-av"'), setUsername: u => { MYUSER = u; }});
+  api.monProfil().then(pp => { MYUSER = pp?.username || ''; }).catch(() => {});
   $('#bnav').innerHTML = $('#nav').innerHTML;
   if (!store.get('filters', null)) F.lvl = p.niveau || 1;
   [SUIVI, CONF, BANK] = await Promise.all([api.loadSuivi(), api.config(), api.banque()]);
@@ -151,13 +157,14 @@ function bindEnvoi() {
     if (!/pdf$/i.test(file.type) && !/\.pdf$/i.test(file.name)) { e.preventDefault(); err.textContent = 'Seuls les fichiers PDF sont acceptés.'; return; }
     if (file.size > 10e6) { e.preventDefault(); err.textContent = 'Fichier trop lourd (10 Mo maximum) : compresse-le ou envoie-le en plusieurs parties.'; return; }
     err.textContent = '';
+    try { sessionStorage.setItem('ce:contrib', file.name.replace(/\.pdf$/i, '').slice(0, 120)); } catch {}
     f.querySelector('button[type=submit]').disabled = true;
     f.querySelector('button[type=submit]').textContent = 'Envoi en cours…';
   };
 }
 
 /* ---------- photo de profil : recadrée en carré 160 px, enregistrée dans le suivi de l'élève ---------- */
-function pickPhoto() {
+function pickPhoto(after) {
   const inp = document.createElement('input');
   inp.type = 'file'; inp.accept = 'image/*';
   inp.onchange = async () => {
@@ -170,7 +177,7 @@ function pickPhoto() {
       const side = Math.min(img.naturalWidth, img.naturalHeight);
       c.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, S, S);
       URL.revokeObjectURL(url);
-      setPhoto(c.toDataURL('image/jpeg', 0.85));
+      setPhoto(c.toDataURL('image/jpeg', 0.85)); after?.();
     } catch { notice('Image illisible : essaie une autre photo.'); }
   };
   inp.click();
@@ -199,16 +206,23 @@ function route() {
   document.body.classList.toggle('detail', h === 'exercices' && !!CUR);
   if (h === 'prof' && !api.isProf) h = 'exercices';
   if (h === 'envoyer') { h = 'apropos'; setTimeout(() => $('#envoi')?.scrollIntoView({behavior: 'smooth'}), 50); }
-  if (!['exercices', 'groupes', 'suivi', 'prof', 'apropos'].includes(h)) h = 'exercices';
+  let pref = null, pmode = '';
+  if (h.startsWith('u/')) { pref = decodeURIComponent(h.slice(2)); h = 'profil'; }
+  else if (h === 'profil' || h.startsWith('profil/')) { pmode = h.split('/')[1] || ''; pref = MYUSER || api.user.id; h = 'profil'; }
+  if (!['exercices', 'groupes', 'suivi', 'prof', 'apropos', 'profil'].includes(h)) h = 'exercices';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + h));
   document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   if (h === 'exercices') { renderStrip(); renderList(); renderCopy(); }
   if (h === 'suivi') renderSuivi();
   if (h === 'groupes') renderGroupes();
   if (h === 'prof') renderProf(true);
+  if (h === 'profil') { PREF = pref; const v = $('#v-profil'); if (pmode === 'modifier') renderEdition(v); else renderProfil(v, pref, {apercu: pmode === 'apercu'}); scrollTo(0, 0);
+    document.querySelectorAll('#nav a[data-v=profil], #bnav a[data-v=profil]').forEach(a => pref === MYUSER || pref === api.user.id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')); }
+  if (SENT && h === 'apropos') { const t = sessionStorage.getItem('ce:contrib'); if (t != null) { sessionStorage.removeItem('ce:contrib'); api.contribution(t).catch(() => {}); } }
   if (h === 'apropos') { $('#v-apropos').innerHTML = presentationPage({nom: api.profile.full_name, email: api.user.email, merci: SENT}); bindEnvoi(); SENT = false; }
   if (pres.v !== h) presence({v: h});
 }
+let PREF = null;
 addEventListener('hashchange', route);
 function rerender() {
   const v = document.querySelector('.view.on')?.id;
@@ -322,6 +336,7 @@ function renderCopy() {
     return;
   }
   const S = sess(ex.id), st = SUIVI.ex?.[ex.id], fig = FIG[ex.id];
+  api.track(ex.id, 'vu');
   S.openH ||= [];
   const K = CORR[ex.id];
   const nH = K ? hintLevels(K).length : 2;
@@ -374,7 +389,10 @@ function renderCopy() {
       <div id="comList"></div>
       ${G && myRole(G) ? `<div class="comform"><div class="replyto" id="replyTo" hidden></div>
         <textarea class="note" id="comTxt" placeholder="Une question, une autre méthode, une erreur repérée… (formules entre $…$)" maxlength="4000">${esc(S.com || '')}</textarea>
-        <div class="comform-b"><span class="small">Visible par tout le groupe · Ctrl+Entrée pour publier</span><button class="btn primary" id="comSend">${ic('msg')} Publier</button></div></div>` : ''}
+        <div class="comform-b"><div class="comvis" role="radiogroup" aria-label="Visibilité du message">
+          <label><input type="radio" name="comVis" value="g" ${S.comPub ? '' : 'checked'}><span>${ic('lock')} Groupe</span></label>
+          <label><input type="radio" name="comVis" value="p" ${S.comPub ? 'checked' : ''}><span>${ic('users')} Public</span></label></div>
+          <span class="small" id="comVisH">${S.comPub ? 'Visible par tous les membres et sur ton profil' : 'Visible par ton groupe seulement'} · Ctrl+Entrée</span><button class="btn primary" id="comSend">${ic('msg')} Publier</button></div></div>` : ''}
     </section>
 
     <div class="actions" id="actions">
@@ -450,6 +468,8 @@ async function loadFil(ex, g) {
   try {
     const [f, m] = await Promise.all([api.fil(g, ex), MEMB[g] ? MEMB[g] : api.membres(g)]);
     FIL[g + '|' + ex] = f; MEMB[g] = m;
+    const inconnus = [...new Set(f.commentaires.map(c => c.user_id))].filter(u => u !== api.user.id && !CARTES[u] && !m.some(x => x.user_id === u));
+    if (inconnus.length) for (const c of await api.cartes(inconnus)) CARTES[c.id] = c;
   } catch (e) { FIL[g + '|' + ex] = {reponses: [], commentaires: [], err: e.message}; }
 }
 
@@ -530,7 +550,7 @@ async function renderFil(ex, G) {
     list.innerHTML = reps.map(r => {
       const own = r.user_id === me, ns = r.notes || [], m = moy(ns), my = ns.find(n => n.evaluateur_id === me)?.note;
       return `<article class="rep ${own ? 'own' : ''}" id="rep-${esc(r.id)}">
-        <header>${avatar(r.user_id, nameOf(G, r.user_id))}<div><b>${esc(nameOf(G, r.user_id))}${own ? ' (moi)' : ''}</b><span class="small">${fmtDate(r.created_at)}</span></div>
+        <header>${avatar(r.user_id, nameOf(G, r.user_id))}<div><b>${who(G, r.user_id)}${own ? ' (moi)' : ''}</b><span class="small">${fmtDate(r.created_at)}</span></div>
           <span class="badges"><span class="badge honor" title="${esc(r.engagement_texte)}">🤝 Sur l’honneur</span>${r.aide_consultee ? '<span class="badge aide" title="Correction ou autres réponses consultées avant l’envoi">aide consultée</span>' : ''}</span></header>
         ${r.contenu ? `<div class="rep-body">${rich(r.contenu)}</div>` : ''}
         ${r.photos?.length ? `<div class="thumbs">${r.photos.map((p, i) => `<a class="thumb" data-ph="${esc(p)}" target="_blank" rel="noopener"><img alt="Photo ${i + 1} de la réponse"></a>`).join('')}</div>` : ''}
@@ -567,10 +587,10 @@ async function renderFil(ex, G) {
   cl.innerHTML = coms.length ? coms.map(c => {
     const own = c.user_id === me, rn = c.reponse_id && refName(c.reponse_id);
     return `<div class="com" id="com-${esc(c.id)}">${avatar(c.user_id, nameOf(G, c.user_id))}<div class="com-in">
-      <div class="com-h"><b>${esc(nameOf(G, c.user_id))}</b><span class="small">${ago(c.created_at)}${c.edited_at ? ' · modifié' : ''}</span>
+      <div class="com-h"><b>${who(G, c.user_id)}</b>${c.public ? `<span class="badge pub" title="Visible par tous les membres connectés et sur le profil de l’auteur">${ic('users')} Public</span>` : ''}<span class="small">${ago(c.created_at)}${c.edited_at ? ' · modifié' : ''}${c.groupe_id !== G ? ' · autre groupe' : ''}</span>
         ${rn ? `<a class="ref" href="#rep-${esc(c.reponse_id)}" data-goto="${esc(c.reponse_id)}">↪ réponse de ${esc(rn)}</a>` : ''}</div>
       <div class="com-b">${rich(c.contenu)}</div>
-      <div class="com-act">${own ? `<button class="linkbtn" data-edit="${esc(c.id)}">Modifier</button>` : ''}${own || canMod(G) ? `<button class="linkbtn danger" data-delc="${esc(c.id)}">Supprimer</button>` : ''}</div>
+      <div class="com-act">${own ? `<button class="linkbtn" data-edit="${esc(c.id)}">Modifier</button>` : ''}${own || (c.groupe_id === G && canMod(G)) || api.isProf ? `<button class="linkbtn danger" data-delc="${esc(c.id)}">Supprimer</button>` : ''}</div>
     </div></div>`;
   }).join('') : '<p class="small">Aucun message. Pose une question ou propose une autre méthode.</p>';
   typeset([...cl.querySelectorAll('.com-b')]);
@@ -597,11 +617,13 @@ function bindComForm(ex, G) {
   const t = $('#comTxt'), b = $('#comSend'); if (!t) return;
   const S = sess(ex.id);
   t.oninput = () => { S.com = t.value; };
+  document.querySelectorAll('[name=comVis]').forEach(r => r.onchange = () => { S.comPub = r.value === 'p' && r.checked; $('#comVisH').textContent = (S.comPub ? 'Visible par tous les membres et sur ton profil' : 'Visible par ton groupe seulement') + ' · Ctrl+Entrée'; });
   t.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); b.click(); } };
   b.onclick = async () => {
     const v = t.value.trim(); if (!v) return;
     b.disabled = true;
-    try { await api.commenter({g: G, ex: ex.id, rid: S.replyTo, contenu: v}); S.com = ''; S.replyTo = null; t.value = ''; await loadFil(ex.id, G); renderFil(ex, G); }
+    if (S.comPub && S.replyTo) notice('Une réponse à la réponse d’un camarade reste visible par le groupe seulement.');
+    try { await api.commenter({g: G, ex: ex.id, rid: S.replyTo, contenu: v, pub: S.comPub}); S.com = ''; S.replyTo = null; t.value = ''; await loadFil(ex.id, G); renderFil(ex, G); }
     catch (x) { notice(esc(x.message)); }
     b.disabled = false;
   };
@@ -670,7 +692,7 @@ async function renderGroupeDetail(gid) {
         <button class="btn ghost" id="gCopy">${ic('link')} Copier</button>${resp ? `<button class="btn ghost" id="gRegen" title="L’ancien code ne fonctionnera plus">Nouveau code</button>` : ''}</div>` : ''}
       <h4>${ic('users')} Membres (${membres.length})</h4>
       <div class="scroll"><table class="stack"><thead><tr><th>Membre</th><th>Rôle</th><th>Arrivée</th><th></th></tr></thead><tbody>
-      ${membres.map(m => `<tr><td data-l="Membre"><span class="person">${avatar(m.user_id, m.full_name)}${esc(m.full_name)}${m.user_id === me ? ' (moi)' : ''}</span></td>
+      ${membres.map(m => `<tr><td data-l="Membre"><span class="person">${avatar(m.user_id, m.full_name)}<a class="who" href="#u/${esc(m.user_id === me ? MYUSER || me : m.user_id)}">${esc(m.full_name)}</a>${m.user_id === me ? ' (moi)' : ''}</span></td>
         <td data-l="Rôle">${resp ? `<select data-role="${esc(m.user_id)}" aria-label="Rôle de ${esc(m.full_name)}">${Object.entries(ROLE).map(([k, v]) => `<option value="${k}" ${k === m.role ? 'selected' : ''}>${v}</option>`).join('')}</select>` : `<span class="rolepill ${m.role}">${ROLE[m.role]}</span>`}</td>
         <td data-l="Arrivée">${fmtDate(m.joined_at)}</td>
         <td>${m.user_id !== me && (resp || (mod && m.role === 'membre')) ? `<button class="linkbtn danger" data-kick="${esc(m.user_id)}">Exclure</button>` : ''}</td></tr>`).join('')}
@@ -763,6 +785,7 @@ async function ask(ex, mode) {
 async function record(ex, t) {
   SUIVI.ex ||= {}; SUIVI.journal ||= []; SUIVI.cree ||= now();
   const st = SUIVI.ex[ex.id] ||= {s: 'en_cours', e: 0, i: 0, sc: 0, d: 0, t: 0};
+  api.track(ex.id, {indice: 'indice', solution: 'corrige', reponse: 'reponse'}[t.kind] || 'vu');
   if (t.kind === 'reponse') st.e++;
   if (t.kind === 'indice') st.i++;
   if (t.kind === 'solution') st.vu = 1;
@@ -796,7 +819,7 @@ function renderSuivi() {
     <div class="pagehead"><h2>Mon suivi</h2><span class="small">${DEMO ? 'mode démonstration' : 'enregistré sur ton compte'}</span></div>
     <div class="panel profile"><span class="ph">${avatar(api.user.id, api.profile.full_name)}</span>
       <div><b>${esc(api.profile.full_name || 'Moi')}</b><span class="small">${esc(api.user.email || '')}</span></div>
-      <div class="pbtns"><button class="btn" id="phChange">${ic('camera')} ${SUIVI.photo ? 'Changer la photo' : 'Ajouter une photo'}</button>${SUIVI.photo ? `<button class="btn ghost" id="phDel">${ic('trash')} Retirer</button>` : ''}</div></div>
+      <div class="pbtns"><button class="btn" id="phChange">${ic('camera')} ${SUIVI.photo ? 'Changer la photo' : 'Ajouter une photo'}</button>${SUIVI.photo ? `<button class="btn ghost" id="phDel">${ic('trash')} Retirer</button>` : ''}<a class="btn" href="#profil">${ic('user')} Mon profil</a></div></div>
     <div class="lvl" id="lvlPick">${[1, 2, 3].map(n => `<button data-n="${n}" aria-pressed="${n === lvl}"><b>${LV[n]}</b><span>${esc(LVD[n])}</span></button>`).join('')}</div>
     <div class="hero">
       <div class="panel stat" style="padding:24px"><div class="k">${ic('trophy')} Exercices réussis — ${LV[lvl]}</div>

@@ -19,6 +19,32 @@ const errFr = e => { const m = e?.message || String(e);
 const D = { get: () => ls.get('demo-g', {groupes: [], membres: [], reponses: [], notes: [], coms: []}), set(v) { ls.set('demo-g', v); emit('groupe'); } };
 export const on = (k, f) => listeners[k].push(f);
 
+/* ---------- profil en mode démonstration (calculé à partir des données locales) ---------- */
+function demoProfil(ref, apercu, A) {
+  const p = ls.get('demo-profil', {username: 'demo', public: false, matieres: []}), sv = ls.get('demo-suivi', {}), act = ls.get('demo-activite', []);
+  if (ref && ref !== 'demo' && ref !== p.username) return null;
+  const d = D.get(), mes = d.reponses.filter(r => r.user_id === 'demo');
+  const uniq = a => [...new Set(a)];
+  const jours = {};
+  act.filter(a => a.kind === 'indice' || a.kind === 'reponse').forEach(a => (jours[a.jour] ||= new Set()).add(a.exercice_id));
+  mes.forEach(r => (jours[r.created_at.slice(0, 10)] ||= new Set()).add(r.exercice_id));
+  const vis = k => !apercu || p['vis_' + k] !== false;
+  const o = {id: 'demo', username: p.username || 'demo', nom: A.profile.full_name, photo: sv.photo || '', bio: p.bio || '', etablissement: p.etablissement || '', filiere: p.filiere || '',
+    annee: p.annee || null, matieres: p.matieres || [], objectif: p.objectif || '', liens: {github: p.lien_github || '', linkedin: p.lien_linkedin || '', site: p.lien_site || ''},
+    public: !!p.public, self: !apercu, admin: true, role: 'admin', membre_depuis: new Date(sv.cree || Date.now()).toISOString(), contributions: ls.get('demo-contrib', 0) || 0};
+  if (!apercu) o.vis = {stats: p.vis_stats !== false, activite: p.vis_activite !== false, parcours: p.vis_parcours !== false, favoris: p.vis_favoris !== false, commentaires: p.vis_commentaires !== false, etoiles: p.vis_etoiles !== false};
+  if (vis('stats') || vis('parcours')) Object.assign(o, {
+    vus: uniq(act.filter(a => a.kind === 'vu').map(a => a.exercice_id)),
+    travailles: uniq(act.filter(a => a.kind === 'indice' || a.kind === 'reponse').map(a => a.exercice_id).concat(mes.map(r => r.exercice_id))),
+    termines: uniq(mes.map(r => r.exercice_id)), sans_aide: uniq(mes.filter(r => !r.aide_consultee).map(r => r.exercice_id)),
+    reussis: uniq(mes.filter(r => { const n = d.notes.filter(x => x.reponse_id === r.id); return n.length >= 2 && n.reduce((a, x) => a + x.note, 0) / n.length >= 6; }).map(r => r.exercice_id))});
+  if (vis('activite')) o.jours = Object.entries(jours).map(([j, s]) => ({j, ids: [...s]})).sort((a, b) => a.j.localeCompare(b.j));
+  if (vis('favoris')) o.favoris = Array.isArray(sv.fav) ? sv.fav : [];
+  if (vis('commentaires')) o.commentaires = d.coms.filter(c => c.user_id === 'demo' && c.public).map(c => ({id: c.id, ex: c.exercice_id, contenu: c.contenu, d: c.created_at})).reverse();
+  if (vis('etoiles')) o.etoiles = {n: 0, moy: null, mienne: null, peut_noter: false};
+  return o;
+}
+
 /* ---------- erreurs d'authentification ---------- */
 export class AuthFail extends Error {
   constructor(code, detail = '') { super(detail || code); this.code = code; this.detail = detail; }
@@ -140,6 +166,64 @@ export const api = {
   async signOut() {
     if (DEMO) { localStorage.removeItem('ce:demo-profile'); this.user = null; this.profile = null; emit('auth', 'out'); return; }
     await sb.auth.signOut();
+  },
+
+  /* ---------- profils ---------- */
+  // Profil éditable de l'utilisateur connecté (ligne de la table "profils")
+  async monProfil() {
+    if (DEMO) return ls.get('demo-profil', {user_id: 'demo', username: 'demo', bio: '', etablissement: '', filiere: '', annee: null, matieres: [], objectif: '',
+      lien_github: '', lien_linkedin: '', lien_site: '', public: false, vis_stats: true, vis_activite: true, vis_parcours: true, vis_favoris: true, vis_commentaires: true, vis_etoiles: true});
+    const { data, error } = await sb.from('profils').select('*').eq('user_id', this.user.id).maybeSingle();
+    if (error) throw new Error(errFr(error));
+    return data;
+  },
+  async majProfil(champs) {
+    if (DEMO) { ls.set('demo-profil', {...await this.monProfil(), ...champs}); return; }
+    const { error } = await sb.from('profils').update(champs).eq('user_id', this.user.id);
+    if (error) {
+      if (error.code === '23505') throw new Error('Cet identifiant est déjà pris : choisis-en un autre.');
+      if (error.code === '23514') throw new Error(/username/.test(error.message) ? 'Identifiant invalide : 3 à 20 caractères, lettres minuscules, chiffres ou _.' : /lien/.test(error.message) ? 'Lien invalide : utilise l’adresse complète, commençant par https://.' : 'Une valeur est invalide ou trop longue.');
+      throw new Error(errFr(error));
+    }
+  },
+  // Lecture d'un profil (confidentialité appliquée par le serveur). apercu = « voir comme les autres »
+  async profilPublic(ref, apercu = false) {
+    if (DEMO) return demoProfil(ref, apercu, this);
+    const { data, error } = await sb.rpc('profil_public', {p_ref: String(ref || ''), p_apercu: !!apercu});
+    if (error) throw new Error(errFr(error));
+    return data;
+  },
+  async cartes(ids) {   // nom, identifiant et photo d'auteurs (commentaires publics)
+    const u = [...new Set(ids.filter(Boolean))]; if (!u.length) return [];
+    if (DEMO) return u.map(id => ({id, nom: id === 'demo' ? this.profile.full_name : 'Membre', username: id === 'demo' ? 'demo' : '', photo: ''}));
+    const { data } = await sb.rpc('cartes_auteurs', {p_ids: u.slice(0, 200)});
+    return data || [];
+  },
+  // Activité réelle : un enregistrement par exercice, type et jour (doublons ignorés)
+  _vus: new Set(),
+  track(exId, kind) {
+    const k = exId + '|' + kind + '|' + new Date().toDateString();
+    if (!this.user || !exId || this._vus.has(k)) return;
+    this._vus.add(k);
+    if (DEMO) { const a = ls.get('demo-activite', []); a.push({exercice_id: exId, kind, jour: new Date().toISOString().slice(0, 10)}); ls.set('demo-activite', a.slice(-3000)); return; }
+    sb.from('activite').upsert({exercice_id: exId, kind}, {onConflict: 'user_id,exercice_id,kind,jour', ignoreDuplicates: true}).then(() => {}, () => {});
+  },
+  async etoile(cible, note) {   // étoiles 1..5 ; null = retirer sa note
+    if (DEMO) throw new Error('Les étoiles nécessitent Supabase.');
+    const r = note == null ? await sb.from('etoiles').delete().eq('cible_id', cible).eq('auteur_id', this.user.id)
+      : await sb.from('etoiles').upsert({cible_id: cible, auteur_id: this.user.id, note}, {onConflict: 'cible_id,auteur_id'});
+    if (r.error) throw new Error(/row-level/.test(r.error.message) ? 'Ce profil n’accepte pas les étoiles.' : errFr(r.error));
+  },
+  async etoilesModeration(cible) {
+    if (DEMO) return [];
+    const { data } = await sb.rpc('etoiles_moderation', {p_cible: cible}); return data || [];
+  },
+  async retirerEtoile(cible, auteur) {
+    const { error } = await sb.from('etoiles').delete().eq('cible_id', cible).eq('auteur_id', auteur); if (error) throw new Error(errFr(error));
+  },
+  async contribution(titre) {   // enregistre le FAIT qu'un PDF a été envoyé (le fichier part par e-mail)
+    if (DEMO) { ls.set('demo-contrib', (ls.get('demo-contrib', 0) || 0) + 1); return; }
+    await sb.from('contributions').insert({titre: String(titre || '').slice(0, 120)});
   },
 
   /* ---------- suivi ---------- */
@@ -274,10 +358,10 @@ export const api = {
   async fil(g, ex) {
     if (DEMO) { const d = D.get();
       return {reponses: d.reponses.filter(r => r.groupe_id === g && r.exercice_id === ex).map(r => ({...r, notes: d.notes.filter(n => n.reponse_id === r.id)})),
-              commentaires: d.coms.filter(c => c.groupe_id === g && c.exercice_id === ex).sort((a, b) => a.created_at.localeCompare(b.created_at))}; }
+              commentaires: d.coms.filter(c => (c.groupe_id === g || c.public) && c.exercice_id === ex).sort((a, b) => a.created_at.localeCompare(b.created_at))}; }
     const [r, c] = await Promise.all([
       sb.from('reponses').select('*, notes(note, evaluateur_id)').eq('groupe_id', g).eq('exercice_id', ex).order('created_at'),
-      sb.from('commentaires').select('*').eq('groupe_id', g).eq('exercice_id', ex).order('created_at')]);
+      sb.from('commentaires').select('*').eq('exercice_id', ex).or(`groupe_id.eq.${g},public.eq.true`).order('created_at').limit(300)]);
     if (r.error) throw new Error(errFr(r.error));
     return {reponses: r.data || [], commentaires: c.data || []};
   },
@@ -319,9 +403,10 @@ export const api = {
       : sb.from('notes').upsert({reponse_id: rid, evaluateur_id: this.user.id, note, updated_at: new Date().toISOString()});
     const { error } = await q; if (error) throw new Error(errFr(error));
   },
-  async commenter({g, ex, rid, contenu}) {
-    if (DEMO) { const d = D.get(); d.coms.push({id: uid4(), groupe_id: g, exercice_id: ex, reponse_id: rid || null, user_id: 'demo', contenu, created_at: new Date().toISOString(), edited_at: null}); D.set(d); return; }
-    const { error } = await sb.from('commentaires').insert({groupe_id: g, exercice_id: ex, reponse_id: rid || null, contenu}); if (error) throw new Error(errFr(error));
+  async commenter({g, ex, rid, contenu, pub = false}) {
+    const publique = !!pub && !rid;   // une réponse à une réponse privée reste dans le groupe
+    if (DEMO) { const d = D.get(); d.coms.push({id: uid4(), groupe_id: g, exercice_id: ex, reponse_id: rid || null, user_id: 'demo', contenu, public: publique, created_at: new Date().toISOString(), edited_at: null}); D.set(d); return; }
+    const { error } = await sb.from('commentaires').insert({groupe_id: g, exercice_id: ex, reponse_id: rid || null, contenu, public: publique}); if (error) throw new Error(errFr(error));
   },
   async modifierCommentaire(id, contenu) {
     if (DEMO) { const d = D.get(), c = d.coms.find(c => c.id === id); c.contenu = contenu; c.edited_at = new Date().toISOString(); D.set(d); return; }

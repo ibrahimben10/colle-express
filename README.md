@@ -114,6 +114,16 @@ Format d’un exercice dans `data/exercices.json` :
 - Chaque élève est limité à `LIMITE_JOUR` demandes IA par jour. Surveille ta consommation sur console.anthropic.com (tu peux y fixer une limite de dépense mensuelle).
 - Les corrections sont générées par IA : elles peuvent se tromper, encourage les élèves à vérifier avec leur cours.
 
+## Profils personnels (`#u/identifiant`)
+
+**À faire une fois** : recolle **tout** `supabase/schema.sql` dans *SQL Editor* → *Run*. Le script peut être relancé sans risque. Il crée un profil pour chaque compte existant, avec un identifiant tiré du nom (`chloe_martin`), et reprend l'historique **réel** : réponses déjà soumises et journal de suivi.
+
+- **Confidentialité** : chaque profil est **privé par défaut**. Rendu public, il n'est visible que des **membres connectés**, jamais d'Internet. Statistiques, carte d'activité, parcours, favoris, commentaires publics et étoiles se masquent un par un. L'e-mail n'est jamais affiché. « Voir comme les autres » montre exactement ce que voient les autres membres.
+- **Comptage** : *consulté* = énoncé ouvert ; *travaillé* = indice demandé ou réponse soumise ; *terminé* = réponse soumise sur l'honneur ; *réussi* = au moins 2 notes de camarades avec une moyenne ≥ 6/10 ; *sans aide* = soumis sans indice ni corrigé. Ouvrir le corrigé n'est jamais une réussite. Le navigateur ne peut ni antidater une activité ni écrire pour un autre élève.
+- **Étoiles (1 à 5)** : une note par membre et par profil, impossible de se noter soi-même ou de noter un profil privé. Les auteurs restent anonymes : un élève ne voit que ses propres notes. La moyenne n'apparaît qu'à partir de 3 notes. L'administrateur voit qui a noté et peut supprimer une note abusive (« Modération des étoiles » sur le profil).
+- **Commentaires** : sous chaque exercice, l'auteur choisit *Groupe* (privé) ou *Public* (tous les membres + son profil). Une réponse à la réponse d'un camarade reste dans le groupe. La visibilité ne peut plus changer après publication.
+- **Contributions** : l'envoi d'un sujet PDF part toujours vers l'adresse fixe `ENVOI_EMAIL` de `js/config.js`, que les élèves ne peuvent pas modifier. Le profil affiche seulement le nombre de sujets envoyés.
+
 ## Connexion, inscription et mot de passe oublié
 
 - Tout est géré par **Supabase Auth** : les mots de passe sont hachés (bcrypt) côté serveur, jamais stockés en clair, et les liens de réinitialisation sont signés, temporaires et à usage unique.
