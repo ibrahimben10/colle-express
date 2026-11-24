@@ -25,7 +25,7 @@ function appliquer(t) {
 }
 export function syncTheme() {
   const dark = themeActuel() === 'dark';
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#070d1f' : '#0a1a4a');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#151A19' : '#F8F7F3');
   document.querySelectorAll('[data-theme-toggle]').forEach(b => {
     b.setAttribute('aria-pressed', dark);
     b.setAttribute('aria-label', dark ? 'Passer en mode clair' : 'Passer en mode sombre');
@@ -39,7 +39,10 @@ export function initTheme() {
     const b = e.target.closest('[data-theme-toggle]'); if (!b) return;
     const next = themeActuel() === 'dark' ? 'light' : 'dark';
     try { localStorage.setItem(THEME_KEY, next); } catch {}
-    appliquer(next);
+    // transition douce entre les thèmes (fondu croisé si le navigateur le permet)
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) appliquer(next);
+    else if (document.startViewTransition) document.startViewTransition(() => appliquer(next));
+    else { document.documentElement.classList.add('theme-anim'); appliquer(next); setTimeout(() => document.documentElement.classList.remove('theme-anim'), 450); }
   });
 }
 export const THEME_ICON = '<svg class="ic th-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="ic th-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';

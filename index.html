@@ -30,7 +30,7 @@
   <header class="lnav"><div class="lin">
     <a class="lbrand" href="#top" aria-label="Colle express, accueil"><img class="logo logo-l " src="img/logo.png" alt="Colle express" height="40" width="193"><img class="logo logo-d " src="img/logo-dark.png" alt="" aria-hidden="true" height="40" width="193"></a>
     <nav class="llinks" aria-label="Accueil">
-      <a class="ul" href="#recit">Une colle, racontée</a><a class="ul" href="#lectures">Trois lectures</a><a class="ul" href="#auteur">Pourquoi ce site</a>
+      <a class="ul" href="#recit">Une colle, racontée</a><a class="ul" href="#slides">Ce que tu trouveras</a><a class="ul" href="#lectures">Trois lectures</a><a class="ul" href="#auteur">Pourquoi ce site</a>
     </nav>
     <div class="lcta">
       <button class="themebtn" type="button" data-theme-toggle aria-label="Changer de thème"></button>
@@ -40,19 +40,28 @@
   </div></header>
 
   <section class="hero3" id="top">
+    <svg class="hero-sci" viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <g class="sci-wave"><path d="M-200 520 Q -150 470 -100 520 T 0 520 T 100 520 T 200 520 T 300 520 T 400 520 T 500 520 T 600 520 T 700 520 T 800 520 T 900 520 T 1000 520 T 1100 520 T 1200 520 T 1300 520 T 1400 520"/></g>
+      <g class="sci-orbit"><circle cx="1040" cy="120" r="70"/><circle cx="1040" cy="120" r="3" class="f"/><line x1="1040" y1="120" x2="1110" y2="120"/><path d="M1110 120 l-9 -5 m9 5 l-9 5"/></g>
+      <g class="sci-vec"><line x1="120" y1="600" x2="220" y2="540"/><path d="M220 540 l-11 1 m11 -1 l-5 9"/><line x1="120" y1="600" x2="250" y2="600"/><path d="M250 600 l-9 -5 m9 5 l-9 5"/></g>
+      <text class="sci-t" x="980" y="560">∫ f(x) dx</text><text class="sci-t" x="60" y="110">∂ₜT = D Δ T</text><text class="sci-t" x="760" y="610">Σ 1/n² = π²/6</text>
+      <g class="sci-tri"><path d="M640 330 l60 0 l-30 -52 z"/></g>
+    </svg>
     <div class="lin">
       <div>
         <p class="kick reveal"><span>Prépa scientifique</span><span>MPSI · MP · MP* · PC · PSI</span><span>Maths &amp; physique-chimie</span></p>
         <h1 class="reveal">Les sciences deviennent plus claires quand <span class="scribble">chaque étape<svg viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 C 48 3, 96 12, 150 7 S 240 4, 297 8"/></svg></span> a&nbsp;du&nbsp;<em>sens</em>.</h1>
+        <p class="rotline reveal" aria-label="Chercher, comprendre, raisonner, progresser, réussir."><span aria-hidden="true">Ici, on apprend à</span> <span class="rot" aria-hidden="true"><span>chercher</span><span>comprendre</span><span>raisonner</span><span>progresser</span><span>réussir</span></span></p>
         <p class="lead reveal">Des exercices de colle courts, du CCINP à l’X-ENS. <b>Tu cherches d’abord.</b> Si tu bloques, un indice, puis un autre. Ensuite une correction qui explique chaque passage, et pas seulement le résultat.</p>
         <div class="hero-btns reveal">
           <button class="btn primary lg" type="button" data-auth="up">Commencer une colle</button>
           <a class="ul" href="#recit">Voir comment ça se passe ↓</a>
         </div>
         <ul class="ledger reveal" aria-label="En chiffres">
-          <li><b data-nbex>233</b>exercices corrigés</li>
-          <li><b>3</b>niveaux de concours</li>
-          <li><b>6</b>étapes par correction</li>
+          <li><b data-nbex data-count="233">233</b>exercices corrigés</li>
+          <li><b data-nbchap data-count="0">—</b>chapitres</li>
+          <li><b data-nbfig data-count="0">—</b>schémas et figures</li>
+          <li><b data-count="3">3</b>niveaux de concours</li>
         </ul>
       </div>
 
@@ -168,9 +177,50 @@
     </div>
   </section>
 
+  <section class="lsec" id="slides" aria-labelledby="sT">
+    <div class="lin">
+      <div class="shead reveal"><span class="num">II. Ce que tu trouveras ici</span><div><h2 id="sT">Six raisons d’y revenir chaque soir.</h2></div></div>
+      <div class="car reveal" role="region" aria-roledescription="carrousel" aria-label="Fonctionnalités de Colle express">
+        <div class="car-bar" aria-hidden="true"><i></i></div>
+        <div class="car-track" tabindex="0" aria-live="off">
+          <article class="slide" role="group" aria-roledescription="diapositive" aria-label="1 sur 6">
+            <div class="sl-txt"><span class="sl-n">01</span><h3>Entraîne-toi pour les concours.</h3><p>Des énoncés courts, classés du CCINP à l’X-ENS, avec un chrono pour retrouver le rythme de l’oral.</p></div>
+            <svg class="sl-art" viewBox="0 0 320 220" aria-hidden="true"><circle cx="160" cy="112" r="78" class="trk"/><circle cx="160" cy="112" r="78" class="arc"/><line x1="160" y1="112" x2="160" y2="52" class="hand2"/><circle cx="160" cy="112" r="4" class="f"/><text x="160" y="205" class="lab">●○○ ●●○ ●●●</text></svg>
+          </article>
+          <article class="slide" role="group" aria-roledescription="diapositive" aria-label="2 sur 6">
+            <div class="sl-txt"><span class="sl-n">02</span><h3>Comprends chaque étape du raisonnement.</h3><p>Analyse, rappels, stratégie, calculs, vérification, conclusion : la correction se lit dans l’ordre où l’on pense.</p></div>
+            <svg class="sl-art" viewBox="0 0 320 220" aria-hidden="true"><path d="M30 160 C 80 60, 130 180, 170 100 S 260 40, 290 70" class="path"/><g class="nodes"><circle cx="30" cy="160" r="9"/><circle cx="82" cy="104" r="9"/><circle cx="128" cy="140" r="9"/><circle cx="170" cy="100" r="9"/><circle cx="228" cy="62" r="9"/><circle cx="290" cy="70" r="9"/></g></svg>
+          </article>
+          <article class="slide" role="group" aria-roledescription="diapositive" aria-label="3 sur 6">
+            <div class="sl-txt"><span class="sl-n">03</span><h3>Découvre des corrections rigoureuses.</h3><p>Hypothèses vérifiées, quantificateurs explicites, résultats contrôlés par le calcul avant d’être publiés.</p></div>
+            <svg class="sl-art" viewBox="0 0 320 220" aria-hidden="true"><rect x="50" y="70" width="220" height="80" class="box"/><text x="160" y="118" class="eq">∀ε&gt;0, ∃N, …</text><path d="M232 160 l14 14 l30 -36" class="tick"/></svg>
+          </article>
+          <article class="slide" role="group" aria-roledescription="diapositive" aria-label="4 sur 6">
+            <div class="sl-txt"><span class="sl-n">04</span><h3>Apprends avec tes camarades.</h3><p>Un groupe de colle, des réponses sur l’honneur, des notes sur 10 et une discussion sous chaque exercice.</p></div>
+            <svg class="sl-art" viewBox="0 0 320 220" aria-hidden="true"><g class="links"><line x1="160" y1="60" x2="80" y2="150"/><line x1="160" y1="60" x2="240" y2="150"/><line x1="80" y1="150" x2="240" y2="150"/></g><g class="nodes"><circle cx="160" cy="60" r="22"/><circle cx="80" cy="150" r="22"/><circle cx="240" cy="150" r="22"/></g><text x="160" y="66" class="lab">8,5</text><text x="80" y="156" class="lab">7</text><text x="240" y="156" class="lab">9</text></svg>
+          </article>
+          <article class="slide" role="group" aria-roledescription="diapositive" aria-label="5 sur 6">
+            <div class="sl-txt"><span class="sl-n">05</span><h3>Suis ta progression personnelle.</h3><p>Exercices réussis, chapitres fragiles, jours de travail : un suivi honnête, calculé sur ce que tu as vraiment fait.</p></div>
+            <svg class="sl-art" viewBox="0 0 320 220" aria-hidden="true"><g class="grid"><rect x="30" y="40" width="18" height="18" rx="3" style="--d:0ms" class="c0"/><rect x="30" y="64" width="18" height="18" rx="3" style="--d:45ms" class="c3"/><rect x="30" y="88" width="18" height="18" rx="3" style="--d:90ms" class="c2"/><rect x="30" y="112" width="18" height="18" rx="3" style="--d:135ms" class="c1"/><rect x="30" y="136" width="18" height="18" rx="3" style="--d:180ms" class="c0"/><rect x="30" y="160" width="18" height="18" rx="3" style="--d:225ms" class="c3"/><rect x="54" y="40" width="18" height="18" rx="3" style="--d:225ms" class="c3"/><rect x="54" y="64" width="18" height="18" rx="3" style="--d:270ms" class="c2"/><rect x="54" y="88" width="18" height="18" rx="3" style="--d:315ms" class="c1"/><rect x="54" y="112" width="18" height="18" rx="3" style="--d:360ms" class="c0"/><rect x="54" y="136" width="18" height="18" rx="3" style="--d:405ms" class="c3"/><rect x="54" y="160" width="18" height="18" rx="3" style="--d:450ms" class="c2"/><rect x="78" y="40" width="18" height="18" rx="3" style="--d:450ms" class="c2"/><rect x="78" y="64" width="18" height="18" rx="3" style="--d:495ms" class="c1"/><rect x="78" y="88" width="18" height="18" rx="3" style="--d:540ms" class="c0"/><rect x="78" y="112" width="18" height="18" rx="3" style="--d:585ms" class="c3"/><rect x="78" y="136" width="18" height="18" rx="3" style="--d:630ms" class="c2"/><rect x="78" y="160" width="18" height="18" rx="3" style="--d:675ms" class="c1"/><rect x="102" y="40" width="18" height="18" rx="3" style="--d:675ms" class="c1"/><rect x="102" y="64" width="18" height="18" rx="3" style="--d:720ms" class="c0"/><rect x="102" y="88" width="18" height="18" rx="3" style="--d:765ms" class="c3"/><rect x="102" y="112" width="18" height="18" rx="3" style="--d:810ms" class="c2"/><rect x="102" y="136" width="18" height="18" rx="3" style="--d:855ms" class="c1"/><rect x="102" y="160" width="18" height="18" rx="3" style="--d:900ms" class="c0"/><rect x="126" y="40" width="18" height="18" rx="3" style="--d:900ms" class="c0"/><rect x="126" y="64" width="18" height="18" rx="3" style="--d:945ms" class="c3"/><rect x="126" y="88" width="18" height="18" rx="3" style="--d:990ms" class="c2"/><rect x="126" y="112" width="18" height="18" rx="3" style="--d:1035ms" class="c1"/><rect x="126" y="136" width="18" height="18" rx="3" style="--d:1080ms" class="c0"/><rect x="126" y="160" width="18" height="18" rx="3" style="--d:1125ms" class="c3"/><rect x="150" y="40" width="18" height="18" rx="3" style="--d:1125ms" class="c3"/><rect x="150" y="64" width="18" height="18" rx="3" style="--d:1170ms" class="c2"/><rect x="150" y="88" width="18" height="18" rx="3" style="--d:1215ms" class="c1"/><rect x="150" y="112" width="18" height="18" rx="3" style="--d:1260ms" class="c0"/><rect x="150" y="136" width="18" height="18" rx="3" style="--d:1305ms" class="c3"/><rect x="150" y="160" width="18" height="18" rx="3" style="--d:1350ms" class="c2"/><rect x="174" y="40" width="18" height="18" rx="3" style="--d:1350ms" class="c2"/><rect x="174" y="64" width="18" height="18" rx="3" style="--d:1395ms" class="c1"/><rect x="174" y="88" width="18" height="18" rx="3" style="--d:1440ms" class="c0"/><rect x="174" y="112" width="18" height="18" rx="3" style="--d:1485ms" class="c3"/><rect x="174" y="136" width="18" height="18" rx="3" style="--d:1530ms" class="c2"/><rect x="174" y="160" width="18" height="18" rx="3" style="--d:1575ms" class="c1"/><rect x="198" y="40" width="18" height="18" rx="3" style="--d:1575ms" class="c1"/><rect x="198" y="64" width="18" height="18" rx="3" style="--d:1620ms" class="c0"/><rect x="198" y="88" width="18" height="18" rx="3" style="--d:1665ms" class="c3"/><rect x="198" y="112" width="18" height="18" rx="3" style="--d:1710ms" class="c2"/><rect x="198" y="136" width="18" height="18" rx="3" style="--d:1755ms" class="c1"/><rect x="198" y="160" width="18" height="18" rx="3" style="--d:1800ms" class="c0"/><rect x="222" y="40" width="18" height="18" rx="3" style="--d:1800ms" class="c0"/><rect x="222" y="64" width="18" height="18" rx="3" style="--d:1845ms" class="c3"/><rect x="222" y="88" width="18" height="18" rx="3" style="--d:1890ms" class="c2"/><rect x="222" y="112" width="18" height="18" rx="3" style="--d:1935ms" class="c1"/><rect x="222" y="136" width="18" height="18" rx="3" style="--d:1980ms" class="c0"/><rect x="222" y="160" width="18" height="18" rx="3" style="--d:2025ms" class="c3"/><rect x="246" y="40" width="18" height="18" rx="3" style="--d:2025ms" class="c3"/><rect x="246" y="64" width="18" height="18" rx="3" style="--d:2070ms" class="c2"/><rect x="246" y="88" width="18" height="18" rx="3" style="--d:2115ms" class="c1"/><rect x="246" y="112" width="18" height="18" rx="3" style="--d:2160ms" class="c0"/><rect x="246" y="136" width="18" height="18" rx="3" style="--d:2205ms" class="c3"/><rect x="246" y="160" width="18" height="18" rx="3" style="--d:2250ms" class="c2"/><rect x="270" y="40" width="18" height="18" rx="3" style="--d:2250ms" class="c2"/><rect x="270" y="64" width="18" height="18" rx="3" style="--d:2295ms" class="c1"/><rect x="270" y="88" width="18" height="18" rx="3" style="--d:2340ms" class="c0"/><rect x="270" y="112" width="18" height="18" rx="3" style="--d:2385ms" class="c3"/><rect x="270" y="136" width="18" height="18" rx="3" style="--d:2430ms" class="c2"/><rect x="270" y="160" width="18" height="18" rx="3" style="--d:2475ms" class="c1"/></g></svg>
+          </article>
+          <article class="slide" role="group" aria-roledescription="diapositive" aria-label="6 sur 6">
+            <div class="sl-txt"><span class="sl-n">06</span><h3>Construis ta méthode de travail.</h3><p>Un carnet pour noter tes erreurs, tes réflexes et tes objectifs de la semaine, et des collections pour tes révisions.</p></div>
+            <svg class="sl-art" viewBox="0 0 320 220" aria-hidden="true"><rect x="70" y="30" width="180" height="170" class="page"/><line x1="92" y1="30" x2="92" y2="200" class="margin"/><g class="checks"><path d="M106 72 l7 7 l14 -16"/><path d="M106 112 l7 7 l14 -16"/><path d="M106 152 l7 7 l14 -16"/></g><g class="rules"><line x1="138" y1="72" x2="226" y2="72"/><line x1="138" y1="112" x2="214" y2="112"/><line x1="138" y1="152" x2="220" y2="152"/></g></svg>
+          </article>
+        </div>
+        <div class="car-nav">
+          <button class="car-btn" type="button" data-car="prev" aria-label="Diapositive précédente">←</button>
+          <div class="car-dots" role="tablist" aria-label="Choisir une diapositive"></div>
+          <button class="car-btn" type="button" data-car="next" aria-label="Diapositive suivante">→</button>
+          <button class="car-btn car-play" type="button" data-car="play" aria-pressed="false" aria-label="Mettre en pause le défilement">❚❚</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="lsec" id="lectures" aria-labelledby="lT">
     <div class="lin">
-      <div class="shead reveal"><span class="num">II. Trois lectures</span><div><h2 id="lT">La même correction, lue de trois façons.</h2><p>Tu choisis selon le moment : en pleine recherche, en révision, ou à la veille du concours.</p></div></div>
+      <div class="shead reveal"><span class="num">III. Trois lectures</span><div><h2 id="lT">La même correction, lue de trois façons.</h2><p>Tu choisis selon le moment : en pleine recherche, en révision, ou à la veille du concours.</p></div></div>
       <div class="modes3">
         <div class="reveal"><span class="k">01</span><h3>Guidée <i>·</i></h3><p>Des indices et des questions. La correction se dévoile une étape à la fois, quand tu le demandes.</p><blockquote>« Quel théorème pourrait servir ici ? »</blockquote></div>
         <div class="reveal"><span class="k">02</span><h3>Détaillée <i>·</i></h3><p>Six étapes : analyse, rappels, stratégie, calculs, vérification, conclusion encadrée. Rien n’est passé sous silence.</p><blockquote>« Voici pourquoi cette méthode fonctionne. »</blockquote></div>
@@ -181,7 +231,7 @@
 
   <section class="lsec" id="groupe" aria-labelledby="gT">
     <div class="lin">
-      <div class="shead reveal"><span class="num">III. À plusieurs</span><div><h2 id="gT">On apprend mieux en se relisant les uns les autres.</h2></div></div>
+      <div class="shead reveal"><span class="num">IV. À plusieurs</span><div><h2 id="gT">On apprend mieux en se relisant les uns les autres.</h2></div></div>
       <dl class="defs">
         <div class="reveal"><span data-ic="users"></span><dt>Un groupe de colle</dt><dd>Tu le rejoins avec un code. Chacun son rôle : responsable, modérateurs, membres.</dd></div>
         <div class="reveal"><span data-ic="check"></span><dt>Une réponse sur l’honneur</dt><dd>Tu t’engages à avoir cherché seul, puis ta réponse devient visible par ton groupe.</dd></div>
@@ -193,7 +243,7 @@
 
   <section class="lsec" id="auteur" aria-labelledby="aT">
     <div class="lin letter">
-      <div class="reveal"><p class="kick"><span>IV. Pourquoi ce site</span></p><h2 id="aT" style="font-size:clamp(30px,3.6vw,44px);font-weight:480">Un mot du créateur</h2><div id="aboutMini"></div></div>
+      <div class="reveal"><p class="kick"><span>V. Pourquoi ce site</span></p><h2 id="aT" style="font-size:clamp(30px,3.6vw,44px);font-weight:480">Un mot du créateur</h2><div id="aboutMini"></div></div>
       <div class="body reveal">
         <p>En prépa, ce qui m’a le plus fait progresser, ce n’était pas de lire des corrigés. C’était de chercher longtemps, de recevoir un indice au bon moment, puis de comprendre <em>pourquoi</em> la méthode marchait.</p>
         <p>Colle express essaie de reproduire ça : des énoncés courts, des indices dosés, et des corrections qui prennent le temps d’expliquer. Si tu repères une erreur, signale-la : je relis tout.</p>
