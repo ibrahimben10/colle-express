@@ -175,10 +175,31 @@ function bindEnvoi() {
     if (file.size > 10e6) { e.preventDefault(); err.textContent = 'Fichier trop lourd (10 Mo maximum) : compresse-le ou envoie-le en plusieurs parties.'; return; }
     err.textContent = '';
     try { sessionStorage.setItem('ce:contrib', file.name.replace(/\.pdf$/i, '').slice(0, 120)); } catch {}
-    f.querySelector('button[type=submit]').disabled = true;
-    f.querySelector('button[type=submit]').textContent = 'Envoi en cours…';
+    if (f.dataset.native) return;                        // repli : envoi classique du formulaire
+    e.preventDefault();
+    const btn = f.querySelector('button[type=submit]'), lab = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Envoi en cours…';
+    const reset = msg => { btn.disabled = false; btn.innerHTML = lab; if (msg) err.textContent = msg; };
+    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 60000);
+    // Envoi en arrière-plan (point d'accès AJAX de FormSubmit) : la réponse s'affiche ici même.
+    fetch(f.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {method: 'POST', body: new FormData(f), headers: {Accept: 'application/json'}, signal: ctl.signal})
+      .then(r => r.json().catch(() => ({})).then(j => ({ok: r.ok, j})))
+      .then(({ok, j}) => {
+        clearTimeout(to);
+        if (ok && String(j.success) === 'true') { SENT = true; route(); setTimeout(() => $('#envoi')?.scrollIntoView({behavior: 'smooth'}), 60); return; }
+        const m = String(j.message || '');
+        reset(/activ/i.test(m) ? 'Le formulaire doit d’abord être activé : ouvre l’e-mail « Activate Form » reçu par ' + (CONFIG.ENVOI_EMAIL || 'l’administrateur') + ', puis renvoie le fichier.'
+          : 'L’envoi a échoué' + (m ? ' : ' + m : '') + '. Réessaie dans un instant.');
+      })
+      .catch(x => {
+        clearTimeout(to);
+        if (x?.name === 'AbortError') return reset('L’envoi a pris trop de temps : vérifie ta connexion, ou compresse le PDF.');
+        f.dataset.native = '1'; btn.disabled = false; f.requestSubmit ? f.requestSubmit() : f.submit();   // réseau ou CORS : envoi classique
+      });
   };
 }
+// Retour arrière depuis la page de FormSubmit : le bouton redevient utilisable.
+addEventListener('pageshow', () => document.querySelectorAll('#envoi button[type=submit]').forEach(b => { b.disabled = false; }));
 
 /* ---------- photo de profil : recadrée en carré 160 px, enregistrée dans le suivi de l'élève ---------- */
 function pickPhoto(after) {
