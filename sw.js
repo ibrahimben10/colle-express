@@ -1,11 +1,14 @@
-// Service worker de Colle express : l'application s'ouvre instantanément et les
-// énoncés, indices et corrigés restent consultables hors connexion.
+// Service worker de Colle express : l'application s'ouvre instantanément, même sur un réseau lent.
+// - Coquille (HTML, CSS, JS, polices) : servie depuis le cache ; elle change quand VERSION change.
+//   => À CHAQUE MISE EN LIGNE, incrémenter VERSION (sinon les visiteurs gardent l'ancienne version).
+// - Données (exercices, corrigés par exercice, schémas) : cache d'abord, mise à jour en arrière-plan.
+//   Un corrigé ouvert une fois reste consultable hors connexion.
 // Les données personnelles (Supabase) ne sont jamais mises en cache.
-const VERSION = 'ce-v25';
+const VERSION = 'ce-v26';
 const SHELL = ['./', './index.html', './correction.html', './manifest.webmanifest',
   './css/style.css', './js/app.js', './js/api.js', './js/config.js', './js/format.js', './js/icons.js',
   './js/figures.js', './js/figkit.js', './js/figures-corr.js', './js/figures-annale.js', './js/figures-annale-index.js', './fonts/latin-modern-roman-regular.woff2', './fonts/latin-modern-roman-italic.woff2', './js/auth.js', './js/validation.js', './js/ui.js', './js/profil.js', './js/carnet.js', './js/biblio.js', './js/communaute.js', './js/modes.js', './js/vivant.js', './js/mouvement.js', './js/tactile.js', './fonts/source-sans-3-latin-wght-normal.woff2', './fonts/source-sans-3-latin-ext-wght-normal.woff2', './fonts/source-sans-3-latin-wght-italic.woff2', './fonts/fraunces-latin-wght-normal.woff2', './fonts/fraunces-latin-wght-italic.woff2', './fonts/jetbrains-mono-latin-wght-normal.woff2', './fonts/caveat-latin-wght-normal.woff2', './js/apropos.js', './js/correction.js', './js/mathjax-config.js',
-  './data/exercices.json', './data/corriges.json', './icons/icon-192.png', './icons/icon-512.png', './img/logo.png', './img/logo-dark.png', './icons/favicon-64.png'];
+  './data/exercices.json', './icons/icon-192.png', './icons/icon-512.png', './img/logo.webp', './img/logo-dark.webp', './img/logo.png', './icons/favicon-64.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)
@@ -15,14 +18,31 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
+const SHELL_URLS = new Set(SHELL.map(p => new URL(p, self.registration.scope).href));
+const put = (req, res) => { if (res.ok) { const c = res.clone(); caches.open(VERSION).then(x => x.put(req, c)); } return res; };
 self.addEventListener('fetch', e => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET') return;
   if (/supabase\.co$/.test(url.hostname) || url.hostname.includes('formsubmit')) return;   // jamais en cache
   if (url.origin === location.origin) {
-    // Site : réseau d'abord (mises à jour immédiates), cache si hors connexion.
-    e.respondWith(fetch(req).then(r => { if (r.ok) { const c = r.clone(); caches.open(VERSION).then(x => x.put(req, c)); } return r; })
-      .catch(() => caches.match(req, {ignoreSearch: req.mode === 'navigate'}).then(r => r || caches.match('./index.html'))));
+    if (req.mode === 'navigate') {
+      // Pages : la version en cache s'affiche tout de suite ; le réseau sert si elle manque.
+      const page = url.pathname.endsWith('correction.html') ? './correction.html' : './index.html';
+      e.respondWith(caches.match(page).then(r => r || fetch(req).then(res => put(req, res))).catch(() => caches.match('./index.html')));
+      return;
+    }
+    const href = url.origin + url.pathname;
+    if (SHELL_URLS.has(href) && !url.pathname.includes('/data/')) {
+      // Coquille : cache d'abord (elle est renouvelée en bloc à chaque nouvelle VERSION).
+      e.respondWith(caches.match(req, {ignoreSearch: true}).then(r => r || fetch(req).then(res => put(req, res))));
+      return;
+    }
+    // Données et schémas : réponse immédiate depuis le cache, rafraîchie en arrière-plan.
+    e.respondWith(caches.open(VERSION).then(c => c.match(req).then(hit => {
+      const net = fetch(req).then(res => { if (res.ok) c.put(req, res.clone()); return res; });
+      if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+      return net;
+    })));
   } else if (/cdn\.jsdelivr\.net|fonts\.(googleapis|gstatic)\.com/.test(url.hostname)) {
     // Bibliothèques versionnées (MathJax, polices, supabase-js) : cache d'abord.
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(res => { if (res.ok || res.type === 'opaque') { const c = res.clone(); caches.open(VERSION).then(x => x.put(req, c)); } return res; })));

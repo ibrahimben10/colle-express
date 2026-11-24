@@ -12,3 +12,4 @@ for i, (th, ast) in B.items():
     if i in C: C[i]['theoremes'], C[i]['astuces'] = list(th), list(ast)
 json.dump(C, open('data/corriges.json', 'w'), ensure_ascii=False)
 print(f'{len(set(B) & ids)} bilans ; sans bilan : {manque} ; ids inconnus : {inconnus}')
+import build_split  # découpe par exercice pour le site

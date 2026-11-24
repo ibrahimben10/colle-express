@@ -25,9 +25,9 @@ const typeset = el => new Promise(res => {
 });
 
 async function load() {
-  const [exs, corr] = await Promise.all([fetch('data/exercices.json').then(r => r.json()), enonceOnly ? {} : fetch('data/corriges.json').then(r => r.json())]);
+  const [exs, corr] = await Promise.all([fetch('data/exercices.json').then(r => r.json()), enonceOnly ? null : fetch('data/corr/' + encodeURIComponent(id) + '.json').then(r => r.ok ? r.json() : null).catch(() => null)]);
   EX = exs.find(e => e.id === id);
-  const K = corr[id];
+  const K = corr;
   if (!EX) { $('#sheet').innerHTML = '<p>Exercice introuvable.</p>'; return; }
   document.title = (enonceOnly ? 'Exercice' : 'Corrigé') + ' — ' + EX.titre;
   const fig = FIG[id];

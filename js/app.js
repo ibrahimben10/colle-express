@@ -36,6 +36,12 @@ const store = { get(k, d) { try { const v = localStorage.getItem('ce:' + k); ret
 
 /* ---------- application installable (PWA) ---------- */
 if ('serviceWorker' in navigator && location.protocol !== 'file:') addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+// Nouvelle version mise en ligne : on recharge une fois, sauf si l'utilisateur est en train d'écrire.
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) navigator.serviceWorker.addEventListener('controllerchange', () => {
+  const busy = () => document.activeElement?.matches?.('input, textarea, [contenteditable=true]') || [...document.querySelectorAll('textarea')].some(t => t.value.trim());
+  const go = () => { if (!busy()) location.reload(); };
+  if (document.hidden) go(); else { go(); document.addEventListener('visibilitychange', () => document.hidden && go()); }
+}, {once: true});
 let installEvt = null;
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -52,6 +58,14 @@ async function installApp() {
 
 /* ---------- état ---------- */
 let BASE = [], BANK = [], CORR = {};
+// Corrigés : un petit fichier par exercice, chargé à la première ouverture (puis gardé en mémoire).
+const CORR_P = {}, CORR_W = new Set();   // promesses en cours ; exercices affichés en attente de leur corrigé
+function loadCorr(id) {
+  if (!id || CORR[id] || CORR_P[id]) return CORR_P[id] || Promise.resolve(CORR[id]);
+  return CORR_P[id] = fetch('data/corr/' + encodeURIComponent(id) + '.json')
+    .then(r => r.ok ? r.json() : null).then(d => { if (d) CORR[id] = d; return d; })   // pas de corrigé : on ne redemande pas
+    .catch(() => { delete CORR_P[id]; return null; });
+}
 const all = () => BASE.concat(BANK);
 const byId = id => all().find(e => e.id === id);
 const F = Object.assign({lvl: 1, mat: '', chap: '', q: ''}, store.get('filters', {}));
@@ -96,6 +110,15 @@ $('#searchIc').outerHTML = ic('search');
 if (DEMO) $('#demo').hidden = false;
 
 /* ---------- MathJax ---------- */
+// Le moteur de formules (≈ 250 Ko) se télécharge après l'affichage de la page, quand le réseau est libre,
+// ou tout de suite si l'on ouvre un exercice avant. typeset() attend qu'il soit prêt.
+let MJ = false;
+function loadMathJax() {
+  if (MJ || window.MathJax?.typesetPromise) return; MJ = true;
+  const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-chtml.js'; s.async = true;
+  document.head.append(s);
+}
+addEventListener('load', () => (window.requestIdleCallback || setTimeout)(loadMathJax, {timeout: 1500}));
 // Accepte un élément ou une liste. Le contenu des accordéons fermés est composé à leur ouverture
 // (MathJax a besoin de la largeur réelle pour couper les formules longues).
 function typeset(el) {
@@ -347,7 +370,10 @@ $('#fChap').onchange = e => { F.chap = e.target.value; renderList(); };
 $('#fQ').oninput = e => { F.q = e.target.value; renderList(); };
 $('#fFav').onclick = () => { F.fav = !F.fav; renderList(); };
 $('#items').onclick = e => { const b = e.target.closest('.item'); if (b) openEx(b.dataset.id); };
+// on commence à télécharger le corrigé dès que le doigt se pose sur l'exercice
+$('#items').addEventListener('pointerdown', e => { const b = e.target.closest('.item'); if (b) loadCorr(b.dataset.id); }, {passive: true});
 function openEx(id) {
+  loadMathJax();
   const from = CUR; CUR = id; const ex = byId(id);
   if (phone() && !from) { LISTY = scrollY; history.pushState({ce: 'ex'}, '', '#ex-' + id); }   // le geste « retour » du téléphone ramène à la liste
   else history.replaceState(history.state, '', '#ex-' + id);
@@ -396,6 +422,7 @@ function renderCopy() {
   api.track(ex.id, 'vu');
   S.openH ||= [];
   const K = CORR[ex.id];
+  if (!K && !CORR_W.has(ex.id)) { CORR_W.add(ex.id); loadCorr(ex.id).then(d => { CORR_W.delete(ex.id); if (d && CUR === ex.id) renderCopy(); }); }
   const nH = K ? hintLevels(K).length : 2;
   const G = GSEL();
   const locked = !(S.unlocked || mine(ex.id) || st?.s === 'reussi' || S.hint >= nH);
@@ -815,7 +842,7 @@ async function addFiles(id, files) {
 
 /* ---------- IA ---------- */
 async function ask(ex, mode) {
-  const S = sess(ex.id), K = CORR[ex.id];
+  const S = sess(ex.id), K = CORR[ex.id] || await loadCorr(ex.id);
   if (K && mode === 'indice') {            // indices préparés : instantanés, sans IA
     if (S.hint >= 3) return;
     const t = {kind: 'indice', n: 0, hint: S.hint + 1, verdict: 'bloque', score: null, resume: '', retour: '', indice: K.indices[S.hint], question: '', points: []};
@@ -1115,7 +1142,6 @@ async function importPhoto(file) {
 /* ================= LANCEMENT ================= */
 (async function boot() {
   try { BASE = await (await fetch('data/exercices.json')).json(); } catch { BASE = []; }
-  fetch('data/corriges.json').then(r => r.json()).then(d => { CORR = d || {}; if (api.user) rerender(); }).catch(() => {});
   document.querySelectorAll('[data-nbex]').forEach(e => BASE.length && countUp(e, BASE.length));
   document.querySelectorAll('[data-nbchap]').forEach(e => BASE.length && countUp(e, new Set(BASE.map(x => x.mat + x.chap)).size));
   document.querySelectorAll('[data-nbfig]').forEach(e => countUp(e, Object.keys(FIG).length));

@@ -1,0 +1,20 @@
+# En-têtes Cloudflare (gratuit) : ce que le navigateur peut garder en mémoire, et combien de temps.
+# Polices, images et schémas ne changent pas : gardés 30 jours.
+/fonts/*
+  Cache-Control: public, max-age=2592000, immutable
+/img/*
+  Cache-Control: public, max-age=2592000
+/icons/*
+  Cache-Control: public, max-age=2592000
+/annale/svg/*
+  Cache-Control: public, max-age=604800
+# Données : 1 heure, puis revalidation (rapide grâce à l'ETag).
+/data/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+# Code et pages : toujours revalidés (les mises à jour arrivent tout de suite) ; le service worker sert l'affichage instantané.
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+/sw.js
+  Cache-Control: no-cache

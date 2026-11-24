@@ -203,7 +203,7 @@ Après une modification du site, incrémente `VERSION` dans `sw.js` pour forcer 
 
 ## Ajouter des exercices en lot
 
-Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 indices, corrigé). Pour régénérer les fichiers de données : `python3 tools/build_new.py`, puis `python3 tools/build_bilan.py`.
+Les exercices ajoutés en lot sont écrits dans `tools/new_*.py` (énoncé, 3 indices, corrigé). Pour régénérer les fichiers de données : `python3 tools/build_new.py`, puis `python3 tools/build_bilan.py` (qui découpe aussi les corrigés en un fichier par exercice dans `data/corr/`, le seul format lu par le site).
 
 ## Structure pédagogique de chaque exercice
 
@@ -263,3 +263,10 @@ Le site suit une direction « carnet de colle » : papier chaud, encre, vert aca
 - Le site charge chaque SVG à la demande (`js/figures-annale.js`) et l'insère dans la page : les traits prennent la couleur du texte, en clair comme en sombre. La police Latin Modern est servie depuis `fonts/`.
 - Le schéma de correction s'affiche en tête de la correction (Détaillée, Rigoureuse, Guidée après la première étape, fiche PDF), jamais avec l'énoncé seul.
 - Les schémas d'énoncé plus anciens restent dans `js/figures.js` pour les exercices qui n'ont pas de version annale.
+
+## Vitesse
+
+- Les corrigés sont chargés un par un (`data/corr/<id>.json`), à l'ouverture de l'exercice ; `data/corriges.json` sert seulement aux outils et n'est pas publié.
+- MathJax se télécharge après l'affichage de la page (ou dès l'ouverture d'un exercice).
+- Le service worker sert l'application depuis le cache : **à chaque mise en ligne, incrémenter `VERSION` dans `sw.js`**. Les visiteurs reçoivent la nouvelle version automatiquement (rechargement discret, jamais pendant la saisie d'un texte).
+- `_headers` règle la durée de cache côté Cloudflare (polices et images 30 jours, données 1 heure).
