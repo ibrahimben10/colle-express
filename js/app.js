@@ -14,6 +14,7 @@ import { initBiblio, renderCollection, openCollectionsPicker } from './biblio.js
 import { renderCorrection } from './modes.js';
 import { rotator, countUp, heroBackground, carousel, celebrate } from './vivant.js';
 import { initMouvement } from './mouvement.js';
+import { initTactile } from './tactile.js';
 import { initCommunaute, renderCommunaute, renderSolutions, openSignalement, renderModeration } from './communaute.js';
 
 const $ = s => document.querySelector(s);
@@ -81,6 +82,7 @@ document.querySelectorAll('#yr, .yr').forEach(e => e.textContent = new Date().ge
 document.querySelectorAll('[data-ic]').forEach(e => { e.innerHTML = ic(e.dataset.ic); });
 initTheme();
 initMouvement();
+initTactile();
 document.querySelectorAll('[data-theme-toggle]').forEach(b => b.innerHTML = THEME_ICON);
 reveal();
 typeset($('#auth'));
@@ -239,11 +241,18 @@ function presence(patch) {
 }
 
 /* ---------- routage ---------- */
+let LISTY = 0;   // position de la liste au moment d'ouvrir un exercice (téléphone)
+const phone = () => innerWidth < 820;
 function route() {
   if (!api.user) return;
   let h = location.hash.slice(1) || 'exercices';
   if (h === 'merci') { SENT = true; history.replaceState(null, '', '#apropos'); h = 'apropos'; }
   if (h.startsWith('ex-')) { const e = byId(h.slice(3)); if (e) { CUR = e.id; F.lvl = e.niveau; } h = 'exercices'; }
+  else if (h === 'exercices' && CUR) {   // retour (geste ou bouton) depuis un exercice
+    const back = document.body.classList.contains('detail'); CUR = null;
+    presence({v: 'exercices', ex: null, t: null, st: null});
+    if (back && phone()) setTimeout(() => scrollTo({top: LISTY, behavior: 'instant'}), 0);
+  }
   document.body.classList.toggle('detail', h === 'exercices' && !!CUR);
   if (h === 'prof' && !api.isProf) h = 'exercices';
   if (h === 'envoyer') { h = 'apropos'; setTimeout(() => $('#envoi')?.scrollIntoView({behavior: 'smooth'}), 50); }
@@ -339,17 +348,17 @@ $('#fQ').oninput = e => { F.q = e.target.value; renderList(); };
 $('#fFav').onclick = () => { F.fav = !F.fav; renderList(); };
 $('#items').onclick = e => { const b = e.target.closest('.item'); if (b) openEx(b.dataset.id); };
 function openEx(id) {
-  CUR = id; const ex = byId(id);
-  history.replaceState(null, '', '#ex-' + id);
+  const from = CUR; CUR = id; const ex = byId(id);
+  if (phone() && !from) { LISTY = scrollY; history.pushState({ce: 'ex'}, '', '#ex-' + id); }   // le geste « retour » du téléphone ramène à la liste
+  else history.replaceState(history.state, '', '#ex-' + id);
   renderList(); renderCopy();
   presence({v: 'exercices', ex: id, t: ex?.titre?.slice(0, 90) || '', n: ex?.niveau || 0, st: 'lit', since: now()});
   document.body.classList.add('detail');
   scrollTo({top: innerWidth < 820 ? 0 : scrollY});
 }
 function closeEx() {
-  CUR = null; document.body.classList.remove('detail');
-  history.replaceState(null, '', '#exercices');
-  renderList(); renderCopy(); presence({v: 'exercices', ex: null, t: null, st: null});
+  if (history.state?.ce === 'ex') { history.back(); return; }   // même chemin que le geste retour
+  history.replaceState(null, '', '#exercices'); route();
 }
 const correctionURL = id => new URL('correction.html?id=' + encodeURIComponent(id), location.href).href;
 async function shareEx(ex, withCorr) {
