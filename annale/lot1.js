@@ -169,14 +169,14 @@ const resoC = (() => {
 })();
 
 export const LOT1 = [
-  {id: 'n-p1-rc', type: 'enonce', titre: 'Charge d’un condensateur', svg: rcE},
-  {id: 'n-p1-rc', type: 'correction', titre: 'Charge d’un condensateur', svg: rcC},
-  {id: 'n-p1-rlc', type: 'enonce', titre: 'Régime libre du RLC série', svg: rlcE},
-  {id: 'n-p1-rlc', type: 'correction', titre: 'Régime libre du RLC série', svg: rlcC},
-  {id: 'n-p2-beau', type: 'correction', titre: 'Cycle de Beau de Rochas', svg: beauC},
-  {id: 'n-p2-ailette', type: 'correction', titre: 'Ailette de refroidissement', svg: ailetteC},
-  {id: 'n-p2-coax', type: 'correction', titre: 'Câble coaxial', svg: coaxC},
-  {id: 'n-p1-pendule', type: 'correction', titre: 'Pendule simple', svg: penduleC},
-  {id: 'n-p1-prisme', type: 'correction', titre: 'Minimum de déviation du prisme', svg: prismeC},
-  {id: 'n-p2-resonance', type: 'correction', titre: 'Résonance d’élongation et Q', svg: resoC},
+  {id: 'n-p1-rc', type: 'enonce', legende: 'Générateur E, interrupteur K fermé à t = 0, résistor R et condensateur C initialement déchargé ; courant i et tension u_C', titre: 'Charge d’un condensateur', svg: rcE},
+  {id: 'n-p1-rc', type: 'correction', legende: 'Convention récepteur pour R et C (u_R = Ri, q = Cu_C, i = dq/dt), générateur pour E. Bilan : le générateur fournit CE², dont la moitié est dissipée par effet Joule et la moitié stockée', titre: 'Charge d’un condensateur', svg: rcC},
+  {id: 'n-p1-rlc', type: 'enonce', legende: 'Condensateur chargé sous U₀ (charge q₀), bobine L et résistor R ; on ferme K à t = 0', titre: 'Régime libre du RLC série', svg: rlcE},
+  {id: 'n-p1-rlc', type: 'correction', legende: 'Convention récepteur : u_L + u_R + u_C = 0, q étant la charge de l’armature où entre i. Régime pseudo-périodique (Q = 5) : q oscille dans l’enveloppe ±q₀e^(−t/τ), pseudo-période T', titre: 'Régime libre du RLC série', svg: rlcC},
+  {id: 'n-p2-beau', type: 'correction', legende: 'Cycle parcouru dans le sens horaire (moteur, W < 0) : adiabatiques 1 → 2 et 3 → 4, isochores 2 → 3 (Q₂₃ > 0) et 4 → 1 (Q₄₁ < 0) ; allure tracée avec a = 4 pour la lisibilité', titre: 'Cycle de Beau de Rochas', svg: beauC},
+  {id: 'n-p2-ailette', type: 'correction', legende: 'Bilan sur la tranche [x, x + dx] : Φ(x) = Φ(x + dx) + hθ·2πa dx, avec θ = T − Tₑ et Φ = −λπa² dT/dx', titre: 'Ailette de refroidissement', svg: ailetteC},
+  {id: 'n-p2-coax', type: 'correction', legende: '(a) Cylindre de Gauss de rayon r entre l’âme et la gaine : E radial. (b) Contour d’Ampère de rayon r : B orthoradial ; le courant I de l’âme revient par la gaine', titre: 'Câble coaxial', svg: coaxC},
+  {id: 'n-p1-pendule', type: 'correction', legende: 'À l’angle θ : poids P, tension T dirigée vers O, base polaire (u_r, u_θ) ; énergie potentielle nulle en B, h = L(1 − cos θ₀) entre A et B', titre: 'Pendule simple', svg: penduleC},
+  {id: 'n-p1-prisme', type: 'correction', legende: 'Au minimum de déviation, le trajet est symétrique : i = i′, r = r′ = A/2, rayon intérieur parallèle à la base, Dm = 2i − A ≈ 37°', titre: 'Minimum de déviation du prisme', svg: prismeC},
+  {id: 'n-p2-resonance', type: 'correction', legende: '(a) Élongation : pic en ω_r = ω₀√(1 − 1/(2Q²)), seulement si Q > 1/√2. (b) Vitesse : pic en ω₀, bande passante à V_max/√2 de largeur Δω = ω₀/Q', titre: 'Résonance d’élongation et Q', svg: resoC},
 ];

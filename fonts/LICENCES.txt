@@ -4,3 +4,6 @@ Polices auto-hébergées (fichiers woff2 issus des paquets @fontsource-variable)
 - JetBrains Mono — JetBrains (repères techniques)
 - Caveat — Impallari Type (annotations manuscrites)
 Texte de la licence : https://openfontlicense.org
+
+Latin Modern Roman 10 (regular, italic) — GUST e-foundry, GUST Font License (libre, redistribution et modification autorisées).
+Sous-ensemble WOFF2 : fonts/latin-modern-roman-regular.woff2, fonts/latin-modern-roman-italic.woff2 (utilisé par les schémas de physique).

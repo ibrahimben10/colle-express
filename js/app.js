@@ -3,6 +3,7 @@ import { CONFIG } from './config.js';
 import { api, on, DEMO } from './api.js';
 import { ic, chapIcon } from './icons.js';
 import { FIG } from './figures.js';
+import { legHTML } from './figures-annale.js';
 import { esc, rich, fmtEnonce, fmtCorrige, hintsHTML, hintLevels, correctionHTML } from './format.js';
 import { presentationCourte, presentationPage } from './apropos.js';
 import { initAuth, showAuth, MSG } from './auth.js';
@@ -403,7 +404,7 @@ function renderCopy() {
     <section class="co co-enonce">
       <div class="co-h"><span class="co-e" aria-hidden="true">📘</span>Énoncé<span class="co-meta">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree} min</span></div>
       <div class="ex-body ${fig ? 'withfig' : ''}"><div class="enonce">${fmtEnonce(ex.enonce)}</div>
-      ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}</div>
+      ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${legHTML(fig.legende)}</span></figcaption></figure>` : ''}</div>
     </section>
 
     <section class="co co-rep" id="repSec">

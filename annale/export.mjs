@@ -20,3 +20,18 @@ writeFileSync(new URL('./planche.html', import.meta.url), `<!doctype html><html 
 .dark{background:#151A19;color:#E9EEEA}.dark figure{border-color:#334}.dark figcaption{color:#aab}</style>
 <body><div class="g">${cards.join('')}</div></body></html>`);
 console.log(nb, 'fichiers,', cards.length, 'sur la planche');
+
+// Index pour le site : légendes des schémas disponibles (les SVG sont chargés à la demande).
+{
+  const idx = {};
+  for (const m of Object.values(mods)) {
+    let lot; try { lot = Object.values(await import(m))[0]; } catch { continue; }
+    for (const f of lot) { (idx[f.id] ||= {})[f.type === 'enonce' ? 'e' : 'c'] = f.legende || ''; }
+  }
+  const body = `// Généré par annale/export.mjs : ne pas modifier à la main.
+// Schémas « annale » : id d'exercice -> {e: légende de l'énoncé, c: légende de la correction}.
+export const AN = ${JSON.stringify(idx, null, 0).replace(/\},"/g, '},\n"')};
+`;
+  writeFileSync(new URL('../js/figures-annale-index.js', import.meta.url), body);
+  console.log(Object.keys(idx).length, 'exercices indexés');
+}

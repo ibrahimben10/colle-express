@@ -1,7 +1,7 @@
 // Schémas SVG des énoncés de physique-chimie (dessinés à la main, thème clair/sombre via CSS).
 // Chaque entrée : id d'exercice -> {svg, legende}
 import { DEFS, svg, L, A, D, T, I, V, C, R, P, dot, spring, ground, wallV, lens, axe, ox, ot } from './figkit.js';
-import { FIG2 } from './figures-enonce.js';
+import { AN, anSlot } from './figures-annale.js';
 
 export const FIG = {
 'p-em-1': {legende: 'Cylindre infini chargé en volume (ρ) et en surface (σ)', svg: svg(360, 200, `
@@ -198,5 +198,6 @@ export const FIG = {
   ${C(140, 115, 6, 'fillR')}${T(150, 112, 'O', 'r', 'start')}${C(82, 92, 4, 'fillY')}${T(76, 90, 'T', '', 'end')}`,
   'Maille CFC')},
 };
-Object.assign(FIG, FIG2);
+// Les schémas « annale » remplacent ou complètent les schémas d'énoncé.
+for (const [id, v] of Object.entries(AN)) if ('e' in v) FIG[id] = {legende: v.e, svg: anSlot(id, 'e')};
 export const hasFig = id => !!FIG[id];

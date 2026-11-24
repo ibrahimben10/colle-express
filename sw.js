@@ -1,10 +1,10 @@
 // Service worker de Colle express : l'application s'ouvre instantanément et les
 // énoncés, indices et corrigés restent consultables hors connexion.
 // Les données personnelles (Supabase) ne sont jamais mises en cache.
-const VERSION = 'ce-v21';
+const VERSION = 'ce-v22';
 const SHELL = ['./', './index.html', './correction.html', './manifest.webmanifest',
   './css/style.css', './js/app.js', './js/api.js', './js/config.js', './js/format.js', './js/icons.js',
-  './js/figures.js', './js/figkit.js', './js/figkit2.js', './js/figures-enonce.js', './js/figures-corr.js', './js/figc1.js', './js/figc2.js', './js/auth.js', './js/validation.js', './js/ui.js', './js/profil.js', './js/carnet.js', './js/biblio.js', './js/communaute.js', './js/modes.js', './js/vivant.js', './fonts/source-sans-3-latin-wght-normal.woff2', './fonts/source-sans-3-latin-ext-wght-normal.woff2', './fonts/source-sans-3-latin-wght-italic.woff2', './fonts/fraunces-latin-wght-normal.woff2', './fonts/fraunces-latin-wght-italic.woff2', './fonts/jetbrains-mono-latin-wght-normal.woff2', './fonts/caveat-latin-wght-normal.woff2', './js/apropos.js', './js/correction.js', './js/mathjax-config.js',
+  './js/figures.js', './js/figkit.js', './js/figures-corr.js', './js/figures-annale.js', './js/figures-annale-index.js', './fonts/latin-modern-roman-regular.woff2', './fonts/latin-modern-roman-italic.woff2', './js/auth.js', './js/validation.js', './js/ui.js', './js/profil.js', './js/carnet.js', './js/biblio.js', './js/communaute.js', './js/modes.js', './js/vivant.js', './fonts/source-sans-3-latin-wght-normal.woff2', './fonts/source-sans-3-latin-ext-wght-normal.woff2', './fonts/source-sans-3-latin-wght-italic.woff2', './fonts/fraunces-latin-wght-normal.woff2', './fonts/fraunces-latin-wght-italic.woff2', './fonts/jetbrains-mono-latin-wght-normal.woff2', './fonts/caveat-latin-wght-normal.woff2', './js/apropos.js', './js/correction.js', './js/mathjax-config.js',
   './data/exercices.json', './data/corriges.json', './icons/icon-192.png', './icons/icon-512.png', './img/logo.png', './img/logo-dark.png', './icons/favicon-64.png'];
 
 self.addEventListener('install', e => {

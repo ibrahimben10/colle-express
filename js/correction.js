@@ -2,7 +2,9 @@
 import { CONFIG } from './config.js';
 import { ic, chapIcon } from './icons.js';
 import { FIG } from './figures.js';
+import { legHTML } from './figures-annale.js';
 import { figCorr } from './figures-corr.js';
+import { anReady } from './figures-annale.js';
 import { esc, fmtEnonce, hintsHTML, hintLevels, correctionHTML } from './format.js';
 
 const $ = s => document.querySelector(s);
@@ -37,7 +39,7 @@ async function load() {
     <h1>${esc(EX.titre)}</h1>
     <section class="co co-enonce"><div class="co-h"><span class="co-e" aria-hidden="true">📘</span>Énoncé<span class="co-meta">${EX.duree} min</span></div>
       <div class="enonce">${fmtEnonce(EX.enonce)}</div>
-      ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${esc(fig.legende)}</span></figcaption></figure>` : ''}</section>
+      ${fig ? `<figure class="fig">${fig.svg}<figcaption>${ic('eye')}<span>${legHTML(fig.legende)}</span></figcaption></figure>` : ''}</section>
     ${!enonceOnly && K ? `
       <section class="co co-indices"><div class="co-h"><span class="co-e" aria-hidden="true">💡</span>Indices<span class="co-meta">cherche d’abord !</span></div>
         ${hintsHTML(K, hintLevels(K).map(() => true))}</section>
@@ -58,7 +60,8 @@ async function load() {
 const fileName = () => ((enonceOnly ? 'exercice-' : 'corrige-') + (EX?.titre || id)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 60) + '.pdf';
 // PDF : export natif du navigateur (vectoriel, formules nettes).
 // Ordinateur : « Enregistrer au format PDF » ; iPhone : Imprimer → Partager ; Android : Imprimer → Enregistrer en PDF.
-function makePdf() {
+async function makePdf() {
+  await anReady();
   document.title = fileName().replace(/\.pdf$/, '');   // nom proposé pour le fichier
   window.print();
 }
