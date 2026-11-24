@@ -738,18 +738,8 @@ begin
     r := r || jsonb_build_object('etoiles', jsonb_build_object('n', et.n, 'moy', case when et.n >= 3 or admin then et.moy end,
       'mienne', mine, 'peut_noter', (u <> me and pr.public and pr.vis_etoiles)));
   end if;
-  return r || public._profil_extras(u, tout);
+  return r || public._profil_extras(u, tout) || public._profil_social(u, tout);
 end $$;
-
--- Nom, identifiant et photo des auteurs de commentaires publics (rien d'autre)
-create or replace function public.cartes_auteurs(p_ids uuid[]) returns table(id uuid, nom text, username text, photo text)
-language sql stable security definer set search_path = public as $$
-  select p.id, p.full_name, x.username, coalesce(s.data->>'photo', '')
-  from public.profiles p left join public.profils x on x.user_id = p.id left join public.suivi s on s.user_id = p.id
-  where auth.uid() is not null and p.id = any(p_ids[1:200])
-    and (p.id = auth.uid() or public.is_prof() or public.partage_groupe(p.id) or coalesce(x.public, false)
-         or exists (select 1 from public.commentaires c where c.user_id = p.id and c.public));
-$$;
 
 -- Liste des notes reçues par un profil, pour la modération (administrateur seulement)
 create or replace function public.etoiles_moderation(p_cible uuid) returns table(auteur_id uuid, auteur text, note smallint, updated_at timestamptz)
@@ -1274,6 +1264,283 @@ begin
     'auteur', jsonb_build_object('id', c.user_id, 'nom', nom, 'username', pr.username),
     'items', (select coalesce(jsonb_agg(i.exercice_id order by i.position, i.added_at), '[]') from public.collection_items i where i.collection_id = c.id));
 end $$;
+
+-- =====================================================================
+--  PHASE 4 : annuaire, abonnements, solutions d'élèves, signalements, modération
+-- =====================================================================
+alter table public.profils add column if not exists annuaire boolean not null default false;
+
+-- Limite anti-spam générique : n lignes au plus par auteur sur une fenêtre de temps
+create or replace function public._limite(tbl regclass, col text, u uuid, n int, fenetre interval) returns void
+language plpgsql security definer set search_path = public as $$
+declare c int;
+begin
+  if u is null then return; end if;
+  execute format('select count(*) from %s where %I = $1 and created_at > now() - $2', tbl, col) into c using u, fenetre;
+  if c >= n then raise exception 'Trop de publications en peu de temps : réessaie plus tard.'; end if;
+end $$;
+create or replace function public.commentaire_antispam() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin perform public._limite('public.commentaires', 'user_id', auth.uid(), 40, interval '1 hour'); return new; end $$;
+drop trigger if exists commentaires_antispam on public.commentaires;
+create trigger commentaires_antispam before insert on public.commentaires for each row execute function public.commentaire_antispam();
+
+create or replace function public.profil_est_public(u uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profils p where p.user_id = u and p.public);
+$$;
+
+-- 22. Abonnements ----------------------------------------------------------------
+create table if not exists public.abonnements (
+  suiveur_id  uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  suivi_id    uuid not null references public.profiles(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (suiveur_id, suivi_id),
+  check (suiveur_id <> suivi_id)
+);
+create index if not exists abonnements_suivi on public.abonnements(suivi_id);
+alter table public.abonnements enable row level security;
+drop policy if exists "abonnements: les miens" on public.abonnements;
+create policy "abonnements: les miens" on public.abonnements for select using (suiveur_id = auth.uid() or public.is_prof());
+drop policy if exists "abonnements: suivre" on public.abonnements;
+create policy "abonnements: suivre" on public.abonnements for insert
+  with check (suiveur_id = auth.uid() and suivi_id <> auth.uid() and public.profil_est_public(suivi_id));
+drop policy if exists "abonnements: ne plus suivre" on public.abonnements;
+create policy "abonnements: ne plus suivre" on public.abonnements for delete using (suiveur_id = auth.uid());
+
+-- 23. Solutions publiées volontairement par des élèves --------------------------------
+create table if not exists public.solutions (
+  id          uuid primary key default gen_random_uuid(),
+  exercice_id text not null check (char_length(exercice_id) between 1 and 80),
+  user_id     uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  contenu     text not null check (char_length(trim(contenu)) between 20 and 20000),
+  statut      text not null default 'publiee' check (statut in ('publiee','masquee')),
+  verifiee    boolean not null default false,   -- relue et validée par l'administrateur
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (exercice_id, user_id)
+);
+create index if not exists solutions_ex on public.solutions(exercice_id, created_at);
+create or replace function public.solution_avant_ecriture() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null then new.user_id := auth.uid(); new.created_at := now(); end if;
+    perform public._limite('public.solutions', 'user_id', new.user_id, 10, interval '1 day');
+    if not public.is_prof() then new.statut := 'publiee'; new.verifiee := false; end if;
+  else
+    new.user_id := old.user_id; new.exercice_id := old.exercice_id; new.created_at := old.created_at;
+    if not public.is_prof() then
+      new.statut := old.statut; new.verifiee := old.verifiee;
+      if new.contenu is distinct from old.contenu then new.verifiee := false; end if;   -- toute modification retire la validation
+    end if;
+  end if;
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists solutions_avant_ecriture on public.solutions;
+create trigger solutions_avant_ecriture before insert or update on public.solutions
+  for each row execute function public.solution_avant_ecriture();
+alter table public.solutions enable row level security;
+drop policy if exists "solutions: lire" on public.solutions;
+create policy "solutions: lire" on public.solutions for select
+  using (auth.uid() is not null and (statut = 'publiee' or user_id = auth.uid() or public.is_prof()));
+drop policy if exists "solutions: publier" on public.solutions;
+create policy "solutions: publier" on public.solutions for insert with check (user_id = auth.uid());
+drop policy if exists "solutions: modifier" on public.solutions;
+create policy "solutions: modifier" on public.solutions for update using (user_id = auth.uid() or public.is_prof());
+drop policy if exists "solutions: supprimer" on public.solutions;
+create policy "solutions: supprimer" on public.solutions for delete using (user_id = auth.uid() or public.is_prof());
+
+create table if not exists public.solution_commentaires (
+  id          uuid primary key default gen_random_uuid(),
+  solution_id uuid not null references public.solutions(id) on delete cascade,
+  user_id     uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  type        text not null default 'commentaire' check (type in ('commentaire','erreur')),
+  contenu     text not null check (char_length(trim(contenu)) between 1 and 4000),
+  created_at  timestamptz not null default now(),
+  edited_at   timestamptz
+);
+create index if not exists solcom_sol on public.solution_commentaires(solution_id, created_at);
+create or replace function public.solcom_avant_ecriture() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null then new.user_id := auth.uid(); new.created_at := now(); end if;
+    new.edited_at := null;
+    perform public._limite('public.solution_commentaires', 'user_id', new.user_id, 40, interval '1 hour');
+  else new.solution_id := old.solution_id; new.user_id := old.user_id; new.type := old.type; new.created_at := old.created_at; new.edited_at := now(); end if;
+  return new;
+end $$;
+drop trigger if exists solcom_avant_ecriture on public.solution_commentaires;
+create trigger solcom_avant_ecriture before insert or update on public.solution_commentaires
+  for each row execute function public.solcom_avant_ecriture();
+create or replace function public.solution_visible(s uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.solutions x where x.id = s and (x.statut = 'publiee' or x.user_id = auth.uid() or public.is_prof()));
+$$;
+alter table public.solution_commentaires enable row level security;
+drop policy if exists "solcom: lire" on public.solution_commentaires;
+create policy "solcom: lire" on public.solution_commentaires for select using (auth.uid() is not null and public.solution_visible(solution_id));
+drop policy if exists "solcom: écrire" on public.solution_commentaires;
+create policy "solcom: écrire" on public.solution_commentaires for insert with check (user_id = auth.uid() and public.solution_visible(solution_id));
+drop policy if exists "solcom: modifier" on public.solution_commentaires;
+create policy "solcom: modifier" on public.solution_commentaires for update using (user_id = auth.uid());
+drop policy if exists "solcom: supprimer" on public.solution_commentaires;
+create policy "solcom: supprimer" on public.solution_commentaires for delete using (user_id = auth.uid() or public.is_prof());
+
+-- 24. Signalements (contenu inapproprié, spam, erreur…) -----------------------------
+create table if not exists public.signalements (
+  id          uuid primary key default gen_random_uuid(),
+  auteur_id   uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  cible_type  text not null check (cible_type in ('commentaire','solution','solution_commentaire','profil','carnet','collection')),
+  cible_id    text not null check (char_length(cible_id) between 1 and 80),
+  motif       text not null check (motif in ('spam','insulte','inapproprie','donnees','autre')),
+  details     text not null default '' check (char_length(details) <= 500),
+  traite      boolean not null default false,
+  decision    text not null default '' check (char_length(decision) <= 200),
+  created_at  timestamptz not null default now(),
+  unique (auteur_id, cible_type, cible_id)
+);
+create or replace function public.signalement_avant_ecriture() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null then new.auteur_id := auth.uid(); new.created_at := now(); end if;
+    new.traite := false; new.decision := '';
+    perform public._limite('public.signalements', 'auteur_id', new.auteur_id, 20, interval '1 day');
+  else
+    new.auteur_id := old.auteur_id; new.cible_type := old.cible_type; new.cible_id := old.cible_id; new.created_at := old.created_at;
+  end if;
+  return new;
+end $$;
+drop trigger if exists signalements_avant_ecriture on public.signalements;
+create trigger signalements_avant_ecriture before insert or update on public.signalements
+  for each row execute function public.signalement_avant_ecriture();
+-- Trois signalements distincts sur une solution la masquent en attendant la décision de l'administrateur
+create or replace function public.signalement_apres_insert() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.cible_type = 'solution' and (select count(*) from public.signalements s where s.cible_type = 'solution' and s.cible_id = new.cible_id and not s.traite) >= 3 then
+    update public.solutions set statut = 'masquee' where id::text = new.cible_id;
+  end if;
+  return null;
+end $$;
+drop trigger if exists signalements_apres_insert on public.signalements;
+create trigger signalements_apres_insert after insert on public.signalements
+  for each row execute function public.signalement_apres_insert();
+alter table public.signalements enable row level security;
+drop policy if exists "signalements: les siens ou admin" on public.signalements;
+create policy "signalements: les siens ou admin" on public.signalements for select using (auteur_id = auth.uid() or public.is_prof());
+drop policy if exists "signalements: signaler" on public.signalements;
+create policy "signalements: signaler" on public.signalements for insert with check (auteur_id = auth.uid());
+drop policy if exists "signalements: traiter" on public.signalements;
+create policy "signalements: traiter" on public.signalements for update using (public.is_prof());
+
+-- File de modération (administrateur) : signalements ouverts, avec un extrait du contenu visé
+create or replace function public.moderation_file() returns jsonb
+language sql stable security definer set search_path = public as $$
+  select coalesce(jsonb_agg(x order by x->>'dernier' desc), '[]') from (
+    select jsonb_build_object('cible_type', s.cible_type, 'cible_id', s.cible_id, 'n', count(*), 'motifs', jsonb_agg(distinct s.motif),
+      'details', jsonb_agg(s.details) filter (where s.details <> ''), 'dernier', max(s.created_at),
+      'extrait', case s.cible_type
+        when 'commentaire' then (select left(c.contenu, 300) from public.commentaires c where c.id::text = s.cible_id)
+        when 'solution' then (select left(x.contenu, 300) from public.solutions x where x.id::text = s.cible_id)
+        when 'solution_commentaire' then (select left(c.contenu, 300) from public.solution_commentaires c where c.id::text = s.cible_id)
+        when 'carnet' then (select left(c.titre || ' — ' || c.contenu, 300) from public.carnet c where c.id::text = s.cible_id)
+        when 'collection' then (select c.titre from public.collections c where c.id::text = s.cible_id)
+        when 'profil' then (select coalesce(p.username, '') || ' — ' || left(p.bio, 200) from public.profils p where p.user_id::text = s.cible_id) end,
+      'exercice', case s.cible_type
+        when 'commentaire' then (select c.exercice_id from public.commentaires c where c.id::text = s.cible_id)
+        when 'solution' then (select x.exercice_id from public.solutions x where x.id::text = s.cible_id)
+        when 'solution_commentaire' then (select x.exercice_id from public.solution_commentaires c join public.solutions x on x.id = c.solution_id where c.id::text = s.cible_id) end) x
+    from public.signalements s where not s.traite and public.is_prof()
+    group by s.cible_type, s.cible_id) q;
+$$;
+-- Décision de l'administrateur : 'supprimer' le contenu, 'masquer' (solution), 'retablir' (solution) ou 'classer'
+create or replace function public.moderer(p_type text, p_id text, p_action text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_prof() then raise exception 'Réservé à l''administrateur'; end if;
+  if p_action = 'supprimer' then
+    case p_type
+      when 'commentaire' then delete from public.commentaires where id::text = p_id;
+      when 'solution' then delete from public.solutions where id::text = p_id;
+      when 'solution_commentaire' then delete from public.solution_commentaires where id::text = p_id;
+      when 'carnet' then delete from public.carnet where id::text = p_id;
+      when 'collection' then delete from public.collections where id::text = p_id;
+      when 'profil' then update public.profils set public = false, annuaire = false, bio = '', objectif = '', lien_github = '', lien_linkedin = '', lien_site = '' where user_id::text = p_id;
+      else null; end case;
+  elsif p_action = 'masquer' and p_type = 'solution' then update public.solutions set statut = 'masquee' where id::text = p_id;
+  elsif p_action = 'retablir' and p_type = 'solution' then update public.solutions set statut = 'publiee' where id::text = p_id;
+  end if;
+  update public.signalements set traite = true, decision = p_action where cible_type = p_type and cible_id = p_id and not traite;
+end $$;
+
+-- 25. Annuaire des profils publics qui ont choisi d'y apparaître (ordre alphabétique, aucun classement)
+create or replace function public.annuaire(p_q text default '', p_filiere text default '', p_matiere text default '',
+  p_etab text default '', p_collections boolean default false, p_suivis boolean default false, p_page int default 0) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select coalesce(jsonb_agg(c order by lower(c->>'nom')), '[]') from (
+    select jsonb_build_object('id', p.user_id, 'username', p.username, 'nom', pf.full_name, 'photo', coalesce(s.data->>'photo', ''),
+      'filiere', p.filiere, 'annee', p.annee, 'etablissement', p.etablissement, 'matieres', to_jsonb(p.matieres), 'bio', left(p.bio, 160),
+      'collections', (select count(*) from public.collections c where c.user_id = p.user_id and c.public and p.vis_collections),
+      'abonnes', (select count(*) from public.abonnements a where a.suivi_id = p.user_id),
+      'suivi', exists (select 1 from public.abonnements a where a.suiveur_id = auth.uid() and a.suivi_id = p.user_id)) c
+    from public.profils p join public.profiles pf on pf.id = p.user_id left join public.suivi s on s.user_id = p.user_id
+    where auth.uid() is not null and p.public and p.annuaire
+      and (coalesce(p_q, '') = '' or pf.full_name ilike '%' || p_q || '%' or p.username ilike '%' || p_q || '%' or p.bio ilike '%' || p_q || '%')
+      and (coalesce(p_filiere, '') = '' or p.filiere = p_filiere)
+      and (coalesce(p_matiere, '') = '' or p_matiere = any(p.matieres))
+      and (coalesce(p_etab, '') = '' or p.etablissement ilike '%' || p_etab || '%')
+      and (not p_collections or exists (select 1 from public.collections c where c.user_id = p.user_id and c.public and p.vis_collections))
+      and (not p_suivis or exists (select 1 from public.abonnements a where a.suiveur_id = auth.uid() and a.suivi_id = p.user_id))
+    order by lower(pf.full_name) limit 24 offset greatest(0, least(p_page, 100)) * 24) q;
+$$;
+
+-- Fil des abonnements : dernières publications publiques des profils suivis
+create or replace function public.fil_abonnements(p_limite int default 40) returns jsonb
+language sql stable security definer set search_path = public as $$
+  with suivis as (select a.suivi_id u from public.abonnements a join public.profils p on p.user_id = a.suivi_id
+                  where a.suiveur_id = auth.uid() and p.public),
+  ev as (
+    select 'solution' k, s.user_id u, s.exercice_id ex, null::text titre, left(s.contenu, 240) txt, s.created_at d, s.id::text ref
+      from public.solutions s where s.user_id in (select u from suivis) and s.statut = 'publiee'
+    union all select 'commentaire', c.user_id, c.exercice_id, null, left(c.contenu, 240), c.created_at, c.id::text
+      from public.commentaires c join public.profils p on p.user_id = c.user_id where c.user_id in (select u from suivis) and c.public and p.vis_commentaires
+    union all select 'collection', c.user_id, null, c.titre, left(c.description, 240), c.created_at, c.id::text
+      from public.collections c join public.profils p on p.user_id = c.user_id where c.user_id in (select u from suivis) and c.public and p.vis_collections
+    union all select 'carnet', c.user_id, c.exercice_id, c.titre, left(c.contenu, 240), c.created_at, c.id::text
+      from public.carnet c join public.profils p on p.user_id = c.user_id where c.user_id in (select u from suivis) and c.public and p.vis_carnet)
+  select coalesce(jsonb_agg(jsonb_build_object('k', ev.k, 'u', ev.u, 'nom', pf.full_name, 'username', pr.username, 'photo', coalesce(sv.data->>'photo', ''),
+    'ex', ev.ex, 'titre', ev.titre, 'txt', ev.txt, 'd', ev.d, 'ref', ev.ref) order by ev.d desc), '[]')
+  from (select * from ev order by d desc limit least(greatest(p_limite, 1), 100)) ev
+  join public.profiles pf on pf.id = ev.u left join public.profils pr on pr.user_id = ev.u left join public.suivi sv on sv.user_id = ev.u;
+$$;
+
+-- Les auteurs de solutions publiées ont aussi une « carte » (nom, identifiant, photo)
+create or replace function public.cartes_auteurs(p_ids uuid[]) returns table(id uuid, nom text, username text, photo text)
+language sql stable security definer set search_path = public as $$
+  select p.id, p.full_name, x.username, coalesce(s.data->>'photo', '')
+  from public.profiles p left join public.profils x on x.user_id = p.id left join public.suivi s on s.user_id = p.id
+  where auth.uid() is not null and p.id = any(p_ids[1:200])
+    and (p.id = auth.uid() or public.is_prof() or public.partage_groupe(p.id) or coalesce(x.public, false)
+         or exists (select 1 from public.commentaires c where c.user_id = p.id and c.public)
+         or exists (select 1 from public.solutions so where so.user_id = p.id and so.statut = 'publiee')
+         or exists (select 1 from public.solution_commentaires sc where sc.user_id = p.id));
+$$;
+
+-- Infos sociales ajoutées au profil : abonnés, abonnement, solutions publiées
+create or replace function public._profil_social(u uuid, tout boolean) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object(
+    'abonnes', (select count(*) from public.abonnements a where a.suivi_id = u),
+    'abonnements', (select count(*) from public.abonnements a where a.suiveur_id = u),
+    'je_suis', exists (select 1 from public.abonnements a where a.suiveur_id = auth.uid() and a.suivi_id = u),
+    'annuaire', (select annuaire from public.profils where user_id = u),
+    'solutions', (select coalesce(jsonb_agg(jsonb_build_object('id', s.id, 'ex', s.exercice_id, 'd', s.created_at, 'verifiee', s.verifiee, 'statut', s.statut) order by s.created_at desc), '[]')
+                  from public.solutions s where s.user_id = u and (s.statut = 'publiee' or tout)));
+$$;
 
 -- =====================================================================
 --  APRÈS avoir créé ton propre compte sur le site, exécute ceci

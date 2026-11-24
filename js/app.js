@@ -10,6 +10,7 @@ import { initTheme, syncTheme, reveal, toast, THEME_ICON } from './ui.js';
 import { initProfil, renderProfil, renderEdition, profilURL } from './profil.js';
 import { initCarnet, renderCarnet, openNote } from './carnet.js';
 import { initBiblio, renderCollection, openCollectionsPicker } from './biblio.js';
+import { initCommunaute, renderCommunaute, renderSolutions, openSignalement, renderModeration } from './communaute.js';
 
 const $ = s => document.querySelector(s);
 const SKEL = (n, cls = 'skel-item') => Array.from({length: n}, () => cls === 'skel-item' ? '<div class="skel-item" aria-hidden="true"><span class="skel"></span><span class="skel skel-l w80"></span><span class="skel skel-l w40"></span></div>' : `<span class="skel ${cls}" aria-hidden="true"></span>`).join('');
@@ -118,15 +119,17 @@ function renderMe() {
 }
 async function afterLogin2() {
   const p = api.profile;
-  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#groupes" data-v="groupes">${ic('users')}<span class="lbl">Groupes</span></a><a href="#suivi" data-v="suivi">${ic('chart')}<span class="lbl">Suivi</span></a><a href="#carnet" data-v="carnet">${ic('pen')}<span class="lbl">Carnet</span></a><a href="#profil" data-v="profil">${ic('user')}<span class="lbl">Profil</span></a>` +
+  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices" title="Exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#groupes" data-v="groupes" title="Groupes">${ic('users')}<span class="lbl">Groupes</span></a><a href="#suivi" data-v="suivi" title="Suivi">${ic('chart')}<span class="lbl">Suivi</span></a><a href="#carnet" data-v="carnet" title="Carnet">${ic('pen')}<span class="lbl">Carnet</span></a><a href="#communaute" data-v="communaute" title="Communauté">${ic('share')}<span class="lbl">Communauté</span></a><a href="#profil" data-v="profil" title="Profil">${ic('user')}<span class="lbl">Profil</span></a>` +
     (api.isProf ? `<a href="#prof" data-v="prof" title="Tableau de bord">${ic('live')}<span class="lbl lbl-long">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '') +
     '';   // « À propos » et l'envoi de sujets restent accessibles par le pied de page et « Mon suivi »
   initProfil({byId, all, LV, typeset, pickPhoto, ref: () => PREF, myAvatar: () => avatar(api.user.id, api.profile.full_name).replace('class="avatar"', 'class="avatar pe-av"'), setUsername: u => { MYUSER = u; }});
   api.monProfil().then(pp => { MYUSER = pp?.username || ''; }).catch(() => {});
   $('#bnav').innerHTML = $('#nav').innerHTML;
-  $('#bnav a[data-v=suivi]')?.remove();   // 5 entrées au plus sur téléphone ; « Mon suivi » reste accessible depuis le profil
+  $('#bnav a[data-v=suivi]')?.remove(); $('#bnav a[data-v=prof]')?.remove();   // sur téléphone, le tableau de bord s'ouvre depuis le profil   // 5 entrées au plus sur téléphone ; « Mon suivi » reste accessible depuis le profil
   initCarnet({byId, all, typeset});
   initBiblio({byId, LV});
+  initCommunaute({byId, typeset, avatar, myId: () => api.user.id,
+    cartes: async ids => { const need = ids.filter(u => u && u !== api.user.id && !CARTES[u]); if (need.length) for (const c of await api.cartes(need)) CARTES[c.id] = c; return CARTES; }});
   if (!store.get('filters', null)) F.lvl = p.niveau || 1;
   [SUIVI, CONF, BANK] = await Promise.all([api.loadSuivi(), api.config(), api.banque()]);
   SUIVI = SUIVI && typeof SUIVI === 'object' ? SUIVI : {};
@@ -214,9 +217,11 @@ function route() {
   let pref = null, pmode = '';
   let cref = null;
   if (h.startsWith('c/')) { cref = decodeURIComponent(h.slice(2)); h = 'collection'; }
+  let ctab = '';
+  if (h.startsWith('communaute')) { ctab = h.split('/')[1] || 'annuaire'; h = 'communaute'; }
   if (h.startsWith('u/')) { pref = decodeURIComponent(h.slice(2)); h = 'profil'; }
   else if (h === 'profil' || h.startsWith('profil/')) { pmode = h.split('/')[1] || ''; pref = MYUSER || api.user.id; h = 'profil'; }
-  if (!['exercices', 'groupes', 'suivi', 'prof', 'apropos', 'profil', 'carnet', 'collection'].includes(h)) h = 'exercices';
+  if (!['exercices', 'groupes', 'suivi', 'prof', 'apropos', 'profil', 'carnet', 'collection', 'communaute'].includes(h)) h = 'exercices';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + h));
   document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   if (h === 'exercices') { renderStrip(); renderList(); renderCopy(); }
@@ -224,6 +229,7 @@ function route() {
   if (h === 'groupes') renderGroupes();
   if (h === 'prof') renderProf(true);
   if (h === 'carnet') { renderCarnet($('#v-carnet')); scrollTo(0, 0); }
+  if (h === 'communaute') { renderCommunaute($('#v-communaute'), ctab); }
   if (h === 'collection') { renderCollection($('#v-collection'), cref); scrollTo(0, 0); }
   if (h === 'profil') { PREF = pref; const v = $('#v-profil'); if (pmode === 'modifier') renderEdition(v); else renderProfil(v, pref, {apercu: pmode === 'apercu'}); scrollTo(0, 0);
     document.querySelectorAll('#nav a[data-v=profil], #bnav a[data-v=profil]').forEach(a => pref === MYUSER || pref === api.user.id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')); }
@@ -386,13 +392,18 @@ function renderCopy() {
         <summary><span class="co-e" aria-hidden="true">${locked ? '🔒' : '📝'}</span><span class="acc-t"><b>Correction détaillée</b><small id="corrHint">${locked ? `Disponible après l’envoi de ta réponse ou ${nH > 1 ? 'les deux indices' : 'l’indice'}` : 'Touche pour afficher la correction'}</small></span><span class="chev" aria-hidden="true"></span></summary>
         <div class="acc-body">${S.busy === 'solution' ? '<p><span class="spin"></span> Rédaction du corrigé…</p>' : sol ? `${correctionHTML(sol)}
           <div class="soltools">${K ? `<a class="btn" href="${esc(correctionURL(ex.id))}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="btn" id="bShareCorr">${ic('share')} Partager</button>` : ''}</div>
-          <p class="small">${K ? 'Corrigé de référence de la colle.' : 'Corrigé rédigé par IA : vérifie-le avec ton cours.'}</p>` : ''}</div>
+          <p class="corr-src">${K ? `<span class="lab-ok">${ic('check')} Correction officielle de la plateforme</span>` : `<span class="lab-warn">${ic('bulb')} Correction générée par IA · non vérifiée</span> <span class="small">Vérifie-la avec ton cours.</span>`}</p>` : ''}</div>
       </details>
     </section>
 
     <section class="co co-grp" id="grpSec">
       <div class="co-h"><span class="co-e" aria-hidden="true">👥</span>Réponses du groupe<span class="co-meta" id="grpMeta"></span></div>
       <div id="repList">${G ? `<div role="status" aria-label="Chargement des réponses">${SKEL(2, 'skel-card')}</div>` : '<p class="small">Les réponses des membres de ton groupe s’afficheront ici.</p>'}</div>
+    </section>
+
+    <section class="co co-sol" id="solSec">
+      <div class="co-h"><span class="co-e" aria-hidden="true">✍️</span>Solutions d’élèves<span class="co-meta">rédigées et publiées volontairement</span></div>
+      <div id="solList"></div>
     </section>
 
     <section class="co co-disc" id="discSec">
@@ -418,6 +429,7 @@ function renderCopy() {
   upd(); tick = setInterval(upd, 1000);
   renderRep(ex);
   if (G) { if (FIL[G + '|' + ex.id]) renderFil(ex, G); loadFil(ex.id, G).then(() => { if (CUR === ex.id) renderFil(ex, G); }); }
+  renderSolutions($('#solList'), ex, {locked, admin: api.isProf, me: api.user.id});
   $('#gSel') && ($('#gSel').onchange = e => { store.set('groupe', e.target.value); renderCopy(); });
   bindComForm(ex, G);
   $('#bHintAI') && ($('#bHintAI').onclick = () => ask(ex, 'indice'));
@@ -441,6 +453,7 @@ function renderCopy() {
     if (acc.open && K && !S.seen) { S.seen = true; presence({st: 'corrige'}); record(ex, {kind: 'solution'}); }
   });
   function unlockCorr() {
+    renderSolutions($('#solList'), ex, {locked: false, admin: api.isProf, me: api.user.id});
     delete acc.dataset.locked;
     acc.querySelector('summary .co-e').textContent = '📝';
     $('#corrHint').textContent = 'Touche pour afficher la correction';
@@ -603,13 +616,14 @@ async function renderFil(ex, G) {
       <div class="com-h"><b>${who(G, c.user_id)}</b>${c.public ? `<span class="badge pub" title="Visible par tous les membres connectés et sur le profil de l’auteur">${ic('users')} Public</span>` : ''}<span class="small">${ago(c.created_at)}${c.edited_at ? ' · modifié' : ''}${c.groupe_id !== G ? ' · autre groupe' : ''}</span>
         ${rn ? `<a class="ref" href="#rep-${esc(c.reponse_id)}" data-goto="${esc(c.reponse_id)}">↪ réponse de ${esc(rn)}</a>` : ''}</div>
       <div class="com-b">${rich(c.contenu)}</div>
-      <div class="com-act">${own ? `<button class="linkbtn" data-edit="${esc(c.id)}">Modifier</button>` : ''}${own || (c.groupe_id === G && canMod(G)) || api.isProf ? `<button class="linkbtn danger" data-delc="${esc(c.id)}">Supprimer</button>` : ''}</div>
+      <div class="com-act">${own ? `<button class="linkbtn" data-edit="${esc(c.id)}">Modifier</button>` : ''}${!own && c.public ? `<button class="linkbtn" data-sigc="${esc(c.id)}">Signaler</button>` : ''}${own || (c.groupe_id === G && canMod(G)) || api.isProf ? `<button class="linkbtn danger" data-delc="${esc(c.id)}">Supprimer</button>` : ''}</div>
     </div></div>`;
   }).join('') : '<p class="small">Aucun message. Pose une question ou propose une autre méthode.</p>';
   typeset([...cl.querySelectorAll('.com-b')]);
   cl.onclick = async e => {
     const a = e.target.closest('[data-goto]'); if (a) { e.preventDefault(); if (!visible) { $('#reveal')?.click(); } $('#rep-' + a.dataset.goto)?.scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
     const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.sigc) return openSignalement('commentaire', b.dataset.sigc);
     if (b.dataset.delc) { if (!confirm('Supprimer ce message ?')) return; try { await api.supprimerCommentaire(b.dataset.delc); await loadFil(ex.id, G); renderFil(ex, G); } catch (x) { notice(esc(x.message)); } }
     if (b.dataset.edit) {
       const c = coms.find(x => x.id === b.dataset.edit), body = $('#com-' + c.id + ' .com-b');
@@ -868,7 +882,7 @@ function renderSuivi() {
 let built = false;
 function renderProf(full) {
   if (!api.isProf) return;
-  if (!built || full) buildProf();
+  if (!built || full) { buildProf(); renderModeration($('#pMod')); }
   updateProf();
 }
 function buildProf() {
@@ -876,6 +890,7 @@ function buildProf() {
   $('#v-prof').innerHTML = `
     <div class="pagehead"><h2>Tableau de bord</h2><span class="small">${esc(CONFIG.NOM_PROF)} · ${new Date().toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'})}</span></div>
     <div class="stats" id="pStats"></div>
+    <h3 class="sec">${ic('key')} Modération <span class="small">signalements en attente</span></h3><div class="panel" style="padding:12px 16px" id="pMod"></div>
     <h3 class="sec">${ic('live')} En direct</h3><div class="live" id="pLive"></div>
     <div class="grid2">
       <div><h3 class="sec">${ic('users')} Élèves</h3>

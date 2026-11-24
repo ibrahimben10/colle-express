@@ -46,6 +46,7 @@ function demoProfil(ref, apercu, A) {
   if (!apercu || p.vis_collections !== false) o.collections = ls.get('demo-coll', []).filter(c => !apercu || c.public).map(c => ({id: c.id, titre: c.titre, description: c.description, public: c.public, n: c.items.length}));
   if (!apercu || p.vis_carnet !== false) o.carnet = ls.get('demo-carnet', []).filter(c => c.public).map(c => ({id: c.id, type: c.type, titre: c.titre, contenu: c.contenu, ex: c.exercice_id, d: c.created_at}));
   o.objectifs = demoObjectifs().filter(x => x.partage && !x.archive);
+  Object.assign(o, {abonnes: 0, abonnements: 0, je_suis: false, annuaire: !!p.annuaire, solutions: ls.get('demo-sol', []).filter(x => x.user_id === 'demo').map(x => ({id: x.id, ex: x.exercice_id, d: x.created_at, verifiee: x.verifiee, statut: x.statut}))});
   if (!apercu || p.vis_badges !== false) {
     const b = [['premier_pas', 'Premier pas', 'Soumettre sa première réponse sur l’honneur', o.termines?.length || 0, 1], ['explorateur', 'Explorateur', 'Travailler des exercices dans 5 chapitres différents', 0, 5], ['regularite', 'Régularité', 'Travailler 7 jours d’affilée', 0, 7]]
       .map(([id, titre, critere, val, cible]) => ({id, titre, critere, val, cible}));
@@ -190,7 +191,7 @@ export const api = {
   // Profil éditable de l'utilisateur connecté (ligne de la table "profils")
   async monProfil() {
     if (DEMO) return ls.get('demo-profil', {user_id: 'demo', username: 'demo', bio: '', etablissement: '', filiere: '', annee: null, matieres: [], objectif: '',
-      lien_github: '', lien_linkedin: '', lien_site: '', public: false, vis_stats: true, vis_activite: true, vis_parcours: true, vis_favoris: true, vis_commentaires: true, vis_etoiles: true, vis_collections: true, vis_carnet: true, vis_badges: true});
+      lien_github: '', lien_linkedin: '', lien_site: '', public: false, vis_stats: true, vis_activite: true, vis_parcours: true, vis_favoris: true, vis_commentaires: true, vis_etoiles: true, vis_collections: true, vis_carnet: true, vis_badges: true, annuaire: false});
     const { data, error } = await sb.from('profils').select('*').eq('user_id', this.user.id).maybeSingle();
     if (error) throw new Error(errFr(error));
     return data;
@@ -314,6 +315,65 @@ export const api = {
   async supprimerObjectif(id) {
     if (DEMO) { ls.set('demo-obj', ls.get('demo-obj', []).filter(x => x.id !== id)); return; }
     const { error } = await sb.from('objectifs').delete().eq('id', id); if (error) throw new Error(errFr(error));
+  },
+
+  /* ---------- communauté ---------- */
+  async annuaire(f = {}, page = 0) {
+    if (DEMO) { const p = ls.get('demo-profil', {}); return p.public && p.annuaire ? [{id: 'demo', username: p.username || 'demo', nom: this.profile.full_name, photo: '', filiere: p.filiere || '', annee: p.annee, etablissement: p.etablissement || '', matieres: p.matieres || [], bio: p.bio || '', collections: 0, abonnes: 0, suivi: false}] : []; }
+    const { data, error } = await sb.rpc('annuaire', {p_q: f.q || '', p_filiere: f.filiere || '', p_matiere: f.matiere || '', p_etab: f.etab || '', p_collections: !!f.collections, p_suivis: !!f.suivis, p_page: page});
+    if (error) throw new Error(errFr(error)); return data || [];
+  },
+  async suivre(id, oui) {
+    if (DEMO) throw new Error('Les abonnements nécessitent Supabase.');
+    const r = oui ? await sb.from('abonnements').insert({suiveur_id: this.user.id, suivi_id: id}) : await sb.from('abonnements').delete().eq('suiveur_id', this.user.id).eq('suivi_id', id);
+    if (r.error && r.error.code !== '23505') throw new Error(/row-level/.test(r.error.message) ? 'Ce profil n’est pas public.' : errFr(r.error));
+  },
+  async filAbonnements() {
+    if (DEMO) return [];
+    const { data, error } = await sb.rpc('fil_abonnements', {p_limite: 50}); if (error) throw new Error(errFr(error)); return data || [];
+  },
+  /* solutions publiées par des élèves */
+  async solutions(exId) {
+    if (DEMO) { const L = ls.get('demo-sol', []).filter(x => x.exercice_id === exId); const C = ls.get('demo-solcom', []); return L.map(x => ({...x, commentaires: C.filter(c => c.solution_id === x.id)})); }
+    const { data, error } = await sb.from('solutions').select('*, solution_commentaires(*)').eq('exercice_id', exId).order('created_at');
+    if (error) throw new Error(errFr(error));
+    return (data || []).map(x => ({...x, commentaires: (x.solution_commentaires || []).sort((a, b) => a.created_at.localeCompare(b.created_at))}));
+  },
+  async publierSolution(exId, contenu, id) {
+    if (DEMO) { const L = ls.get('demo-sol', []); if (id) Object.assign(L.find(x => x.id === id), {contenu, verifiee: false, updated_at: new Date().toISOString()}); else L.push({id: uid4(), exercice_id: exId, user_id: 'demo', contenu, statut: 'publiee', verifiee: false, created_at: new Date().toISOString()}); ls.set('demo-sol', L); return; }
+    const r = id ? await sb.from('solutions').update({contenu}).eq('id', id) : await sb.from('solutions').insert({exercice_id: exId, contenu});
+    if (r.error) throw new Error(r.error.code === '23505' ? 'Tu as déjà publié une solution pour cet exercice : modifie-la.' : r.error.code === '23514' ? 'Solution trop courte (20 caractères au moins).' : /Trop de/.test(r.error.message) ? r.error.message : errFr(r.error));
+  },
+  async majSolution(id, champs) {   // administrateur : vérifier, masquer, rétablir
+    if (DEMO) { const L = ls.get('demo-sol', []); Object.assign(L.find(x => x.id === id) || {}, champs); ls.set('demo-sol', L); return; }
+    const { error } = await sb.from('solutions').update(champs).eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  async supprimerSolution(id) {
+    if (DEMO) { ls.set('demo-sol', ls.get('demo-sol', []).filter(x => x.id !== id)); return; }
+    const { error } = await sb.from('solutions').delete().eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  async commenterSolution(sid, contenu, type = 'commentaire') {
+    if (DEMO) { const C = ls.get('demo-solcom', []); C.push({id: uid4(), solution_id: sid, user_id: 'demo', type, contenu, created_at: new Date().toISOString()}); ls.set('demo-solcom', C); return; }
+    const { error } = await sb.from('solution_commentaires').insert({solution_id: sid, contenu, type});
+    if (error) throw new Error(/Trop de/.test(error.message) ? error.message : errFr(error));
+  },
+  async supprimerSolCom(id) {
+    if (DEMO) { ls.set('demo-solcom', ls.get('demo-solcom', []).filter(x => x.id !== id)); return; }
+    const { error } = await sb.from('solution_commentaires').delete().eq('id', id); if (error) throw new Error(errFr(error));
+  },
+  /* signalements et modération */
+  async signaler(type, id, motif, details = '') {
+    if (DEMO) { const L = ls.get('demo-sig', []); L.push({cible_type: type, cible_id: id, motif, details}); ls.set('demo-sig', L); return; }
+    const { error } = await sb.from('signalements').insert({cible_type: type, cible_id: String(id), motif, details});
+    if (error) throw new Error(error.code === '23505' ? 'Tu as déjà signalé ce contenu : l’administrateur va l’examiner.' : /Trop de/.test(error.message) ? error.message : errFr(error));
+  },
+  async moderationFile() {
+    if (DEMO) { const L = ls.get('demo-sig', []); return L.map(s => ({...s, n: 1, motifs: [s.motif], details: s.details ? [s.details] : [], extrait: '', dernier: new Date().toISOString()})); }
+    const { data, error } = await sb.rpc('moderation_file'); if (error) throw new Error(errFr(error)); return data || [];
+  },
+  async moderer(type, id, action) {
+    if (DEMO) { ls.set('demo-sig', ls.get('demo-sig', []).filter(s => !(s.cible_type === type && s.cible_id === id))); return; }
+    const { error } = await sb.rpc('moderer', {p_type: type, p_id: String(id), p_action: action}); if (error) throw new Error(errFr(error));
   },
 
   /* ---------- suivi ---------- */
