@@ -37,7 +37,7 @@ export const CONFIG = {
     ],
     pourquoi: [
       'Des énoncés de type oral, classés par niveau : CCINP, Mines-Centrale, X-ENS.',
-      'Des réponses sur l’honneur, notées sur 10 par les membres de ton groupe.',
+      'Des réponses sur l’honneur, notées sur 20 par les membres de ton groupe.',
       'Des indices progressifs plutôt que la réponse, puis un corrigé détaillé.',
       'Un suivi personnel pour savoir quoi retravailler.',
     ],

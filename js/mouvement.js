@@ -73,7 +73,7 @@ function success(el) {
   const seen = store.get('cele', []); if (seen.includes(id)) return;
   store.set('cele', [...seen, id].slice(-500));
   buzz([10, 40, 18]);
-  if (!reduce()) celebrate(el, 'Exercice réussi : tes pairs t’ont donné au moins 6/10.');
+  if (!reduce()) celebrate(el, 'Exercice réussi : tes pairs t’ont donné au moins 12/20.');
 }
 
 /* ---------- l'observateur ---------- */

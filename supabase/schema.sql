@@ -320,14 +320,24 @@ drop trigger if exists reponses_avant_insert on public.reponses;
 create trigger reponses_avant_insert before insert on public.reponses
   for each row execute function public.reponse_avant_insert();
 
--- 8. Notes de 0 à 10 par les pairs --------------------------------------------
+-- 8. Notes de 0 à 20 par les pairs --------------------------------------------
 create table if not exists public.notes (
   reponse_id    uuid not null references public.reponses(id) on delete cascade,
   evaluateur_id uuid not null default auth.uid() references public.profiles(id) on delete cascade,
-  note          smallint not null check (note between 0 and 10),
+  note          smallint not null check (note between 0 and 20),
   updated_at    timestamptz not null default now(),
   primary key (reponse_id, evaluateur_id)
 );
+-- Passage des notes de /10 à /20 (une seule fois : les notes existantes sont doublées).
+do $$ declare c text; begin
+  select conname into c from pg_constraint where conrelid = 'public.notes'::regclass and contype = 'c'
+    and pg_get_constraintdef(oid) like '%<= 10)%';
+  if c is not null then
+    execute format('alter table public.notes drop constraint %I', c);
+    update public.notes set note = note * 2;
+    alter table public.notes add constraint notes_note_check check (note between 0 and 20);
+  end if;
+end $$;
 
 create or replace function public.groupe_de_reponse(r uuid) returns uuid
 language sql stable security definer set search_path = public as $$
@@ -716,7 +726,7 @@ begin
       'sans_aide', (select coalesce(jsonb_agg(distinct exercice_id), '[]') from public.reponses where user_id = u and not aide_consultee),
       'reussis',   (select coalesce(jsonb_agg(distinct r2.exercice_id), '[]') from public.reponses r2
                      where r2.user_id = u and (select count(*) from public.notes n where n.reponse_id = r2.id) >= 2
-                       and (select avg(n.note) from public.notes n where n.reponse_id = r2.id) >= 6));
+                       and (select avg(n.note) from public.notes n where n.reponse_id = r2.id) >= 12));
   end if;
   if tout or pr.vis_activite then
     r := r || jsonb_build_object('jours', (select coalesce(jsonb_agg(jsonb_build_object('j', jour, 'ids', ids) order by jour), '[]') from (
@@ -1226,7 +1236,7 @@ begin
   select count(distinct exercice_id) into sans_aide from public.reponses where user_id = u and not aide_consultee;
   select count(distinct r.exercice_id) into reussis from public.reponses r
     where r.user_id = u and (select count(*) from public.notes n where n.reponse_id = r.id) >= 2
-      and (select avg(n.note) from public.notes n where n.reponse_id = r.id) >= 6;
+      and (select avg(n.note) from public.notes n where n.reponse_id = r.id) >= 12;
   with t as (select distinct exercice_id from public.activite where user_id = u and kind in ('indice','reponse')
              union select exercice_id from public.reponses where user_id = u)
   select count(distinct x.chap), (select count(*) from (select x2.dom from t t2 cross join lateral public.ex_meta(t2.exercice_id) x2 group by x2.dom having count(*) >= 3) d)
@@ -1246,7 +1256,7 @@ begin
     jsonb_build_object('id','explorateur','titre','Explorateur','critere','Travailler des exercices dans 5 chapitres différents','val',chapitres,'cible',5),
     jsonb_build_object('id','polyvalent','titre','Polyvalent','critere','Travailler au moins 3 exercices dans 3 domaines différents','val',domaines3,'cible',3),
     jsonb_build_object('id','autonome','titre','Autonome','critere','Soumettre 10 réponses sans avoir consulté d’indice ni de corrigé','val',sans_aide,'cible',10),
-    jsonb_build_object('id','reconnu','titre','Reconnu par ses pairs','critere','5 exercices réussis : au moins 2 notes de camarades, moyenne ≥ 6/10','val',reussis,'cible',5),
+    jsonb_build_object('id','reconnu','titre','Reconnu par ses pairs','critere','5 exercices réussis : au moins 2 notes de camarades, moyenne ≥ 12/20','val',reussis,'cible',5),
     jsonb_build_object('id','perseverant','titre','Persévérant','critere','Retravailler 5 exercices notés « à refaire » ou « difficile » dans son carnet, au moins un jour plus tard','val',refaits,'cible',5),
     jsonb_build_object('id','specialiste','titre','Passionné · ' || coalesce(meilleur.dom, 'un domaine'),'critere','Terminer 15 exercices d’un même domaine','val',coalesce(meilleur.n, 0),'cible',15),
     jsonb_build_object('id','contributeur','titre','Contributeur','critere','Envoyer un sujet d’oral en PDF pour enrichir la plateforme','val',contrib,'cible',1));

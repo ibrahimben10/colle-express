@@ -136,7 +136,7 @@ function statsHTML(S, p) {
       <dt>Consulté</dt><dd>l’énoncé a été ouvert.</dd>
       <dt>Travaillé</dt><dd>un indice a été demandé ou une réponse soumise.</dd>
       <dt>Terminé</dt><dd>une réponse a été soumise sur l’honneur dans un groupe.</dd>
-      <dt>Réussi</dt><dd>cette réponse a reçu au moins 2 notes de camarades, avec une moyenne d’au moins 6/10. Ouvrir le corrigé ne compte jamais comme une réussite.</dd>
+      <dt>Réussi</dt><dd>cette réponse a reçu au moins 2 notes de camarades, avec une moyenne d’au moins 12/20. Ouvrir le corrigé ne compte jamais comme une réussite.</dd>
       <dt>Sans aide</dt><dd>réponse soumise sans avoir consulté d’indice ni le corrigé avant.</dd></dl></details>`;
 }
 

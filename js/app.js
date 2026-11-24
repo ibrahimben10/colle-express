@@ -412,7 +412,7 @@ function renderCopy() {
         <div><b>${ic('pen')} 1. Cherche</b><span class="small">Sur papier, comme au tableau, en surveillant le chrono.</span></div>
         <div><b>${ic('bulb')} 2. Débloque-toi</b><span class="small">Un indice pour avancer ? Puis la correction, une étape à la fois si tu préfères.</span></div>
         <div><b>${ic('users')} 3. Soumets</b><span class="small">Ta réponse, sur l’honneur, devient visible par ton groupe.</span></div>
-        <div><b>${ic('msg')} 4. Évalue</b><span class="small">Note les réponses des autres sur 10, puis compare avec une rédaction de concours.</span></div>
+        <div><b>${ic('msg')} 4. Évalue</b><span class="small">Note les réponses des autres sur 20, puis compare avec une rédaction de concours.</span></div>
       </div>
       ${sel.length ? `<h3 class="sec">${ic('star')} Sélection recommandée</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}</div>`;
     el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openEx(b.dataset.open));
@@ -437,7 +437,7 @@ function renderCopy() {
       <button class="iconbtn" id="bNote" title="Ajouter au carnet de progression">${ic('pen')}<span class="lbl">Carnet</span></button>
       <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button>
       <button class="iconbtn" id="bFocus" aria-pressed="${document.body.classList.contains('focus')}" title="Mode concentration : masque tout le reste (Échap pour sortir)">${ic('target')}<span class="lbl">Concentration</span></button></div></div>
-    ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 6/10)' : mine(ex.id) ? 'Réponse soumise' : 'En cours'}</div>` : ''}
+    ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 12/20)' : mine(ex.id) ? 'Réponse soumise' : 'En cours'}</div>` : ''}
 
     <section class="co co-enonce">
       <div class="co-h"><span class="co-e" aria-hidden="true">📘</span>Énoncé<span class="co-meta">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree} min</span></div>
@@ -554,14 +554,14 @@ async function loadGroups() {
   try { [GROUPS, MES] = await Promise.all([api.groupes(), api.mesReponses()]); } catch (e) { GROUPS = []; MES = []; notice(esc(e.message)); }
   syncNotes();
 }
-// La moyenne reçue des pairs alimente le suivi : réussi si au moins 2 notes et moyenne ≥ 6/10.
+// La moyenne reçue des pairs alimente le suivi : réussi si au moins 2 notes et moyenne ≥ 12/20.
 function syncNotes() {
   SUIVI.ex ||= {}; let ch = false;
   const best = {};
-  for (const r of MES) { const m = moy(r.notes); best[r.exercice_id] = Math.max(best[r.exercice_id] ?? -1, m ?? -1); if ((r.notes?.length || 0) >= 2 && m >= 6) best[r.exercice_id + '!'] = 1; }
+  for (const r of MES) { const m = moy(r.notes); best[r.exercice_id] = Math.max(best[r.exercice_id] ?? -1, m ?? -1); if ((r.notes?.length || 0) >= 2 && m >= 12) best[r.exercice_id + '!'] = 1; }
   for (const r of MES) {
     const id = r.exercice_id, st = SUIVI.ex[id] ||= {s: 'en_cours', e: 1, i: 0, sc: 0, d: Date.parse(r.created_at) || now(), t: 0};
-    const sc = best[id] >= 0 ? Math.round(best[id] * 10) : 0;
+    const sc = best[id] >= 0 ? Math.round(best[id] * 5) : 0;
     if (st.sc !== sc) { st.sc = sc; ch = true; }
     if (best[id + '!'] && st.s !== 'reussi') { st.s = 'reussi'; ch = true; }
   }
@@ -591,7 +591,7 @@ function renderRep(ex) {
     const m = moy(r.notes), n = r.notes?.length || 0;
     box.innerHTML = `<div class="sub-ok">${ic('check')}<div><b>Réponse soumise sur l’honneur</b> le ${fmtDate(r.created_at)}
       <span class="small">Visible par les ${g.n} membres de « ${esc(g.nom)} » · non modifiable</span></div>
-      <div class="avg-big" title="Moyenne des notes reçues"><b>${fmtNote(m)}</b><span>/10</span><small>${n} note${n > 1 ? 's' : ''}</small></div></div>
+      <div class="avg-big" title="Moyenne des notes reçues"><b>${fmtNote(m)}</b><span>/20</span><small>${n} note${n > 1 ? 's' : ''}</small></div></div>
       <a class="btn wide" href="#rep-${esc(r.id)}" id="seeMine">${ic('eye')} Voir ma réponse et les autres</a>`;
     $('#seeMine').onclick = e => { e.preventDefault(); $('#rep-' + r.id)?.scrollIntoView({behavior: 'smooth', block: 'start'}); };
     return;
@@ -658,8 +658,8 @@ async function renderFil(ex, G) {
         ${r.contenu ? `<div class="rep-body">${rich(r.contenu)}</div>` : ''}
         ${r.photos?.length ? `<div class="thumbs">${r.photos.map((p, i) => `<a class="thumb" data-ph="${esc(p)}" target="_blank" rel="noopener"><img alt="Photo ${i + 1} de la réponse"></a>`).join('')}</div>` : ''}
         <div class="rate">
-          <div class="avg" title="Moyenne des pairs">${m == null ? '<span class="small">Pas encore notée</span>' : `<b>${fmtNote(m)}</b>/10 <span class="small">· ${ns.length} note${ns.length > 1 ? 's' : ''}</span>`}</div>
-          ${member && !own ? `<div class="scale" role="group" aria-label="Ta note sur 10 pour ${esc(nameOf(G, r.user_id))}">${[...Array(11).keys()].map(n => `<button data-rate="${n}" data-r="${esc(r.id)}" aria-pressed="${my === n}" title="${my === n ? 'Retirer ma note' : 'Noter ' + n + '/10'}">${n}</button>`).join('')}</div>`
+          <div class="avg" title="Moyenne des pairs">${m == null ? '<span class="small">Pas encore notée</span>' : `<b>${fmtNote(m)}</b>/20 <span class="small">· ${ns.length} note${ns.length > 1 ? 's' : ''}</span>`}</div>
+          ${member && !own ? `<div class="scale" role="group" aria-label="Ta note sur 20 pour ${esc(nameOf(G, r.user_id))}">${[...Array(21).keys()].map(n => `<button data-rate="${n}" data-r="${esc(r.id)}" aria-pressed="${my === n}" title="${my === n ? 'Retirer ma note' : 'Noter ' + n + '/20'}">${n}</button>`).join('')}</div>`
             : own ? '<span class="small">Tu ne peux pas noter ta propre réponse.</span>' : ''}
         </div>
         <div class="rep-act">${member ? `<button class="linkbtn" data-reply="${esc(r.id)}">${ic('msg')} Commenter</button>` : ''}
@@ -803,7 +803,7 @@ async function renderGroupeDetail(gid) {
       </tbody></table></div>
       <h4>${ic('clock')} Dernières réponses</h4>
       <div class="glist">${recent.map(r => { const e = byId(r.exercice_id); return `<a class="item" href="#ex-${esc(r.exercice_id)}"><span class="t">${esc(e?.titre || r.exercice_id)}</span>
-        <span class="avgpill">${fmtNote(moy(r.notes))}/10</span><span class="m">${esc(nameOf(gid, r.user_id))} · ${ago(r.created_at)}${r.aide_consultee ? ' · aide consultée' : ''}</span></a>`; }).join('') || '<div class="empty">Aucune réponse soumise pour l’instant.</div>'}</div>
+        <span class="avgpill">${fmtNote(moy(r.notes))}/20</span><span class="m">${esc(nameOf(gid, r.user_id))} · ${ago(r.created_at)}${r.aide_consultee ? ' · aide consultée' : ''}</span></a>`; }).join('') || '<div class="empty">Aucune réponse soumise pour l’instant.</div>'}</div>
       <div class="gactions">${g.role ? `<button class="btn" id="gLeave">${ic('logout')} Quitter le groupe</button>` : ''}${resp ? `<button class="btn danger" id="gDel">${ic('trash')} Supprimer le groupe</button>` : ''}</div>
       <span class="small err" id="gErr"></span>
     </div>`;
@@ -985,7 +985,7 @@ function renderSuivi() {
         <div class="bar" style="grid-template-columns:minmax(0,1fr);margin-top:10px"><span class="tr"><i style="width:${atL.length ? 100 * ok / atL.length : 0}%;background:var(--green)"></i></span></div></div>
       <div class="stats">
         <div class="panel stat"><div class="k">${ic('pen')} Réponses soumises</div><div class="v">${MES.length}</div></div>
-        <div class="panel stat"><div class="k">${ic('star')} Note moyenne reçue</div><div class="v">${fmtNote(moy(MES.flatMap(r => r.notes || [])))}<span style="font-size:.5em"> /10</span></div></div>
+        <div class="panel stat"><div class="k">${ic('star')} Note moyenne reçue</div><div class="v">${fmtNote(moy(MES.flatMap(r => r.notes || [])))}<span style="font-size:.5em"> /20</span></div></div>
         <div class="panel stat"><div class="k">${ic('bulb')} Indices demandés</div><div class="v">${tot('i')}</div></div>
         <div class="panel stat"><div class="k">${ic('clock')} Temps de travail</div><div class="v">${Math.round(tot('t') / 60)}<span style="font-size:.5em"> min</span></div></div>
         <div class="panel stat"><div class="k">${ic('target')} Exercices commencés</div><div class="v">${exs.length}</div></div>
@@ -1000,7 +1000,7 @@ function renderSuivi() {
     <div class="panel" style="padding:8px">${favs().map(byId).filter(Boolean).map(e => `<button class="item" data-open="${esc(e.id)}"><span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span><span class="t">${esc(e.titre)}</span><span></span><span class="m">${LV[e.niveau]} · ${esc(e.chap)} · ${e.duree} min</span></button>`).join('') || `<div class="empty">Aucun exercice enregistré. Appuie sur ${ic('heart')} dans un exercice pour le retrouver ici.</div>`}</div>
     <h3 class="sec">${ic('clock')} Historique</h3>
     <div class="panel scroll"><table class="stack"><thead><tr><th>Date</th><th>Exercice</th><th>Action</th><th class="r">Note</th></tr></thead><tbody>
-    ${(s.journal || []).map(j => `<tr><td>${fmtDate(j.d)}</td><td>${esc(byId(j.id)?.titre || j.id)}</td><td>${j.k === 'reponse' ? 'Réponse soumise sur l’honneur' : j.k === 'copie' ? 'Copie : ' + esc({juste: 'juste', partiel: 'partielle', faux: 'erreur', illisible: 'illisible'}[j.v] || j.v) : j.k === 'indice' ? 'Indice' : 'Corrigé consulté'}</td><td class="r">${j.k === 'reponse' ? (() => { const r = mine(j.id); const m = r && moy(r.notes); return m != null ? fmtNote(m) + '/10' : ''; })() : j.sc != null ? j.sc + ' %' : ''}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Pas encore d’activité.</td></tr>'}
+    ${(s.journal || []).map(j => `<tr><td>${fmtDate(j.d)}</td><td>${esc(byId(j.id)?.titre || j.id)}</td><td>${j.k === 'reponse' ? 'Réponse soumise sur l’honneur' : j.k === 'copie' ? 'Copie : ' + esc({juste: 'juste', partiel: 'partielle', faux: 'erreur', illisible: 'illisible'}[j.v] || j.v) : j.k === 'indice' ? 'Indice' : 'Corrigé consulté'}</td><td class="r">${j.k === 'reponse' ? (() => { const r = mine(j.id); const m = r && moy(r.notes); return m != null ? fmtNote(m) + '/20' : ''; })() : j.sc != null ? j.sc + ' %' : ''}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Pas encore d’activité.</td></tr>'}
     </tbody></table></div>
     <a class="panel cta" href="#envoyer">${ic('upload')}<span><b>Tu as passé un oral ?</b><span class="small">Envoie ton sujet en PDF pour enrichir la plateforme.</span></span></a>`;
   $('#phChange').onclick = pickPhoto;
@@ -1113,7 +1113,7 @@ function studentDialog(id) {
     <h3 class="sec" style="font-size:20px">Chapitres (${LV[lvl]})</h3><div class="bars" style="padding:0">${bars(chapStats(lvl, d))}</div>
     <h3 class="sec" style="font-size:20px">Exercices travaillés</h3>
     <div class="scroll"><table class="stack"><thead><tr><th>Exercice</th><th>Statut</th><th class="r">Réponses</th><th class="r">Indices</th><th class="r">Note</th><th>Date</th></tr></thead><tbody>
-    ${Object.entries(d.ex || {}).sort((a, b) => b[1].d - a[1].d).map(([eid, v]) => `<tr><td>${esc(byId(eid)?.titre || eid)}</td><td>${v.s === 'reussi' ? '✓ réussi' : 'en cours'}${v.vu ? ' · corrigé vu' : ''}</td><td class="r">${v.e || 0}</td><td class="r">${v.i || 0}</td><td class="r">${v.sc ? fmtNote(v.sc / 10) + '/10' : '—'}</td><td>${fmtDate(v.d)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Rien encore.</td></tr>'}
+    ${Object.entries(d.ex || {}).sort((a, b) => b[1].d - a[1].d).map(([eid, v]) => `<tr><td>${esc(byId(eid)?.titre || eid)}</td><td>${v.s === 'reussi' ? '✓ réussi' : 'en cours'}${v.vu ? ' · corrigé vu' : ''}</td><td class="r">${v.e || 0}</td><td class="r">${v.i || 0}</td><td class="r">${v.sc ? fmtNote(v.sc / 5) + '/20' : '—'}</td><td>${fmtDate(v.d)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Rien encore.</td></tr>'}
     </tbody></table></div>`;
   $('#dLvl').onchange = async e => { try { await api.setLevel(id, +e.target.value); c.niveau = +e.target.value; updateProf(); } catch { notice('Modification impossible.'); } };
   $('#dlg').showModal();

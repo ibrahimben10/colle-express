@@ -119,7 +119,7 @@ Format d’un exercice dans `data/exercices.json` :
 **À faire une fois** : recolle **tout** `supabase/schema.sql` dans *SQL Editor* → *Run*. Le script peut être relancé sans risque. Il crée un profil pour chaque compte existant, avec un identifiant tiré du nom (`chloe_martin`), et reprend l'historique **réel** : réponses déjà soumises et journal de suivi.
 
 - **Confidentialité** : chaque profil est **privé par défaut**. Rendu public, il n'est visible que des **membres connectés**, jamais d'Internet. Statistiques, carte d'activité, parcours, favoris, commentaires publics et étoiles se masquent un par un. L'e-mail n'est jamais affiché. « Voir comme les autres » montre exactement ce que voient les autres membres.
-- **Comptage** : *consulté* = énoncé ouvert ; *travaillé* = indice demandé ou réponse soumise ; *terminé* = réponse soumise sur l'honneur ; *réussi* = au moins 2 notes de camarades avec une moyenne ≥ 6/10 ; *sans aide* = soumis sans indice ni corrigé. Ouvrir le corrigé n'est jamais une réussite. Le navigateur ne peut ni antidater une activité ni écrire pour un autre élève.
+- **Comptage** : *consulté* = énoncé ouvert ; *travaillé* = indice demandé ou réponse soumise ; *terminé* = réponse soumise sur l'honneur ; *réussi* = au moins 2 notes de camarades avec une moyenne ≥ 12/20 ; *sans aide* = soumis sans indice ni corrigé. Ouvrir le corrigé n'est jamais une réussite. Le navigateur ne peut ni antidater une activité ni écrire pour un autre élève.
 - **Étoiles (1 à 5)** : une note par membre et par profil, impossible de se noter soi-même ou de noter un profil privé. Les auteurs restent anonymes : un élève ne voit que ses propres notes. La moyenne n'apparaît qu'à partir de 3 notes. L'administrateur voit qui a noté et peut supprimer une note abusive (« Modération des étoiles » sur le profil).
 - **Commentaires** : sous chaque exercice, l'auteur choisit *Groupe* (privé) ou *Public* (tous les membres + son profil). Une réponse à la réponse d'un camarade reste dans le groupe. La visibilité ne peut plus changer après publication.
 - **Contributions** : l'envoi d'un sujet PDF part toujours vers l'adresse fixe `ENVOI_EMAIL` de `js/config.js`, que les élèves ne peuvent pas modifier. Le profil affiche seulement le nombre de sujets envoyés.
@@ -190,7 +190,7 @@ Règles garanties par la base (et non seulement par l’interface) :
 - on ne peut pas noter sa propre réponse ; les notes sont des entiers de 0 à 10, modifiables ou retirables par leur auteur ;
 - un commentaire ne peut être modifié que par son auteur, et supprimé par lui ou par un modérateur.
 
-Dans le suivi, un exercice est marqué **réussi** quand la réponse a reçu au moins 2 notes et une moyenne d’au moins 6/10.
+Dans le suivi, un exercice est marqué **réussi** quand la réponse a reçu au moins 2 notes et une moyenne d’au moins 12/20.
 
 ## Application installable (téléphone et ordinateur)
 

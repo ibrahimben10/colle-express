@@ -37,7 +37,7 @@ function demoProfil(ref, apercu, A) {
     vus: uniq(act.filter(a => a.kind === 'vu').map(a => a.exercice_id)),
     travailles: uniq(act.filter(a => a.kind === 'indice' || a.kind === 'reponse').map(a => a.exercice_id).concat(mes.map(r => r.exercice_id))),
     termines: uniq(mes.map(r => r.exercice_id)), sans_aide: uniq(mes.filter(r => !r.aide_consultee).map(r => r.exercice_id)),
-    reussis: uniq(mes.filter(r => { const n = d.notes.filter(x => x.reponse_id === r.id); return n.length >= 2 && n.reduce((a, x) => a + x.note, 0) / n.length >= 6; }).map(r => r.exercice_id))});
+    reussis: uniq(mes.filter(r => { const n = d.notes.filter(x => x.reponse_id === r.id); return n.length >= 2 && n.reduce((a, x) => a + x.note, 0) / n.length >= 12; }).map(r => r.exercice_id))});
   if (vis('activite')) o.jours = Object.entries(jours).map(([j, s]) => ({j, ids: [...s]})).sort((a, b) => a.j.localeCompare(b.j));
   if (vis('favoris')) o.favoris = Array.isArray(sv.fav) ? sv.fav : [];
   if (vis('commentaires')) o.commentaires = d.coms.filter(c => c.user_id === 'demo' && c.public).map(c => ({id: c.id, ex: c.exercice_id, contenu: c.contenu, d: c.created_at})).reverse();
