@@ -39,7 +39,53 @@ body{background-color:#eef2f8}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#0a1a4a;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;max-width:90vw;opacity:1;display:block}.toast::before{display:none}
 .toast:empty{display:none}
 @media(max-width:700px){.sheet{margin:0;border-radius:0;border:0;padding:20px 16px 20px 34px}.sheet::before{left:18px}.sheet h1{font-size:26px}.bar .lbl{display:none}.sh-head .lvl{display:none}}
-@media print{.bar,.toast,.noprint,.chev{display:none}details.acc>summary small{display:none}.co{break-inside:auto}.sheet{background-image:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{background:#fff}.sheet{box-shadow:none;border:0;margin:0;max-width:none;padding:0 0 0 28px}.sheet::before{left:8px}@page{margin:14mm}}
+/* ---------- PDF / impression : une vraie feuille de corrigé, aérée et sans cadres superflus ---------- */
+@media print{
+  @page{size:A4;margin:15mm 14mm 17mm 14mm;
+    @bottom-left{content:"Colle express · corrigé détaillé";font:8.5pt Manrope,sans-serif;color:#5b6782}
+    @bottom-right{content:counter(page) " / " counter(pages);font:8.5pt Manrope,sans-serif;color:#5b6782}}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{background:#fff!important}
+  .bar,.toast,.noprint,.chev,.co-e,.sh-foot,details.acc>summary small{display:none!important}
+  .sheet{max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;background:none;font-size:10.5pt;line-height:1.5}
+  .sheet::before{display:none}
+  .sh-head{border-bottom:1.6pt solid #2f5bff;padding-bottom:7pt;margin-bottom:12pt}
+  .sh-head .crest{height:34px}.sh-head b{font-size:16pt}
+  .sheet h1{font-size:21pt;line-height:1.15;margin:0 0 12pt;letter-spacing:-.02em}
+  .sheet .co{border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;padding:0!important;margin:0 0 14pt!important;break-inside:auto!important}
+  .sheet .co::before,.sheet .co::after{display:none!important}
+  .sheet .co-h{display:flex;align-items:baseline;gap:8pt;font-size:10pt;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#2f5bff;
+    border-bottom:.8pt solid #c9d4ea;padding:0 0 3pt;margin:0 0 7pt;break-after:avoid}
+  .sheet .co-meta{margin-left:auto;font-size:8.5pt;font-weight:600;letter-spacing:0;text-transform:none;color:#5b6782}
+  .enonce{font-size:11pt}
+  .sheet .fig{max-width:320px;margin:8pt auto;break-inside:avoid}
+  /* indices : deux lignes sobres */
+  .sheet details.acc{border:0!important;background:none!important;box-shadow:none!important;margin:0 0 6pt!important;padding:0!important}
+  .sheet details.hint-acc{break-inside:avoid}
+  .sheet,.sheet>*:last-child{margin-bottom:0!important;padding-bottom:0!important}
+  .sheet details.hint-acc>summary{display:flex;gap:6pt;align-items:center;padding:0!important;min-height:0;font-size:9.5pt;cursor:default}
+  .sheet details.hint-acc>summary .hn{width:15pt;height:15pt;font-size:8pt}
+  .sheet details.hint-acc .acc-body{padding:2pt 0 0 21pt!important;font-size:10pt;color:#334}
+  /* correction : le titre devient un intitulé de section */
+  .sheet details.corr-acc>summary{display:block;padding:0!important;margin:0 0 8pt;font-size:10pt;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#1d7a4b;border-bottom:.8pt solid #c9d4ea;padding-bottom:3pt!important}
+  .sheet details.corr-acc>summary .acc-t b{font:inherit;color:inherit}
+  .sheet .acc-body{padding:0!important;border:0!important}
+  .result{break-inside:avoid;border:1pt solid #9fcfb5!important;background:#f1f9f4!important;border-radius:8pt;padding:7pt 10pt!important;margin:0 0 10pt}
+  .corrige{font-size:10.5pt;line-height:1.5}
+  .corrige .step,.step{break-inside:auto!important;page-break-inside:auto!important}
+  .corrige .step h4,.corrige h5.sub{break-after:avoid;page-break-after:avoid}
+  .corrige .step.etape{margin:13pt 0 0;padding-left:30pt}
+  .corrige .step.etape::before{top:28px}
+  .corrige .step.etape h4{font-size:12pt;min-height:24px;margin-bottom:5pt}
+  .corrige .step.etape h4 .en{width:22px;height:22px;font-size:10.5pt;box-shadow:none}
+  .corrige .e6{break-inside:avoid;padding:9pt 10pt 9pt 40pt!important;border:1pt solid #b9dcc8}
+  .corrige .e6 h4 .en{left:9pt;top:9pt}
+  .callout{break-inside:avoid;padding:6pt 9pt;margin:6pt 0;border-radius:7pt}
+  .callout-t{font-size:8.5pt}
+  .co-bilan{break-inside:avoid-page}
+  mjx-container[display=true]{break-inside:avoid;margin:5pt 0!important}
+  p,li{orphans:3;widows:3}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0a1a4a">
