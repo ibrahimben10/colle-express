@@ -54,14 +54,14 @@ function draw(el) {
       <p class="cn-sub">Tes objectifs, ce que tu as compris, tes erreurs, les exercices à refaire. Personne d’autre ne le lit, sauf les notes que tu choisis de publier sur ton profil.</p></div>
       <button class="btn primary" type="button" data-new="note">${ic('plus')} Nouvelle note</button></header>
 
-    <section class="cn-sec"><header class="pf-sh"><span class="pf-num">§1</span><h2>Objectifs du moment</h2><span class="pf-note">progression calculée sur ton activité réelle</span></header>
+    <section class="cn-sec"><header class="pf-sh"><span class="pf-num">01</span><h2>Objectifs du moment</h2><span class="pf-note">progression calculée sur ton activité réelle</span></header>
       <div class="obj-list">${actifs.map(objHTML).join('') || '<p class="pf-emptyline">Aucun objectif en cours. Un objectif modeste et précis aide plus qu’un grand objectif flou.</p>'}</div>
       <details class="obj-new"${actifs.length ? '' : ' open'}><summary>${ic('target')} Fixer un objectif</summary>${objFormHTML()}</details>
       ${archives.length ? `<details class="obj-arch"><summary>Objectifs archivés (${archives.length})</summary><div class="obj-list">${archives.map(objHTML).join('')}</div></details>` : ''}
     </section>
     <div class="pf-rule" aria-hidden="true">∎</div>
 
-    <section class="cn-sec"><header class="pf-sh"><span class="pf-num">§2</span><h2>Ce que j’ai appris</h2><span class="pf-note">tes acquis, avec tes mots</span></header>
+    <section class="cn-sec"><header class="pf-sh"><span class="pf-num">02</span><h2>Ce que j’ai appris</h2><span class="pf-note">tes acquis, avec tes mots</span></header>
       <form class="learn-add" id="learnAdd"><label class="sr" for="learnT">Ce que j’ai appris</label><input id="learnT" maxlength="120" placeholder="Ex. : une série entière se dérive terme à terme sur son disque ouvert"><button class="btn" type="submit">${ic('plus')} Ajouter</button></form>
       <ol class="learn">${appris.map(n => `<li data-id="${esc(n.id)}"><span class="learn-ic">${ic('check')}</span><div><b>${esc(n.titre)}</b>${n.contenu ? `<div class="cn-rich">${rich(n.contenu)}</div>` : ''}
         <span class="small">${dateFR(n.created_at)}${n.exercice_id ? ` · <a href="#ex-${esc(n.exercice_id)}">${esc(D.byId(n.exercice_id)?.titre || 'exercice')}</a>` : ''}${n.public ? ' · <span class="badge pub">Public</span>' : ''}</span></div>
@@ -69,7 +69,7 @@ function draw(el) {
     </section>
     <div class="pf-rule" aria-hidden="true">∎</div>
 
-    <section class="cn-sec"><header class="pf-sh"><span class="pf-num">§3</span><h2>Pages du carnet</h2><span class="pf-note">${autres.length} note${autres.length > 1 ? 's' : ''}</span></header>
+    <section class="cn-sec"><header class="pf-sh"><span class="pf-num">03</span><h2>Pages du carnet</h2><span class="pf-note">${autres.length} note${autres.length > 1 ? 's' : ''}</span></header>
       <div class="cn-tools"><div class="cn-filt" role="group" aria-label="Filtrer par type"><button type="button" data-ft="" aria-pressed="${!F.type}">Tout</button>${Object.entries(TYPES).filter(([k]) => k !== 'appris').map(([k, t]) => `<button type="button" data-ft="${k}" aria-pressed="${F.type === k}" class="t-${t.c}">${t.l}${counts[k] ? ` <span>${counts[k]}</span>` : ''}</button>`).join('')}</div>
         <label class="sr" for="cnQ">Rechercher</label><input id="cnQ" type="search" placeholder="Rechercher dans le carnet…" value="${esc(F.q)}"></div>
       <div class="cn-pages">${pagesHTML(autres)}</div>

@@ -55,7 +55,7 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
   }
   const S = stats(p), sections = [];
   let n = 0; const sec = (id, titre, html, note = '') => { n++; sections.push(`<section class="pf-sec" id="pf-${id}" aria-labelledby="pf-${id}-t">
-    <header class="pf-sh"><span class="pf-num">§${n}</span><h2 id="pf-${id}-t">${titre}</h2>${note ? `<span class="pf-note">${note}</span>` : ''}</header>${html}</section>`); };
+    <header class="pf-sh"><span class="pf-num">${String(n).padStart(2,"0")}</span><h2 id="pf-${id}-t">${titre}</h2>${note ? `<span class="pf-note">${note}</span>` : ''}</header>${html}</section>`); };
 
   if (p.travailles) sec('stats', 'En chiffres', statsHTML(S, p), 'activité réelle, comptée depuis l’inscription');
   if (p.jours) sec('activite', 'Carte d’activité', heatHTML(p.jours), 'jours où des exercices ont été travaillés');
@@ -307,14 +307,14 @@ export async function renderEdition(el) {
   el.innerHTML = `<form class="pf-edit" id="pfForm" novalidate>
     <div class="pagehead"><h2>Mon profil</h2><a class="btn ghost" href="#profil">${ic('back')} Retour au profil</a></div>
     <div class="alert" id="pfErr" hidden></div>
-    <fieldset class="panel pe-sec"><legend><span class="pf-num">§1</span> Identité</legend>
+    <fieldset class="panel pe-sec"><legend><span class="pf-num">01</span> Identité</legend>
       <div class="pe-photo">${D.myAvatar()}<div><button type="button" class="btn" id="peAv">${ic('camera')} Changer la photo</button><p class="small">Carré recadré automatiquement, 160 px.</p></div></div>
       <div class="fld"><label>Nom affiché</label><input value="${esc(api.profile.full_name || '')}" disabled><p class="small">Ton nom vient de ton inscription. Pour le changer, contacte l’administrateur.</p></div>
       <div class="fld"><label for="peUser">Identifiant public</label><div class="pe-user"><span>@</span><input id="peUser" name="username" value="${esc(p.username || '')}" maxlength="20" autocomplete="off" spellcheck="false" aria-describedby="peUserH"></div>
         <p class="small" id="peUserH">3 à 20 caractères : lettres minuscules, chiffres, _. Adresse : <code>${esc(location.host)}/#u/<span id="peUserV">${esc(p.username || '')}</span></code></p></div>
       <div class="fld"><label for="peBio">Présentation <span class="small" id="peBioN"></span></label><textarea id="peBio" name="bio" maxlength="280" rows="3" placeholder="Ce que tu prépares, ce qui te plaît en sciences…">${esc(p.bio)}</textarea></div>
     </fieldset>
-    <fieldset class="panel pe-sec"><legend><span class="pf-num">§2</span> Parcours</legend>
+    <fieldset class="panel pe-sec"><legend><span class="pf-num">02</span> Parcours</legend>
       <div class="frow3">
         <div class="fld"><label for="peFil">Filière</label><select id="peFil" name="filiere"><option value="">—</option>${FILIERES.map(f => `<option ${p.filiere === f ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
         <div class="fld"><label for="peAn">Année</label><select id="peAn" name="annee"><option value="">—</option>${[1, 2, 3, 4, 5].map(a => `<option value="${a}" ${p.annee === a ? 'selected' : ''}>${a}${a === 1 ? 're' : 'e'} année</option>`).join('')}</select></div>
@@ -323,14 +323,14 @@ export async function renderEdition(el) {
       <div class="fld"><span class="lab">Matières préférées <span class="small">(8 au plus)</span></span><div class="pe-chips">${DOMAINES.map(d => `<label class="chipc"><input type="checkbox" name="mat" value="${esc(d)}" ${p.matieres?.includes(d) ? 'checked' : ''}><span>${esc(d)}</span></label>`).join('')}</div></div>
       <div class="fld"><label for="peObj">Objectif du moment <span class="small">(facultatif)</span></label><input id="peObj" name="objectif" maxlength="160" value="${esc(p.objectif)}" placeholder="Ex. : réussir l’oral de Centrale en juin"></div>
     </fieldset>
-    <fieldset class="panel pe-sec"><legend><span class="pf-num">§3</span> Liens <span class="small">(facultatifs)</span></legend>
+    <fieldset class="panel pe-sec"><legend><span class="pf-num">03</span> Liens <span class="small">(facultatifs)</span></legend>
       <div class="frow3">
         <div class="fld"><label for="peGh">GitHub</label><input id="peGh" name="lien_github" type="url" inputmode="url" placeholder="https://github.com/…" value="${esc(p.lien_github)}"></div>
         <div class="fld"><label for="peLi">LinkedIn</label><input id="peLi" name="lien_linkedin" type="url" inputmode="url" placeholder="https://www.linkedin.com/in/…" value="${esc(p.lien_linkedin)}"></div>
         <div class="fld"><label for="peSi">Site / portfolio</label><input id="peSi" name="lien_site" type="url" inputmode="url" placeholder="https://…" value="${esc(p.lien_site)}"></div>
       </div>
     </fieldset>
-    <fieldset class="panel pe-sec"><legend><span class="pf-num">§4</span> Confidentialité</legend>
+    <fieldset class="panel pe-sec"><legend><span class="pf-num">04</span> Confidentialité</legend>
       ${tog('public', 'Profil visible par les membres connectés', 'Désactivé : personne d’autre que toi (et l’administrateur) ne voit ton profil. Ton e-mail n’est jamais affiché.')}
       <div class="pe-vis" id="peVis">
         ${tog('annuaire', 'Apparaître dans l’annuaire de la communauté', 'Les membres pourront te trouver par ton nom, ta filière ou tes matières, et te suivre.')}

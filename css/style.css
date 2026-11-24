@@ -1199,7 +1199,7 @@ nav.tabs a[aria-current=page]{background:none;color:var(--ink);font-weight:600;b
 .co{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:18px 0 6px;margin:8px 0}
 .co:first-of-type{border-top:0}
 .co-h{font-family:var(--fm);font-weight:500;font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--soft)!important;margin-bottom:12px}
-.co-h::before{content:"§";font-family:var(--fd);font-size:18px;letter-spacing:0;color:var(--terra-ink);text-transform:none;margin-right:2px}
+.co-h::before{content:none}
 .co-e{display:none}
 .co-meta{font-family:var(--fm);font-size:12px;text-transform:none;letter-spacing:0}
 details.acc{border-radius:4px;border-color:var(--line);background:var(--card)}
