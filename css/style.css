@@ -1374,3 +1374,11 @@ img.logo{display:block;width:auto}
 #fMat.seg{flex-wrap:nowrap;gap:5px}
 #fMat.seg button{flex:1 1 0;padding:4px 6px;justify-content:center;white-space:nowrap}
 .filters .searchbox input{background:var(--card)}
+/* matières : une seule barre segmentée, cases égales, séparées par un filet */
+#fMat.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:6px;background:var(--card);padding:3px;overflow:hidden}
+#fMat.seg button{flex:none;min-height:36px;padding:0 4px;border:0;border-radius:4px;background:none;font-size:14.5px;font-weight:500;color:var(--soft);position:relative}
+#fMat.seg button .ic{display:none}
+#fMat.seg button+button::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:1px;background:var(--line)}
+#fMat.seg button[aria-pressed=true]::before,#fMat.seg button[aria-pressed=true]+button::before{display:none}
+#fMat.seg button:hover{color:var(--ink);background:var(--wash);border:0}
+#fMat.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper);font-weight:600}
