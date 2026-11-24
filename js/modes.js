@@ -9,6 +9,7 @@ const IA = () => !!CONFIG.IA && !DEMO;
 import { ic } from './icons.js';
 import { esc, rich, inline, fmtCorrige, correctionHTML, stepChunks, guideQuestion } from './format.js';
 import { toast, busy } from './ui.js';
+import { celebrate, readingProgress, stepNav } from './vivant.js';
 
 const MODES = [
   {k: 'guide', t: 'Guidée', d: 'Une étape à la fois, avec des questions pour chercher toi-même.'},
@@ -83,8 +84,10 @@ function drawGuide(box, ctx, draw) {
     if (!ctx.sol()) { S.gstep = Math.max(S.gstep, 1); ctx.record('guide'); await ctx.ensureSolution(); return; }
     if (S.gstep === 0) ctx.record('guide');
     S.gstep = Math.min(S.gstep + 1, stepChunks(ctx.sol().corrige).length);
-    if (S.gstep >= stepChunks(ctx.sol().corrige).length) { ctx.unlock(); ctx.record('solution'); }
+    const fini = S.gstep >= stepChunks(ctx.sol().corrige).length;
+    if (fini) { ctx.unlock(); ctx.record('solution'); }
     draw(false);
+    if (fini && !S.cele) { S.cele = true; celebrate(box.querySelector('.guide-end') || box, 'Bien joué : tu as parcouru toute la correction.'); }
     const last = box.querySelectorAll('.corrige.guide > .step, .corrige.guide > *'); const el = [...box.querySelectorAll('.corrige.guide > section')].at(-1) || last[last.length - 1];
     if (el) { el.classList.add('fresh'); el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest'}); }
   });
@@ -169,6 +172,7 @@ function drawDetail(box, ctx, draw) {
   box.querySelector('#tCopy').onclick = () => copier(`${ex.titre}\n\n${sol.corrige}${sol.reponse ? `\n\nRésultat : ${sol.reponse}` : ''}`);
   box.querySelector('#tShare')?.addEventListener('click', () => ctx.share());
   box.querySelector('#tReport').onclick = () => signaler(ctx, C, 'détaillée');
+  stepNav(box); readingProgress(box);
   bindVerifier(box, ctx, draw);
 }
 const waitHTML = t => `<p class="wait"><span class="spin"></span> ${esc(t)}</p>`;

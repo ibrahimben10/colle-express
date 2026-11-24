@@ -11,6 +11,7 @@ import { initProfil, renderProfil, renderEdition, profilURL } from './profil.js'
 import { initCarnet, renderCarnet, openNote } from './carnet.js';
 import { initBiblio, renderCollection, openCollectionsPicker } from './biblio.js';
 import { renderCorrection } from './modes.js';
+import { rotator, countUp, heroBackground, carousel, celebrate } from './vivant.js';
 import { initCommunaute, renderCommunaute, renderSolutions, openSignalement, renderModeration } from './communaute.js';
 
 const $ = s => document.querySelector(s);
@@ -80,6 +81,12 @@ initTheme();
 document.querySelectorAll('[data-theme-toggle]').forEach(b => b.innerHTML = THEME_ICON);
 reveal();
 typeset($('#auth'));
+rotator(); heroBackground(); carousel(document.querySelector('.car'));
+document.querySelectorAll('[data-count]').forEach(e => +e.dataset.count && countUp(e, e.dataset.count));
+document.querySelectorAll('[data-nbfig]').forEach(e => countUp(e, Object.keys(FIG).length));
+// chiffres réels de la page d'accueil (fichier statique, mis en cache par le service worker)
+fetch('data/exercices.json').then(r => r.json()).then(L => { document.querySelectorAll('[data-nbex]').forEach(e => countUp(e, L.length));
+  document.querySelectorAll('[data-nbchap]').forEach(e => countUp(e, new Set(L.map(x => x.mat + x.chap)).size)); }).catch(() => {});
 $('#searchIc').outerHTML = ic('search');
 if (DEMO) $('#demo').hidden = false;
 
@@ -368,7 +375,8 @@ function renderCopy() {
       <div class="tools"><button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
       <button class="iconbtn" id="bColl" title="Ranger dans une collection">${ic('book')}<span class="lbl">Collection</span></button>
       <button class="iconbtn" id="bNote" title="Ajouter au carnet de progression">${ic('pen')}<span class="lbl">Carnet</span></button>
-      <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button></div></div>
+      <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button>
+      <button class="iconbtn" id="bFocus" aria-pressed="${document.body.classList.contains('focus')}" title="Mode concentration : masque tout le reste (Échap pour sortir)">${ic('target')}<span class="lbl">Concentration</span></button></div></div>
     ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 6/10)' : mine(ex.id) ? 'Réponse soumise' : 'En cours'}</div>` : ''}
 
     <section class="co co-enonce">
@@ -420,6 +428,7 @@ function renderCopy() {
     </div>`;
   typeset(visibleParts(el));
   el.querySelectorAll('details.acc').forEach(lazyTypeset);
+  if (el.dataset.ex !== ex.id) { el.dataset.ex = ex.id; el.classList.remove('ex-in'); void el.offsetWidth; el.classList.add('ex-in'); }
   const tm = $('#timer'); const upd = () => { const s = (now() - S.start) / 1000; tm.textContent = mmss(s); tm.classList.toggle('late', s > ex.duree * 60); };
   upd(); tick = setInterval(upd, 1000);
   renderRep(ex);
@@ -464,8 +473,21 @@ function renderCopy() {
   $('#bColl').onclick = () => openCollectionsPicker(ex.id);
   $('#bNote').onclick = () => openNote({exercice_id: ex.id, titre: ex.titre, type: 'difficile'});
   $('#bShareEx').onclick = () => shareEx(ex, false);
+  $('#bFocus').onclick = () => setFocus(!document.body.classList.contains('focus'));
   $('#bShareCorr') && ($('#bShareCorr').onclick = () => shareEx(ex, true));
 }
+
+// Mode concentration : seul l'exercice reste à l'écran.
+function setFocus(on) {
+  document.body.classList.toggle('focus', on);
+  $('#bFocus')?.setAttribute('aria-pressed', on);
+  let x = $('#focusExit');
+  if (on && !x) { x = document.createElement('button'); x.id = 'focusExit'; x.className = 'focus-exit'; x.type = 'button'; x.innerHTML = `${ic('x')} Quitter la concentration`; x.onclick = () => setFocus(false); document.body.append(x); }
+  if (!on) x?.remove();
+  if (on) toast('Mode concentration : Échap pour revenir.', 'info', 2500);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('focus') && !document.querySelector('dialog[open]')) setFocus(false); });
+addEventListener('hashchange', () => { if (!location.hash.startsWith('#ex-')) setFocus(false); });
 
 /* ================= GROUPES : réponses sur l'honneur, notes, discussion ================= */
 async function loadGroups() {
@@ -832,6 +854,58 @@ function recommend(src, lvl) {
   for (const r of chapStats(lvl, src).sort((a, b) => a.ok / a.tot - b.ok / b.tot)) { const e = all().find(e => e.niveau === lvl && e.mat === r.mat && e.chap === r.chap && !src?.ex?.[e.id]); if (e) fresh.push(e.id); if (fresh.length >= 4) break; }
   return [...new Set([...sel, ...going, ...fresh])].slice(0, 6).map(byId).filter(Boolean);
 }
+/* ---------- espace personnel : données réelles uniquement ---------- */
+const dayKey = t => { const d = new Date(t); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+function activityDays(src) {
+  const days = new Map();
+  for (const j of src.journal || []) if (j.d) days.set(dayKey(j.d), (days.get(dayKey(j.d)) || 0) + 1);
+  for (const v of Object.values(src.ex || {})) if (v.d && !days.has(dayKey(v.d))) days.set(dayKey(v.d), 1);
+  return days;
+}
+function streakOf(days) {
+  let n = 0; const d = new Date(); d.setHours(12);
+  if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1);   // la série tient encore si on a travaillé hier
+  while (days.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function dailyPick(lvl, src) {
+  const pool = all().filter(e => e.niveau === lvl && src.ex?.[e.id]?.s !== 'reussi');
+  if (!pool.length) return null;
+  const k = dayKey(now()); let h = 0; for (const c of String(k)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return pool[h % pool.length];
+}
+function calHTML(days) {
+  const end = new Date(); end.setHours(12); const start = new Date(end); start.setDate(end.getDate() - 7 * 12 + 1 - ((end.getDay() + 6) % 7));
+  const cells = []; for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) { const n = days.get(dayKey(d)) || 0;
+    cells.push(`<i class="h${n ? Math.min(3, n) : 0}" title="${d.toLocaleDateString('fr-FR', {weekday: 'short', day: 'numeric', month: 'short'})} : ${n ? n + ' action' + (n > 1 ? 's' : '') : 'rien'}"></i>`); }
+  return `<div class="cal" role="img" aria-label="Activité des 12 dernières semaines : ${[...days.values()].length} jours travaillés">${cells.join('')}</div>`;
+}
+function bentoHTML(lvl) {
+  const s = SUIVI, days = activityDays(s), streak = streakOf(days), first = (api.profile.full_name || '').split(' ')[0];
+  const recent = [...new Set((s.journal || []).map(j => j.id))].map(byId).filter(Boolean).slice(0, 4);
+  const last = recent[0], pick = dailyPick(lvl, s);
+  const week = [...days.keys()].filter(k => k >= dayKey(now() - 6 * 864e5)).length;
+  const mot = streak >= 5 ? `${streak} jours d’affilée : c’est cette régularité qui paie en mai.` : streak >= 2 ? 'Belle série. Un exercice ce soir, même court, la prolonge.'
+    : days.size ? 'Une colle de quinze minutes suffit pour relancer la machine.' : 'Commence par un exercice CCINP : vingt minutes, un énoncé court, et c’est parti.';
+  return `<div class="bento">
+    <section class="bx bx-hi"><p class="hand">${new Date().getHours() >= 18 || new Date().getHours() < 5 ? 'Bonsoir' : 'Bonjour'} ${esc(first)}</p><h3>${last ? 'On reprend où tu t’étais arrêté ?' : 'Prêt pour ta première colle ?'}</h3>
+      <p class="small">${mot}</p>
+      ${last ? `<button class="btn primary" data-open="${esc(last.id)}">${ic('arrow')} Reprendre : ${esc(last.titre)}</button>` : `<a class="btn primary" href="#exercices">${ic('arrow')} Choisir un exercice</a>`}</section>
+    <section class="bx bx-streak"><span class="k">Série en cours</span><b class="num">${streak}</b><span class="small">jour${streak > 1 ? 's' : ''} de travail consécutif${streak > 1 ? 's' : ''} · ${week}/7 cette semaine</span></section>
+    <section class="bx bx-day"><span class="k">Exercice du jour</span>${pick ? `<h3>${esc(pick.titre)}</h3><span class="small">${esc(pick.chap)} · ${LV[pick.niveau]} · ${pick.duree} min</span><button class="btn" data-open="${esc(pick.id)}">Le tenter</button>` : '<p class="small">Tout est réussi à ce niveau. Passe au niveau supérieur !</p>'}</section>
+    <section class="bx bx-cal"><span class="k">Douze semaines de travail</span>${calHTML(days)}<span class="small">${days.size} jour${days.size > 1 ? 's' : ''} actif${days.size > 1 ? 's' : ''} enregistré${days.size > 1 ? 's' : ''}</span></section>
+    <section class="bx bx-goal" id="bxGoal"><span class="k">Objectif en cours</span><p class="small">Chargement…</p></section>
+    <section class="bx bx-recent"><span class="k">Derniers exercices</span>${recent.length ? `<ul>${recent.map(e => `<li><button class="linkbtn" data-open="${esc(e.id)}">${esc(e.titre)}</button><span class="small">${esc(e.chap)}</span></li>`).join('')}</ul>` : '<p class="small">Rien pour l’instant : ton historique apparaîtra ici.</p>'}</section>
+  </div>`;
+}
+async function fillGoal() {
+  const b = $('#bxGoal'); if (!b) return;
+  let L = []; try { L = (await api.mesObjectifs()).filter(o => !o.archive); } catch {}
+  const o = L.sort((a, b) => String(a.fin).localeCompare(String(b.fin)))[0];
+  if (!$('#bxGoal')) return;
+  b.innerHTML = o ? `<span class="k">Objectif en cours</span><h3>${esc(o.titre)}</h3><div class="gbar"><i style="--p:${Math.min(100, Math.round(100 * (o.progression || 0) / o.cible))}%"></i></div><span class="small">${Math.min(o.progression || 0, o.cible)} / ${o.cible} · jusqu’au ${new Date(o.fin).toLocaleDateString('fr-FR', {day: 'numeric', month: 'long'})}</span>`
+    : `<span class="k">Objectif en cours</span><p class="small">Aucun objectif. Un objectif précis aide plus qu’une bonne résolution.</p><a class="btn" href="#carnet">Fixer un objectif</a>`;
+}
 function renderSuivi() {
   const s = SUIVI, lvl = api.profile.niveau || 1;
   const exs = Object.values(s.ex || {}), atL = all().filter(e => e.niveau === lvl);
@@ -840,6 +914,7 @@ function renderSuivi() {
   const rec = recommend(s, lvl);
   $('#v-suivi').innerHTML = `
     <div class="pagehead"><h2>Mon suivi</h2><span class="small">${DEMO ? 'mode démonstration' : 'enregistré sur ton compte'}</span></div>
+    ${bentoHTML(lvl)}
     <div class="panel profile"><span class="ph">${avatar(api.user.id, api.profile.full_name)}</span>
       <div><b>${esc(api.profile.full_name || 'Moi')}</b><span class="small">${esc(api.user.email || '')}</span></div>
       <div class="pbtns"><button class="btn" id="phChange">${ic('camera')} ${SUIVI.photo ? 'Changer la photo' : 'Ajouter une photo'}</button>${SUIVI.photo ? `<button class="btn ghost" id="phDel">${ic('trash')} Retirer</button>` : ''}<a class="btn" href="#profil">${ic('user')} Mon profil</a></div></div>
@@ -872,6 +947,7 @@ function renderSuivi() {
   if ($('#phDel')) $('#phDel').onclick = () => setPhoto('');
   $('#lvlPick').onclick = async e => { const b = e.target.closest('button'); if (!b) return; F.lvl = +b.dataset.n; await api.setMyLevel(F.lvl); renderSuivi(); };
   document.querySelectorAll('#v-suivi [data-open]').forEach(b => b.onclick = () => { location.hash = 'ex-' + b.dataset.open; });
+  fillGoal();
 }
 
 /* ================= TABLEAU DE BORD ================= */
@@ -1007,7 +1083,9 @@ async function importPhoto(file) {
 (async function boot() {
   try { BASE = await (await fetch('data/exercices.json')).json(); } catch { BASE = []; }
   fetch('data/corriges.json').then(r => r.json()).then(d => { CORR = d || {}; if (api.user) rerender(); }).catch(() => {});
-  document.querySelectorAll('[data-nbex]').forEach(e => e.textContent = BASE.length || e.textContent);
+  document.querySelectorAll('[data-nbex]').forEach(e => BASE.length && countUp(e, BASE.length));
+  document.querySelectorAll('[data-nbchap]').forEach(e => BASE.length && countUp(e, new Set(BASE.map(x => x.mat + x.chap)).size));
+  document.querySelectorAll('[data-nbfig]').forEach(e => countUp(e, Object.keys(FIG).length));
   try { await api.init(); }
   catch { showAuth('in', {alert: navigator.onLine ? 'Connexion au serveur impossible pour le moment. Réessayez dans un instant.' : 'Vous êtes hors connexion : reconnectez-vous à Internet pour accéder à votre compte.'}); return; }
   if (api.linkError === 'email_link') return showAuth('in', {alert: MSG.email_link});

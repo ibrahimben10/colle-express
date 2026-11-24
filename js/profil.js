@@ -1,6 +1,7 @@
 // Profils personnels : page « carnet » (#u/identifiant), édition et confidentialité.
 // Toutes les données viennent du serveur (fonction profil_public) qui applique la confidentialité ;
 // rien n'est inventé : une section sans données affiche un état vide.
+import { bannerSVG } from './vivant.js';
 import { api } from './api.js';
 import { ic } from './icons.js';
 import { esc, rich } from './format.js';
@@ -69,6 +70,7 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
   el.innerHTML = `
     ${apercu ? `<div class="pf-preview" role="status">${ic('eye')} Aperçu : voici ce que voient les autres membres. <a href="#profil">Revenir à mon profil</a></div>` : ''}
     <article class="pf" style="--h:${hue(p.id)}">
+      ${bannerSVG(p.username || p.nom || '')}
       <header class="pf-head">
         <div class="pf-margin" aria-hidden="true"><span>∑</span><span>∫</span><span>∂</span></div>
         ${avatarXL(p)}
