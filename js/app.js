@@ -13,6 +13,7 @@ import { initCarnet, renderCarnet, openNote } from './carnet.js';
 import { initBiblio, renderCollection, openCollectionsPicker } from './biblio.js';
 import { renderCorrection } from './modes.js';
 import { rotator, countUp, heroBackground, carousel, celebrate } from './vivant.js';
+import { initMouvement } from './mouvement.js';
 import { initCommunaute, renderCommunaute, renderSolutions, openSignalement, renderModeration } from './communaute.js';
 
 const $ = s => document.querySelector(s);
@@ -79,6 +80,7 @@ $('#aboutMini').innerHTML = presentationCourte();
 document.querySelectorAll('#yr, .yr').forEach(e => e.textContent = new Date().getFullYear());
 document.querySelectorAll('[data-ic]').forEach(e => { e.innerHTML = ic(e.dataset.ic); });
 initTheme();
+initMouvement();
 document.querySelectorAll('[data-theme-toggle]').forEach(b => b.innerHTML = THEME_ICON);
 reveal();
 typeset($('#auth'));

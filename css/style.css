@@ -1679,3 +1679,64 @@ body.focus .copy{border-color:transparent;box-shadow:none}
 .an-svg{display:block;min-height:120px;color:var(--ink)}
 .an-svg svg{display:block;width:100%;height:auto;max-height:340px;margin:0 auto}
 .an-svg:empty::before{content:'';display:block;height:140px;border-radius:6px;background:var(--line);opacity:.35}
+
+/* ===================== Mouvement (js/mouvement.js) ===================== */
+@media (prefers-reduced-motion:no-preference){
+ /* changement d'onglet : la page glisse doucement */
+ .view.on{animation:viewIn .38s var(--ease) both}
+ @keyframes viewIn{from{opacity:0}to{opacity:1}}
+ /* liste : cascade à chaque nouveau filtre */
+ .mv #items:not(.still)>.item{animation:itemIn .42s var(--ease) both;animation-delay:calc(var(--i,0) * 28ms)}
+ @keyframes itemIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+ /* survol : l'exercice s'avance, son icône s'anime */
+ @media (hover:hover){
+  .item{transition:background-color .15s,transform .25s var(--ease)}
+  .item:hover{transform:translateX(3px)}
+  .item:hover .tile svg{animation:wig .5s var(--ease)}
+  .panel.stat,.cm-card,.coll-cards a{transition:transform .25s var(--ease),box-shadow .25s,border-color .2s}
+  .panel.stat:hover,.cm-card:hover,.coll-cards a:hover{transform:translateY(-3px);box-shadow:0 10px 24px -14px color-mix(in srgb,var(--ink) 40%,transparent)}
+ }
+ @keyframes wig{30%{transform:rotate(-12deg) scale(1.1)}60%{transform:rotate(8deg)}100%{transform:none}}
+ /* appui : tout répond au doigt */
+ .item:active,.seg button:active,.favtoggle:active,.bottombar a:active{transform:scale(.97)}
+ .btn:active:not(:disabled){transform:scale(.97)}
+ .seg button[aria-pressed=true],.chipc input:checked+span{animation:pressIn .3s var(--ease)}
+ @keyframes pressIn{40%{transform:scale(1.07)}}
+ /* ondulation */
+ .has-rip{position:relative;overflow:hidden;isolation:isolate}
+ .rip{position:absolute;border-radius:50%;background:currentColor;opacity:.16;transform:scale(0);pointer-events:none;z-index:-1;animation:rip .6s var(--ease) forwards}
+ @keyframes rip{to{transform:scale(1);opacity:0}}
+ /* barre du bas : l'onglet actif sautille et reçoit un trait */
+ .bottombar a::before{content:"";position:absolute;top:2px;left:50%;width:22px;height:3px;margin-left:-11px;border-radius:2px;background:var(--terra);transform:scaleX(0);transition:transform .3s var(--ease)}
+ .bottombar a[aria-current=page]::before{transform:scaleX(1)}
+ svg.hop{animation:hop .5s var(--ease)}
+ @keyframes hop{30%{transform:translateY(-5px) scale(1.12)}60%{transform:translateY(1px) scale(.96)}100%{transform:none}}
+ /* favori : battement + éclats */
+ #bFav{position:relative;overflow:visible}
+ #bFav.beat svg{animation:beat .45s var(--ease)}
+ @keyframes beat{25%{transform:scale(1.35)}50%{transform:scale(.9)}75%{transform:scale(1.1)}100%{transform:none}}
+ .burst{position:absolute;inset:0;pointer-events:none}
+ .burst i{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--terra);transform:rotate(var(--a)) translateY(0);opacity:1;animation:burst .7s var(--ease) forwards}
+ .burst i:nth-child(even){background:var(--gold,#c9a227);width:4px;height:4px;margin:-2px}
+ @keyframes burst{to{transform:rotate(var(--a)) translateY(-26px);opacity:0}}
+ /* révélation au défilement */
+ .rv{opacity:0;transform:translateY(16px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+ .rv.rv-in{opacity:1;transform:none}
+ /* indices : l'ampoule s'allume à l'ouverture */
+ .hint-acc[open]>summary svg{animation:glow 1.2s var(--ease)}
+ @keyframes glow{0%{filter:none}30%{filter:drop-shadow(0 0 6px var(--gold,#e8b931));transform:scale(1.2)}100%{filter:none}}
+ /* chrono : respire quand le temps est dépassé */
+ .timer.late{display:inline-block;animation:late 1.6s ease-in-out infinite}
+ @keyframes late{50%{transform:scale(1.08);color:var(--red)}}
+ /* notifications : arrivée avec rebond */
+ .toast{transition:opacity .25s,transform .45s cubic-bezier(.34,1.56,.64,1)}
+ .toast.ok::before{content:"";flex:none;width:16px;height:16px;border-radius:50%;background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5'/%3E%3C/svg%3E") center/100% no-repeat;animation:popIn .5s .1s var(--ease) both}
+ @keyframes popIn{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:none;opacity:1}}
+ /* salutation : arrivée douce */
+ #strip h2{animation:fadeUp .6s var(--ease) both}
+ #strip h2+*{animation:fadeUp .6s .12s var(--ease) both}
+ @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+ /* barres de progression : remplissage */
+ .obj-bar i{animation:growx 1s var(--ease) both}
+}
+@media print{.rv{opacity:1!important;transform:none!important}}
