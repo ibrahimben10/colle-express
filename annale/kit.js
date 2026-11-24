@@ -145,3 +145,9 @@ export function graphe(x, y, w, h, xr, yr) {
   const hl = (v, k = 'pt', x0 = null, x1 = null) => L(x0 === null ? x : X(x0), Y(v), x1 === null ? x + w : X(x1), Y(v), k);
   return {X, Y, courbe, axes, vl, hl};
 }
+
+// Source de tension sinusoïdale : cercle traversé par le fil, sinusoïde à l'intérieur.
+export const sinus = (x, y, h = false, r = 12) => C(x, y, r) + (h ? L(x - r, y, x + r, y) : L(x, y - r, x, y + r))
+  + `<path d="M${x - 7},${y + (h ? 6 : 0)} q3.5,-7 7,0 t7,0" ${'fill="none" stroke="currentColor" stroke-width="0.9"'}${h ? '' : ` transform="translate(${-0},${0})"`}/>`;
+// Masse.
+export const masse = (x, y) => L(x, y, x, y + 8) + L(x - 10, y + 8, x + 10, y + 8, 'epais') + L(x - 6, y + 12, x + 6, y + 12) + L(x - 2.5, y + 16, x + 2.5, y + 16);
