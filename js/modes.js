@@ -4,6 +4,8 @@
 // Les contenus générés par l'IA passent par la fonction Supabase « corriger », qui garde la clé API
 // côté serveur, met en cache les contenus partagés et contrôle les rédactions par une relecture indépendante.
 import { api, DEMO } from './api.js';
+import { CONFIG } from './config.js';
+const IA = () => !!CONFIG.IA && !DEMO;
 import { ic } from './icons.js';
 import { esc, rich, inline, fmtCorrige, correctionHTML, stepChunks, guideQuestion } from './format.js';
 import { toast, busy } from './ui.js';
@@ -31,7 +33,7 @@ export function renderCorrection(sec, ctx) {
   sec.innerHTML = `<div class="co-h">Correction<span class="co-meta" id="corrMeta"></span></div>
     <div class="modebar">
       <div class="modesel" role="radiogroup" aria-label="Mode de correction">${MODES.map((m, i) => `<button type="button" role="radio" data-m="${m.k}" aria-checked="${S.cmode === m.k}" tabindex="${S.cmode === m.k ? 0 : -1}"><span class="mk-n">0${i + 1}</span><b>${m.t}</b></button>`).join('')}</div>
-      <label class="prog"><span>Programme</span><select id="cFil" aria-label="Ta filière (adapte les contenus générés)">${FILIERES.map(f => `<option ${f === filiere() ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
+      ${IA() ? `<label class="prog"><span>Programme</span><select id="cFil" aria-label="Ta filière (adapte les contenus générés)">${FILIERES.map(f => `<option ${f === filiere() ? 'selected' : ''}>${f}</option>`).join('')}</select></label>` : ''}
     </div>
     <p class="mode-d" id="modeD"></p>
     <div id="corrBody" class="corr-body"></div>`;
@@ -41,7 +43,7 @@ export function renderCorrection(sec, ctx) {
     r.onclick = () => pick(r.dataset.m);
     r.onkeydown = e => { const d = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[e.key]; if (!d) return; e.preventDefault(); const n = radios[(i + d + 3) % 3]; n.focus(); pick(n.dataset.m); };
   });
-  sec.querySelector('#cFil').onchange = e => { setFiliere(e.target.value); toast(`Programme ${e.target.value} : les prochains contenus générés en tiendront compte.`, 'ok'); };
+  sec.querySelector('#cFil') && (sec.querySelector('#cFil').onchange = e => { setFiliere(e.target.value); toast(`Programme ${e.target.value} : les prochains contenus générés en tiendront compte.`, 'ok'); });
   const body = sec.querySelector('#corrBody');
   function draw(anim) {
     sec.querySelector('#modeD').textContent = MODES.find(m => m.k === S.cmode).d;
@@ -60,6 +62,7 @@ function drawGuide(box, ctx, draw) {
   const n = Math.min(S.gstep, C.length || S.gstep);
   const done = sol && n >= C.length;
   const nxt = sol ? C[n] : null;
+  if (!sol && !IA()) { box.innerHTML = `<div class="gate"><p>Cet exercice n’a pas encore de correction rédigée.</p><p class="small">Elle arrivera bientôt. En attendant, compare ta réponse avec celles de ton groupe.</p></div>`; return; }
   box.innerHTML = `
     ${n === 0 ? `<p class="guide-intro"><span class="hand">On commence par comprendre l’énoncé.</span> Essaie chaque question sur ta feuille avant de dévoiler la suite. Tu peux t’arrêter dès que tu as compris.</p>` : ''}
     ${sol && n ? `<div class="corrige guide">${fmtCorrige(C.slice(0, n).map(c => c.md).join('\n\n'))}</div>` : ''}
@@ -107,6 +110,7 @@ function drawDetail(box, ctx, draw) {
   const {S, K, ex} = ctx;
   if (gate(box, ctx, draw)) return;
   const sol = ctx.sol();
+  if (!sol && !IA()) { box.innerHTML = `<div class="gate"><p>Cet exercice n’a pas encore de correction rédigée.</p><p class="small">Elle arrivera bientôt.</p></div>`; return; }
   if (!sol) {
     box.innerHTML = S.busy === 'solution' ? `<p class="wait"><span class="spin"></span> Rédaction de la correction, puis relecture indépendante… cela peut prendre une minute.</p>`
       : `<div class="gate"><p>Cet exercice n’a pas encore de correction rédigée par l’équipe.</p><p class="small">Une correction peut être rédigée par l’IA puis contrôlée par une seconde relecture automatique. Elle restera signalée comme telle.</p>
@@ -119,8 +123,8 @@ function drawDetail(box, ctx, draw) {
   const strat = C.find(c => /stratégie|méthode/i.test(c.title));
   box.innerHTML = `
     <div class="ctools" role="toolbar" aria-label="Outils de la correction">
-      <button class="tbtn" id="tWhy" aria-expanded="${!!S.showWhy}">${ic('target')} Pourquoi cette méthode ?</button>
-      <button class="tbtn" id="tAlt" aria-expanded="${!!S.showAlt}">${ic('wave')} Autre méthode</button>
+      ${strat || IA() ? `<button class="tbtn" id="tWhy" aria-expanded="${!!S.showWhy}">${ic('target')} Pourquoi cette méthode ?</button>` : ''}
+      ${IA() ? `<button class="tbtn" id="tAlt" aria-expanded="${!!S.showAlt}">${ic('wave')} Autre méthode</button>` : ''}
       <button class="tbtn" id="tFold">${ic('menu')} ${Object.values(S.fold).some(Boolean) ? 'Tout déplier' : 'Tout replier'}</button>
       <button class="tbtn" id="tCopy">${ic('link')} Copier</button>
       ${K ? `<a class="tbtn" href="${esc(ctx.shareURL)}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="tbtn" id="tShare">${ic('share')} Partager</button>` : ''}
@@ -135,9 +139,11 @@ function drawDetail(box, ctx, draw) {
   box.querySelectorAll('.corrige > section.step').forEach((st, i) => {
     st.dataset.i = i;
     const h = st.querySelector('h4');
-    const tb = document.createElement('span'); tb.className = 'stools';
-    tb.innerHTML = `<button class="sbtn" data-x="${i}" aria-expanded="${!!S.expl[i]}">${ic('bulb')} <span>Expliquer davantage</span></button>`;
-    h.append(tb);
+    if (IA()) {
+      const tb = document.createElement('span'); tb.className = 'stools';
+      tb.innerHTML = `<button class="sbtn" data-x="${i}" aria-expanded="${!!S.expl[i]}">${ic('bulb')} <span>Expliquer davantage</span></button>`;
+      h.append(tb);
+    }
     h.tabIndex = 0; h.setAttribute('role', 'button'); h.setAttribute('aria-expanded', !S.fold[i]);
     const tog = e => { if (e?.target?.closest?.('.sbtn')) return; S.fold[i] = !S.fold[i]; st.classList.toggle('folded', S.fold[i]); h.setAttribute('aria-expanded', !S.fold[i]); };
     h.onclick = tog; h.onkeydown = e => { if (e.target === h && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tog(); } };
@@ -145,20 +151,20 @@ function drawDetail(box, ctx, draw) {
     if (S.expl[i]) st.append(explBox(S.expl[i]));
   });
   box.querySelectorAll('[data-x]').forEach(b => b.onclick = e => { e.stopPropagation(); expliquer(+b.dataset.x, b, ctx, C); });
-  box.querySelector('#tWhy').onclick = async () => {
+  box.querySelector('#tWhy') && (box.querySelector('#tWhy').onclick = async () => {
     S.showWhy = !S.showWhy; const w = box.querySelector('#whyBox');
     w.hidden = !S.showWhy; box.querySelector('#tWhy').setAttribute('aria-expanded', S.showWhy);
     if (!S.showWhy) return;
     if (!strat && !S.ia.pourquoi) { w.innerHTML = waitHTML('Je prépare l’explication…'); await outil('pourquoi', ctx, {}, r => { S.ia.pourquoi = r; }); }
     w.innerHTML = whyHTML(ctx, strat); ctx.typeset(w);
-  };
-  box.querySelector('#tAlt').onclick = async () => {
+  });
+  box.querySelector('#tAlt') && (box.querySelector('#tAlt').onclick = async () => {
     S.showAlt = !S.showAlt; const w = box.querySelector('#altBox');
     w.hidden = !S.showAlt; box.querySelector('#tAlt').setAttribute('aria-expanded', S.showAlt);
     if (!S.showAlt) return;
     if (!S.ia.autre) { w.innerHTML = waitHTML('Je cherche une autre méthode, puis je la fais relire… (jusqu’à une minute)'); await outil('autre', ctx, {}, r => { S.ia.autre = r; }); }
     w.innerHTML = altHTML(ctx); ctx.typeset(w); w.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-  };
+  });
   box.querySelector('#tFold').onclick = () => { const any = Object.values(S.fold).some(Boolean); C.forEach((_, i) => S.fold[i] = !any); draw(false); };
   box.querySelector('#tCopy').onclick = () => copier(`${ex.titre}\n\n${sol.corrige}${sol.reponse ? `\n\nRésultat : ${sol.reponse}` : ''}`);
   box.querySelector('#tShare')?.addEventListener('click', () => ctx.share());
@@ -201,6 +207,33 @@ async function expliquer(i, btn, ctx, C) {
 function drawRigueur(box, ctx, draw) {
   const {S, K, ex} = ctx;
   if (gate(box, ctx, draw)) return;
+  const sol0 = ctx.sol();
+  // 1. Rédaction de concours écrite par l'équipe ; 2. à défaut, version courte tirée des étapes Résolution et Conclusion.
+  const hand = sol0?.rigoureux;
+  const C0 = sol0 ? stepChunks(sol0.corrige) : [];
+  const res = C0.find(c => /^Résolution/i.test(c.title)), concl = C0.find(c => /^Conclusion/i.test(c.title));
+  const strip = c => c ? c.md.replace(/^\*\*[^*]+\*\*\s*/, '') : '';
+  const derive = !hand && res ? strip(res) + (concl ? '\n\n**Conclusion.** ' + strip(concl) : '') : '';
+  if (hand || (derive && !IA())) {
+    const txt = hand || derive;
+    box.innerHTML = `<div class="ctools" role="toolbar" aria-label="Outils de la rédaction">
+        <button class="tbtn" id="tCopy">${ic('link')} Copier</button><button class="tbtn warnb" id="tReport">${ic('x')} Signaler une erreur</button></div>
+      <p class="rig-src">${hand ? `<span class="lab-ok">${ic('check')} Rédaction de concours</span> <span class="small">Écrite par l’équipe et vérifiée par calcul, comme une copie : objets définis, hypothèses vérifiées, conclusion par question.</span>`
+        : `<span class="lab-warn">Version courte</span> <span class="small">Tirée de la résolution détaillée, sans les rappels ni les commentaires. La rédaction de concours complète de cet exercice arrive bientôt.</span>`}</p>
+      <div class="corrige rig">${fmtCorrige(txt)}</div>
+      ${sol0.reponse ? `<div class="result"><span class="lab">Résultat</span><div>${rich(sol0.reponse)}</div></div>` : ''}`;
+    box.querySelector('#tCopy').onclick = () => copier(`${ex.titre}\n\n${txt}`);
+    box.querySelector('#tReport').onclick = () => signaler(ctx, stepChunks(txt), 'rigoureuse');
+    ctx.record('solution');
+    return;
+  }
+  if (!IA()) {
+    box.innerHTML = `<div class="gate"><p class="gate-t">Pas encore de rédaction de concours pour cet exercice.</p>
+      <p class="small">On les rédige une par une, en vérifiant chaque calcul. En attendant, le mode Détaillé contient la démonstration complète.</p>
+      <button class="btn" id="toDet">${ic('book')} Voir la correction détaillée</button></div>`;
+    box.querySelector('#toDet').onclick = () => document.querySelector('.modesel [data-m=detail]')?.click();
+    return;
+  }
   const r = S.ia.rigoureux;
   if (r && !r.error) {
     box.innerHTML = `<div class="ctools" role="toolbar" aria-label="Outils de la rédaction">
@@ -231,6 +264,7 @@ function drawRigueur(box, ctx, draw) {
 
 /* ---------------- « Vérifier ma réponse » : analyse de la démarche de l'élève ---------------- */
 function verifierHTML(ctx) {
+  if (!IA()) return '';
   const {S} = ctx, a = S.analyse;
   return `<details class="verif" ${S.openV ? 'open' : ''}><summary>${ic('check')} <b>Vérifier ma réponse</b><span class="small">résultat ou démarche : on cherche ta première erreur, sans te donner la solution</span></summary>
     <div class="verif-b">

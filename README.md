@@ -236,6 +236,22 @@ Le sélecteur « Programme » (MPSI, MP, PC, PSI…) est transmis à l'IA pour q
 
 Les contenus partagés sont mis en cache par une empreinte SHA-256 de toutes leurs entrées : une deuxième demande identique ne coûte rien et ne compte pas dans la limite quotidienne. Une réponse coupée par la limite de longueur est refusée au lieu d'être affichée tronquée. Un contenu que la relecture juge faux n'est pas mis en cache. Les signalements d'erreurs arrivent dans la file de modération du tableau de bord.
 
+### Interrupteur de l'IA
+
+Toutes les fonctions qui ont besoin de la clé Anthropic sont masquées tant que `IA: false` dans `js/config.js` :
+- indices et corrigés générés ;
+- « Expliquer davantage », « Autre méthode » et « Vérifier ma réponse » ;
+- choix du programme ;
+- import d'énoncé par photo.
+
+Une fois le secret `ANTHROPIC_API_KEY` enregistré dans Supabase, passe `IA: true` pour les réactiver.
+
+### Rédactions rigoureuses écrites à la main
+
+Le mode Rigoureux affiche d'abord la rédaction de concours écrite par l'équipe. Elle se trouve dans `tools/rig/r*.py`, sous la forme d'un dictionnaire `R = {id: texte}`, et `python3 tools/build_detail.py` la copie dans le champ `rigoureux` de `data/corriges.json`.
+
+À défaut, il affiche une « version courte » : les étapes Résolution et Conclusion de la correction en 6 étapes. Si l'exercice n'a ni l'une ni l'autre, un message invite à lire le mode Détaillé.
+
 ## Identité visuelle
 
 Le site suit une direction « carnet de colle » : papier chaud, encre, vert académique `#235347`, terracotta `#D97952`, et la ligne de marge comme signature. Les polices sont auto-hébergées dans `fonts/` (licence OFL) : Fraunces pour les titres, Source Sans 3 pour le texte, JetBrains Mono pour les repères, Caveat pour les annotations. Les couleurs et les polices sont réglées par les variables en tête de `css/style.css`. Le mode sombre (graphite, ivoire, sauge, cuivre) suit automatiquement le système ou le bouton lune/soleil. Toutes les paires texte/fond passent le niveau AA du WCAG.

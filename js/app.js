@@ -386,7 +386,7 @@ function renderCopy() {
     <section class="co co-indices" id="hintsSec">
       <div class="co-h"><span class="co-e" aria-hidden="true">💡</span>Indices<span class="co-meta">ouvre-les seulement si tu bloques</span></div>
       ${K ? hintsHTML(K, S.openH) : `${aiHints.map((t, i) => `<div class="acc-static"><span class="hn">${i + 1}</span><div>${rich(t.indice)}${t.question ? `<p class="q">« ${esc(t.question)} »</p>` : ''}</div></div>`).join('')}
-        ${S.hint < 2 ? `<button class="btn wide" id="bHintAI" ${S.busy ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + ` Demander l’indice ${S.hint + 1} · ${['Piste globale', 'Méthode précise'][S.hint]}`}</button>` : ''}`}
+        ${!CONFIG.IA && !aiHints.length ? '<p class="small">Pas d’indice préparé pour cet exercice.</p>' : ''}${CONFIG.IA && S.hint < 2 ? `<button class="btn wide" id="bHintAI" ${S.busy ? 'disabled' : ''}>${S.busy === 'indice' ? '<span class="spin"></span> …' : ic('bulb') + ` Demander l’indice ${S.hint + 1} · ${['Piste globale', 'Méthode précise'][S.hint]}`}</button>` : ''}`}
     </section>
 
     <section class="co co-corr" id="corrSec" aria-label="Correction"></section>
@@ -897,8 +897,8 @@ function buildProf() {
       <div><h3 class="sec">${ic('star')} Message et sélection pour la classe</h3><div class="panel form" id="pConf"></div></div>
       <div><h3 class="sec">${ic('plus')} Ajouter un exercice</h3>
         <div class="panel form">
-          <label class="btn" style="justify-self:start;cursor:pointer;position:relative"><input type="file" id="impFile" accept="image/*" class="sr">${ic('camera')} Importer depuis une photo d’énoncé</label>
-          <span class="small" id="impSt">L’IA retranscrit l’énoncé en LaTeX ; relis avant d’enregistrer.</span>
+          ${CONFIG.IA ? `<label class="btn" style="justify-self:start;cursor:pointer;position:relative"><input type="file" id="impFile" accept="image/*" class="sr">${ic('camera')} Importer depuis une photo d’énoncé</label>
+          <span class="small" id="impSt">L’IA retranscrit l’énoncé en LaTeX ; relis avant d’enregistrer.</span>` : ''}
           <div class="row"><label class="field">Titre<input id="aT"></label><label class="field">Matière<select id="aM"><option>Maths</option><option>Physique</option><option>Chimie</option></select></label></div>
           <div class="row"><label class="field">Chapitre<input id="aC"></label><label class="field">Niveau<select id="aN"><option value="1">CCINP</option><option value="2">Mines-Centrale</option><option value="3">X-ENS</option></select></label><label class="field">Durée (min)<input id="aD" type="number" value="20" min="5" max="60"></label></div>
           <label class="field">Énoncé (formules en LaTeX entre $…$)<textarea id="aE"></textarea></label>
@@ -912,7 +912,7 @@ function buildProf() {
   $('#pRows').onclick = e => { const tr = e.target.closest('[data-st]'); if (tr) studentDialog(tr.dataset.st); };
   $('#pRows').onkeydown = e => { const tr = e.target.closest('[data-st]'); if (tr && e.key === 'Enter') studentDialog(tr.dataset.st); };
   $('#aSave').onclick = addExercise;
-  $('#impFile').onchange = e => importPhoto(e.target.files[0]);
+  $('#impFile') && ($('#impFile').onchange = e => importPhoto(e.target.files[0]));
   $('#pBank').onclick = async e => { const b = e.target.closest('[data-del]'); if (!b) return; b.disabled = true; try { await api.delBanque(b.dataset.del); BANK = await api.banque(); updateProf(); } catch { b.disabled = false; } };
   api.getCode().then(c => { $('#cCode').value = c; });
   $('#cCodeSave').onclick = async () => { const c = $('#cCode').value.trim(); if (c.length < 4) { $('#cCodeOk').textContent = '4 caractères minimum.'; return; } try { await api.setCode(c); $('#cCodeOk').textContent = 'Nouveau code enregistré.'; } catch { $('#cCodeOk').textContent = 'Échec.'; } };

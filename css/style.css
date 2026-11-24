@@ -1345,3 +1345,4 @@ blockquote.cit{margin:6px 0;padding:4px 12px;border-left:2px solid var(--red);fo
  .sbtn span{font-size:13.5px}
 }
 .ianote{display:block}.ianote .ic{vertical-align:-2px;margin-right:2px}
+.rig-src{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin:0 0 12px}

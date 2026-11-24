@@ -7,6 +7,11 @@ export const CONFIG = {
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidnRpZ2Z4cHRraWlveWtoZXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUzOTU3NDAsImV4cCI6MjExMDk3MTc0MH0.0VtDSrmOkksC20c-McUSqm7GQSy6BT31__UDBPxFJdI',
 
   // Affichage
+  // Fonctions qui appellent l'IA (fonction Supabase « corriger » + clé ANTHROPIC_API_KEY) :
+  // indices et corrigés générés, « Expliquer davantage », « Autre méthode », « Vérifier ma réponse »,
+  // import d'énoncé par photo. Passe à true une fois la clé enregistrée dans les secrets Supabase.
+  IA: false,
+
   NOM_PROF: 'BEN YAKHLEF IBRAHIM',
   NOM_SITE: 'Colle express',
   SOUS_TITRE: 'Classes préparatoires MP · Maths & Physique-Chimie',
