@@ -1667,3 +1667,8 @@ body.focus .copy{border-color:transparent;box-shadow:none}
 .item:has(.tile.Maths):hover::before{background:var(--blue)}.item:has(.tile.Physique):hover::before{background:var(--terra)}.item:has(.tile.Chimie):hover::before{background:var(--amber)}
 .st.ok{animation:pop .4s var(--ease)}
 .pf-head{background:var(--card)!important;background-image:none!important}
+
+/* Schéma de la correction : dans le flux, centré, jamais collant */
+.fig.figc{position:static;max-width:560px;margin:6px auto 22px}
+.fig.figc figcaption b{color:var(--ink);font-weight:700}
+@media print{.fig.figc{break-inside:avoid}}

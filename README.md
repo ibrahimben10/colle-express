@@ -255,3 +255,8 @@ Le mode Rigoureux affiche d'abord la rédaction de concours écrite par l'équip
 ## Identité visuelle
 
 Le site suit une direction « carnet de colle » : papier chaud, encre, vert académique `#235347`, terracotta `#D97952`, et la ligne de marge comme signature. Les polices sont auto-hébergées dans `fonts/` (licence OFL) : Fraunces pour les titres, Source Sans 3 pour le texte, JetBrains Mono pour les repères, Caveat pour les annotations. Les couleurs et les polices sont réglées par les variables en tête de `css/style.css`. Le mode sombre (graphite, ivoire, sauge, cuivre) suit automatiquement le système ou le bouton lune/soleil. Toutes les paires texte/fond passent le niveau AA du WCAG.
+
+## Schémas de physique
+- `js/figures.js` + `js/figures-enonce.js` : schémas d'énoncé (affichés à côté de l'énoncé).
+- `js/figc1.js`, `js/figc2.js` (réunis dans `js/figures-corr.js`) : schémas de correction, affichés en tête de la correction (modes Détaillé et Rigoureux, mode Guidé dès la première étape, fiche PDF). Jamais avec l'énoncé seul, pour ne pas dévoiler la méthode.
+- Outils de dessin : `js/figkit.js` (traits, flèches, ressorts, lentilles) et `js/figkit2.js` (composants de circuit, arcs, repères de courbes calculées).

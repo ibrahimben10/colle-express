@@ -2,6 +2,7 @@
 import { CONFIG } from './config.js';
 import { ic, chapIcon } from './icons.js';
 import { FIG } from './figures.js';
+import { figCorr } from './figures-corr.js';
 import { esc, fmtEnonce, hintsHTML, hintLevels, correctionHTML } from './format.js';
 
 const $ = s => document.querySelector(s);
@@ -42,7 +43,7 @@ async function load() {
         ${hintsHTML(K, hintLevels(K).map(() => true))}</section>
       <section class="co co-corr"><details class="acc corr-acc" open>
         <summary><span class="co-e" aria-hidden="true">📝</span><span class="acc-t"><b>Correction détaillée</b><small>Touche pour afficher ou masquer</small></span><span class="chev" aria-hidden="true"></span></summary>
-        <div class="acc-body">${correctionHTML(K)}</div></details></section>` : ''}
+        <div class="acc-body">${figCorr(id)}${correctionHTML(K)}</div></details></section>` : ''}
     <div class="noprint openall">${!enonceOnly && K ? `<button class="btn" id="bAll">Tout afficher</button>` : ''}</div>
     <footer class="sh-foot"><span>${esc(CONFIG.NOM_SITE)} — ${esc(CONFIG.NOM_PROF)}</span><span>${esc(location.href.split('&pdf')[0])}</span></footer>`;
   // Tout est composé ouvert (largeur réelle pour MathJax), puis replié pour laisser chercher l'élève.

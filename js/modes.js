@@ -10,6 +10,7 @@ import { ic } from './icons.js';
 import { esc, rich, inline, fmtCorrige, correctionHTML, stepChunks, guideQuestion } from './format.js';
 import { toast, busy } from './ui.js';
 import { celebrate, readingProgress, stepNav } from './vivant.js';
+import { figCorr } from './figures-corr.js';
 
 const MODES = [
   {k: 'guide', t: 'Guidée', d: 'Une étape à la fois, avec des questions pour chercher toi-même.'},
@@ -66,6 +67,7 @@ function drawGuide(box, ctx, draw) {
   if (!sol && !IA()) { box.innerHTML = `<div class="gate"><p>Cet exercice n’a pas encore de correction rédigée.</p><p class="small">Elle arrivera bientôt. En attendant, compare ta réponse avec celles de ton groupe.</p></div>`; return; }
   box.innerHTML = `
     ${n === 0 ? `<p class="guide-intro"><span class="hand">On commence par comprendre l’énoncé.</span> Essaie chaque question sur ta feuille avant de dévoiler la suite. Tu peux t’arrêter dès que tu as compris.</p>` : ''}
+    ${sol && n ? figCorr(ctx.ex.id) : ''}
     ${sol && n ? `<div class="corrige guide">${fmtCorrige(C.slice(0, n).map(c => c.md).join('\n\n'))}</div>` : ''}
     ${S.busy === 'solution' ? `<p class="wait"><span class="spin"></span> Rédaction de la correction, puis relecture indépendante… cela peut prendre une minute.</p>` : done ? `
       <div class="guide-end"><p class="sep" aria-hidden="true">∴</p>
@@ -134,6 +136,7 @@ function drawDetail(box, ctx, draw) {
       <button class="tbtn warnb" id="tReport">${ic('x')} Signaler une erreur</button>
     </div>
     <div id="whyBox" ${S.showWhy ? '' : 'hidden'}>${S.showWhy ? whyHTML(ctx, strat) : ''}</div>
+    ${figCorr(ex.id)}
     ${correctionHTML(sol)}
     ${srcHTML(ctx)}
     <div id="altBox" ${S.showAlt ? '' : 'hidden'}>${S.showAlt ? altHTML(ctx) : ''}</div>
@@ -224,6 +227,7 @@ function drawRigueur(box, ctx, draw) {
         <button class="tbtn" id="tCopy">${ic('link')} Copier</button><button class="tbtn warnb" id="tReport">${ic('x')} Signaler une erreur</button></div>
       <p class="rig-src">${hand ? `<span class="lab-ok">${ic('check')} Rédaction de concours</span> <span class="small">Écrite par l’équipe et vérifiée par calcul, comme une copie : objets définis, hypothèses vérifiées, conclusion par question.</span>`
         : `<span class="lab-warn">Version courte</span> <span class="small">Tirée de la résolution détaillée, sans les rappels ni les commentaires. La rédaction de concours complète de cet exercice arrive bientôt.</span>`}</p>
+      ${figCorr(ex.id)}
       <div class="corrige rig">${fmtCorrige(txt)}</div>
       ${sol0.reponse ? `<div class="result"><span class="lab">Résultat</span><div>${rich(sol0.reponse)}</div></div>` : ''}`;
     box.querySelector('#tCopy').onclick = () => copier(`${ex.titre}\n\n${txt}`);
