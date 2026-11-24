@@ -23,6 +23,40 @@ Règles impératives :
 - Garde des étapes ("points") stables d'un retour à l'autre, formulées sans révéler les résultats.`;
 }
 
+// Exigences communes au corrigé et à sa relecture (format « 6 étapes » affiché par le site).
+const REGLES_CORRIGE = `FORMAT OBLIGATOIRE du champ "corrige" (Markdown + LaTeX), six étapes dans cet ordre, chacune ouverte par une ligne en gras exactement de la forme :
+**Étape 1 — Analyse de l'énoncé.** données, hypothèses, ce qu'il faut démontrer ou calculer (question par question).
+**Étape 2 — Rappels du cours.** chaque théorème, définition ou propriété utilisé, dans un encadré : un paragraphe commençant par « > **Théorème — Nom.** » (ou Définition, Propriété, Loi, Formule) avec l'énoncé précis ET ses hypothèses.
+**Étape 3 — Stratégie.** la méthode choisie et pourquoi elle est adaptée.
+**Étape 4 — Résolution détaillée.** sous-parties « **4.1 Titre.** », « **4.2 Titre.** »… ; chaque égalité, inégalité ou transformation est justifiée (« car », « d'après », hypothèse vérifiée) ; aucune étape sautée ; calculs intermédiaires écrits.
+**Étape 5 — Vérification.** au moins deux contrôles parmi : cas particulier, cas limite, recalcul par une autre voie, homogénéité et unités, signes, ordre de grandeur, rôle de chaque hypothèse (contre-exemple si on la retire). Un contrôle peut être mis en encadré « > **Vérification — …** ».
+**Étape 6 — Conclusion.** résultat final dans $$\\boxed{…}$$.
+RIGUEUR :
+- Mathématiques : quantificateurs explicites, implications et équivalences correctes, hypothèses de chaque théorème vérifiées au moment de l'appliquer (continuité, intégrabilité, convergence, dimension finie…), cas d'égalité et cas limites traités.
+- Physique et chimie : système, référentiel, lois utilisées et leurs conditions de validité, conventions de signe, approximations annoncées et justifiées (« > **Hypothèses — …** »), homogénéité vérifiée, applications numériques avec unités et un nombre raisonnable de chiffres significatifs.
+- Informatique : spécification, invariant de boucle démontré (initialisation, conservation, terminaison), complexité justifiée.
+- Ne présente jamais une intuition comme une preuve. Si une étape ne peut pas être établie avec certitude, écris-le dans un encadré « > **Point non démontré — …** » au lieu d'inventer une justification.
+- Toute formule en LaTeX ($…$, $$…$$ pour les formules centrées, environnement aligned pour aligner plusieurs lignes). Pas de titre général.
+CHAMPS : "reponse" = résultats finaux en une ou deux lignes ; "theoremes" = 1 à 4 éléments « **Nom.** énoncé avec hypothèses » ; "astuces" = 2 ou 3 réflexes (« Penser à … quand … »).`;
+
+// Relecture indépendante : un second appel, qui n'a pas rédigé le corrigé, le contrôle et le corrige.
+function promptRelecture(ex: any, brouillon: string) {
+  return `Tu es un examinateur exigeant de concours (CCINP, Mines-Ponts, CentraleSupélec, X-ENS). Un collègue a rédigé le corrigé ci-dessous. Tu ne l'as pas écrit : relis-le de façon critique et INDÉPENDANTE.
+1. Refais toi-même chaque calcul (signes, facteurs, bornes, unités) et chaque raisonnement ; vérifie les hypothèses de chaque théorème au moment où il est appliqué ; repère tout saut logique ou toute justification fausse ou absente.
+2. Corrige toutes les erreurs et complète les justifications manquantes. Garde le format imposé ci-dessous.
+3. Si un point reste douteux après ta relecture, signale-le dans un encadré « > **Point non démontré — …** » plutôt que de le masquer.
+
+${REGLES_CORRIGE}
+
+ÉNONCÉ :
+${clip(ex.enonce, 6000)}
+
+CORRIGÉ À RELIRE (JSON) :
+${clip(brouillon, 24000)}
+
+Réponds UNIQUEMENT avec un objet JSON valide : {"corrige":"…","reponse":"…","theoremes":["…"],"astuces":["…"],"verification":{"statut":"conforme|corrige|incertain","remarques":["erreurs trouvées et corrections faites, ou points incertains"]}}`;
+}
+
 function prompt(mode: string, b: any) {
   const ex = b.exercice ?? {};
   const hint = Math.max(1, Math.min(2, Number(b.hint) || 1));
@@ -46,12 +80,9 @@ Réponds UNIQUEMENT avec un objet JSON valide :
 TÂCHE : l'élève bloque${note} et n'a pas envoyé de copie. Donne un indice de niveau ${hint} et une question qui le fait avancer.
 Réponds UNIQUEMENT avec un objet JSON valide :
 {"verdict":"bloque","score":null,"resume":"","points":[],"retour":"une phrase de méthode","indice":"…","question":"…"}`;
-  if (mode === "solution") return `Tu es professeur en classe préparatoire MP. Rédige un corrigé complet et rigoureux de l'exercice suivant, comme attendu à l'oral (${LV[ex.niveau] ?? "MP"}).
-- Corrigé étape par étape : un paragraphe par question, commençant par **1.**, **2.**, etc. ; explicite chaque transition logique (« donc », « car », hypothèse utilisée), sans saut d'étape.
-- Formules en LaTeX entre $...$ ($$...$$ pour les formules centrées). Pas de titre.
-- "reponse" : les résultats finaux, en une ou deux lignes.
-- "theoremes" : 1 à 4 théorèmes, définitions ou propriétés utilisés, chacun sous la forme "**Nom.** énoncé précis avec ses hypothèses".
-- "astuces" : 2 ou 3 réflexes à retenir pour des exercices similaires (« Penser à … quand … »).
+  if (mode === "solution") return `Tu es professeur en classe préparatoire MP et tu rédiges le corrigé de référence de l'exercice ci-dessous, au niveau ${LV[ex.niveau] ?? "MP"} (matière : ${ex.mat ?? "?"}, chapitre : ${ex.chap ?? "?"}).
+
+${REGLES_CORRIGE}
 
 ÉNONCÉ :
 ${clip(ex.enonce, 6000)}
@@ -101,15 +132,30 @@ Deno.serve(async (req) => {
   const content: any[] = images.map((d) => ({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: String(d).replace(/^data:image\/\w+;base64,/, "") } }));
   content.push({ type: "text", text: prompt(mode, body) });
 
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: mode === "solution" ? 4000 : 1500, messages: [{ role: "user", content }] }),
-  });
-  if (!r.ok) return json({ error: "Le service de correction a refusé la demande.", detail: (await r.text()).slice(0, 300) }, 502);
-  const out = await r.json();
-  const text = (out.content ?? []).filter((c: any) => c.type === "text").map((c: any) => c.text).join("\n");
+  const appel = async (contenu: any[], max: number) => {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model: MODEL, max_tokens: max, messages: [{ role: "user", content: contenu }] }),
+    });
+    if (!r.ok) throw new Error((await r.text()).slice(0, 300));
+    const out = await r.json();
+    return (out.content ?? []).filter((c: any) => c.type === "text").map((c: any) => c.text).join("\n");
+  };
+  let text: string;
+  try { text = await appel(content, mode === "solution" ? 8000 : 1500); }
+  catch (e) { return json({ error: "Le service de correction a refusé la demande.", detail: String(e).slice(0, 300) }, 502); }
   await admin.from("ia_usage").insert({ user_id: uid, mode });
+  if (mode === "solution") {
+    // Contrôle qualité : seconde passe de relecture critique avant tout affichage.
+    let brouillon: any;
+    try { brouillon = parse(text); } catch { brouillon = { corrige: text }; }
+    try {
+      const relu = parse(await appel([{ type: "text", text: promptRelecture(body.exercice ?? {}, JSON.stringify(brouillon)) }], 10000));
+      if (relu?.corrige) return json({ ...relu, relu: true });
+    } catch { /* relecture indisponible : on renvoie le brouillon, signalé comme non relu */ }
+    return json({ ...brouillon, relu: false });
+  }
   try { return json(parse(text)); }
-  catch { return mode === "solution" ? json({ corrige: text }) : json({ error: "Réponse de l'IA illisible, réessaie." }, 502); }
+  catch { return json({ error: "Réponse de l'IA illisible, réessaie." }, 502); }
 });

@@ -65,17 +65,36 @@ export function fmtEnonce(text) {
 // Corrigé : chaque paragraphe qui commence par **1.**, **2.(a)**, **Conclusion.** devient une étape titrée.
 export function fmtCorrige(text) {
   // Un paragraphe « **Titre.** … » ouvre une étape ; les paragraphes suivants s'y rattachent.
+  // Format « 6 étapes » : « **Étape 3 — Stratégie.** » ouvre une grande étape numérotée,
+  // « **4.2 Titre.** » une sous-partie, et un paragraphe commençant par « > » un encadré
+  // (Théorème, Définition, Hypothèses, Attention, Vérification, Point non démontré…).
   let html = '', open = false;
   for (const p of String(text ?? '').split(/\n{2,}/)) {
+    if (/^>\s?/.test(p)) { html += callout(p.replace(/^>\s?/gm, '')); continue; }
     const m = p.match(/^\*\*(.+?)\*\*\s*([\s\S]*)$/);
-    if (m && m[1].length < 70) {
+    if (m && m[1].length < 90) {
       let head = m[1].replace(/\s*[.:]\s*$/, '');
-      if (/^\d+(\.?\([a-z]\))?$/.test(head)) head = 'Question ' + head.replace('.(', '(');
+      const sub = head.match(/^(\d+\.\d+)\s+(.+)$/);
+      if (sub && open) { html += `<h5 class="sub"><span>${sub[1]}</span> ${inline(sub[2])}</h5>${m[2].trim() ? para(m[2].trim()) : ''}`; continue; }
+      const et = head.match(/^Étape\s+(\d)\s*[—–-]\s*(.+)$/);
       if (open) html += '</section>';
-      html += `<section class="step"><h4>${inline(head)}</h4>${m[2].trim() ? para(m[2].trim()) : ''}`; open = true;
+      if (et) html += `<section class="step etape e${et[1]}"><h4><span class="en" aria-hidden="true">${et[1]}</span><span class="sr">Étape ${et[1]} : </span>${inline(et[2])}</h4>${m[2].trim() ? para(m[2].trim()) : ''}`;
+      else {
+        if (/^\d+(\.?\([a-z]\))?$/.test(head)) head = 'Question ' + head.replace('.(', '(');
+        html += `<section class="step"><h4>${inline(head)}</h4>${m[2].trim() ? para(m[2].trim()) : ''}`;
+      }
+      open = true;
     } else html += isTable(p) ? table(p) : para(p);
   }
   return html + (open ? '</section>' : '');
+}
+// Encadré : le premier mot en gras fixe le style (théorème, mise en garde, vérification, réserve).
+function callout(p) {
+  const m = p.match(/^\*\*(.+?)\*\*\s*([\s\S]*)$/), t = (m ? m[1] : '').toLowerCase();
+  const k = /^(théorème|propriété|définition|lemme|rappel|formule|loi|principe|relation|corollaire)/.test(t) ? 'thm'
+    : /^(hypothèse|attention|piège|condition)/.test(t) ? 'warn' : /^(vérification|contrôle|cohérence)/.test(t) ? 'chk'
+    : /^(point non démontré|réserve|limite)/.test(t) ? 'doubt' : 'note';
+  return `<aside class="callout ${k}">${m ? `<b class="callout-t">${inline(m[1].replace(/\s*[.:]\s*$/, ''))}</b>${m[2].trim() ? para(m[2].trim()) : ''}` : para(p)}</aside>`;
 }
 
 /* ---------- Blocs pédagogiques partagés (site et page de correction) ---------- */

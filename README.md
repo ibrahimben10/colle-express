@@ -134,6 +134,18 @@ Recolle **tout** `supabase/schema.sql` après chaque mise à jour, comme pour le
 - **Badges** : Premier pas, Régularité (7 jours d'affilée), Explorateur (5 chapitres), Polyvalent (3 domaines), Autonome (10 réponses sans aide), Reconnu par ses pairs (5 réussites), Persévérant (5 exercices refaits), Passionné (15 exercices d'un domaine), Contributeur. Ils sont recalculés par le serveur à chaque affichage et ne peuvent pas être attribués depuis le site. Les autres membres ne voient que les badges obtenus.
 - Les métadonnées des exercices (matière, chapitre) sont copiées dans la base pour ces calculs. Après avoir ajouté des exercices dans `data/exercices.json`, lance `python3 tools/build_meta.py`, puis recolle `schema.sql`.
 
+## Format des corrigés (« 6 étapes »)
+
+Les corrigés suivent progressivement un format unique : **1. Analyse de l'énoncé · 2. Rappels du cours · 3. Stratégie · 4. Résolution détaillée · 5. Vérification · 6. Conclusion encadrée**.
+
+- Dans `tools/detail/d*.py`, un corrigé s'écrit en Markdown + LaTeX :
+  - « `**Étape 3 — Stratégie.**` » ouvre une étape ;
+  - « `**4.2 Titre.**` » ouvre une sous-partie ;
+  - un paragraphe commençant par « `> **Théorème — Nom.**` » devient un encadré (Théorème / Définition / Hypothèses / Attention / Vérification / Point non démontré).
+- `python3 tools/build_detail.py` reconstruit `data/corriges.json`.
+- Pilote : `tools/detail/d60.py` (6 exercices). Les autres corrigés gardent l'ancien format question par question jusqu'à leur conversion.
+- **Corrigés générés par l'IA** (exercices ajoutés par photo) : la fonction `corriger` rédige au format 6 étapes, puis un **second appel indépendant relit** le corrigé (recalculs, hypothèses, sauts logiques) et le corrige. Le site affiche « relue par une seconde passe automatique » et les remarques de relecture. Après modification, **redéploie la fonction** : Supabase → *Edge Functions* → `corriger` → coller `supabase/functions/corriger/index.ts` → *Deploy*. Chaque corrigé IA compte pour deux appels à l'API Claude.
+
 ## Connexion, inscription et mot de passe oublié
 
 - Tout est géré par **Supabase Auth** : les mots de passe sont hachés (bcrypt) côté serveur, jamais stockés en clair, et les liens de réinitialisation sont signés, temporaires et à usage unique.

@@ -392,7 +392,7 @@ function renderCopy() {
         <summary><span class="co-e" aria-hidden="true">${locked ? '🔒' : '📝'}</span><span class="acc-t"><b>Correction détaillée</b><small id="corrHint">${locked ? `Disponible après l’envoi de ta réponse ou ${nH > 1 ? 'les deux indices' : 'l’indice'}` : 'Touche pour afficher la correction'}</small></span><span class="chev" aria-hidden="true"></span></summary>
         <div class="acc-body">${S.busy === 'solution' ? '<p><span class="spin"></span> Rédaction du corrigé…</p>' : sol ? `${correctionHTML(sol)}
           <div class="soltools">${K ? `<a class="btn" href="${esc(correctionURL(ex.id))}&pdf=1" target="_blank" rel="noopener">${ic('pdf')} PDF</a><button class="btn" id="bShareCorr">${ic('share')} Partager</button>` : ''}</div>
-          <p class="corr-src">${K ? `<span class="lab-ok">${ic('check')} Correction officielle de la plateforme</span>` : `<span class="lab-warn">${ic('bulb')} Correction générée par IA · non vérifiée</span> <span class="small">Vérifie-la avec ton cours.</span>`}</p>` : ''}</div>
+          <p class="corr-src">${K ? `<span class="lab-ok">${ic('check')} Correction officielle de la plateforme</span>` : `<span class="lab-warn">${ic('bulb')} Correction générée par IA · non vérifiée par un professeur</span> <span class="small">${S.relu ? 'Relue par une seconde passe automatique indépendante' + (S.verif?.statut === 'corrige' ? ', qui a corrigé des erreurs du premier jet' : S.verif?.statut === 'incertain' ? ', qui signale des points incertains' : '') + '.' : 'Non relue.'} Vérifie-la avec ton cours.</span>`}${!K && S.verif?.remarques?.length && S.verif.statut !== 'conforme' ? `<details class="nprev"><summary>Remarques de la relecture</summary><ul>${S.verif.remarques.map(x => `<li>${rich(x)}</li>`).join('')}</ul></details>` : ''}</p>` : ''}</div>
       </details>
     </section>
 
@@ -791,6 +791,7 @@ async function ask(ex, mode) {
     if (mode === 'solution') {
       const arr = v => Array.isArray(v) ? v.slice(0, 5).map(String) : [];
       S.solution = String(r.corrige || ''); S.reponse = String(r.reponse || ''); S.theoremes = arr(r.theoremes); S.astuces = arr(r.astuces);
+      S.relu = !!r.relu; S.verif = r.verification && typeof r.verification === 'object' ? {statut: String(r.verification.statut || ''), remarques: arr(r.verification.remarques)} : null;
       S.openC = true; S.seen = true; await record(ex, {kind: 'solution'});
     }
     else {
