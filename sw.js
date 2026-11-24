@@ -4,7 +4,7 @@
 // - Données (exercices, corrigés par exercice, schémas) : cache d'abord, mise à jour en arrière-plan.
 //   Un corrigé ouvert une fois reste consultable hors connexion.
 // Les données personnelles (Supabase) ne sont jamais mises en cache.
-const VERSION = 'ce-v27';
+const VERSION = 'ce-v28';
 const SHELL = ['./', './index.html', './correction.html', './manifest.webmanifest',
   './css/style.css', './js/app.js', './js/api.js', './js/config.js', './js/format.js', './js/icons.js',
   './js/figures.js', './js/figkit.js', './js/figures-corr.js', './js/figures-annale.js', './js/figures-annale-index.js', './fonts/latin-modern-roman-regular.woff2', './fonts/latin-modern-roman-italic.woff2', './js/auth.js', './js/validation.js', './js/ui.js', './js/profil.js', './js/carnet.js', './js/biblio.js', './js/communaute.js', './js/modes.js', './js/vivant.js', './js/mouvement.js', './js/tactile.js', './fonts/source-sans-3-latin-wght-normal.woff2', './fonts/source-sans-3-latin-ext-wght-normal.woff2', './fonts/source-sans-3-latin-wght-italic.woff2', './fonts/fraunces-latin-wght-normal.woff2', './fonts/fraunces-latin-wght-italic.woff2', './fonts/jetbrains-mono-latin-wght-normal.woff2', './fonts/caveat-latin-wght-normal.woff2', './js/apropos.js', './js/correction.js', './js/mathjax-config.js',
@@ -25,9 +25,15 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   if (/supabase\.co$/.test(url.hostname) || url.hostname.includes('formsubmit')) return;   // jamais en cache
   if (url.origin === location.origin) {
+    const scope = new URL(self.registration.scope).pathname, rest = url.pathname.slice(scope.length);
+    if (req.mode === 'navigate' && !['', 'index.html', 'correction.html'].includes(rest)) {
+      // Autre page ou fichier ouvert directement (PDF…) : toujours le réseau.
+      e.respondWith(fetch(req).catch(() => caches.match('./index.html')));
+      return;
+    }
     if (req.mode === 'navigate') {
-      // Pages : la version en cache s'affiche tout de suite ; le réseau sert si elle manque.
-      const page = url.pathname.endsWith('correction.html') ? './correction.html' : './index.html';
+      // Pages de l'application : la version en cache s'affiche tout de suite ; le réseau sert si elle manque.
+      const page = rest === 'correction.html' ? './correction.html' : './index.html';
       e.respondWith(caches.match(page).then(r => r || fetch(req).then(res => put(req, res))).catch(() => caches.match('./index.html')));
       return;
     }
