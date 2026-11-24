@@ -1191,7 +1191,7 @@ nav.tabs a[aria-current=page]{background:none;color:var(--ink);font-weight:600;b
 .iconbtn{border-radius:4px;font-weight:500}
 .status{border-radius:3px;font-family:var(--fm);font-size:12.5px}
 .qn{background:none;color:var(--terra-ink);font-family:var(--fd);font-style:italic;font-weight:500;font-size:20px;border-radius:0;width:auto;justify-content:start}
-.sk{border:0;font-family:var(--fd);font-style:italic;font-weight:500;color:var(--soft);font-size:15px}
+.sk{border:0;font-family:var(--fd);font-style:italic;font-weight:500;color:var(--soft);font-size:15px;display:flex;justify-content:center;align-items:baseline}
 .sk::after{content:")"}
 .donnees{border-radius:3px;border-style:solid;background:var(--wash)}
 .donnees .dlab{font-family:var(--fm);font-weight:500;color:var(--soft)}
