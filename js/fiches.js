@@ -4,7 +4,7 @@ import { esc, rich, callout, inlineC } from './format.js';
 import { ic } from './icons.js';
 
 let IDX = null, FIGS = {};
-const MODS = {p1: () => import('./fiches-fig-p1.js')};
+const MODS = {p1: () => import('./fiches-fig-p1.js'), p2: () => import('./fiches-fig-p2.js'), p3: () => import('./fiches-fig-p2.js'), p4: () => import('./fiches-fig-p4.js')};
 async function index() { if (!IDX) IDX = await fetch('data/fiches/index.json').then(r => r.json()); return IDX; }
 async function figs(id) {
   const k = id.split('-')[0]; if (!MODS[k] || FIGS[k]) return FIGS[k] || {};
