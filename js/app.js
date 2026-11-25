@@ -24,7 +24,7 @@ const $ = s => document.querySelector(s);
 const SKEL = (n, cls = 'skel-item') => Array.from({length: n}, () => cls === 'skel-item' ? '<div class="skel-item" aria-hidden="true"><span class="skel"></span><span class="skel skel-l w80"></span><span class="skel skel-l w40"></span></div>' : `<span class="skel ${cls}" aria-hidden="true"></span>`).join('');
 const LV = {1: 'CCINP', 2: 'Mines-Centrale', 3: 'X-ENS'};
 const LVD = {1: 'Fondamentaux et applications directes du cours', 2: 'Oraux Mines-Ponts et Centrale-Supélec', 3: 'Oraux X-ENS : exercices ouverts'};
-const MAT_IC = {Maths: 'sigma', Physique: 'atom', Chimie: 'flask'};
+const MAT_IC = {Maths: 'sigma', Physique: 'atom', Chimie: 'flask', Informatique: 'code'};
 const now = () => Date.now();
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const fmtDate = t => t ? new Date(t).toLocaleString('fr-FR', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}) : '—';
@@ -353,12 +353,12 @@ const finOf = id => !!SUIVI.ex?.[id]?.fin;   // « fait » : coché par l'élèv
 const VUS = () => store.get('vus', []);
 const vu = id => store.set('vus', [id, ...VUS().filter(x => x !== id)].slice(0, 12));
 function listOrder() {
-  const sel = new Set(CONF.sel?.[F.lvl] || []), order = ['Maths', 'Physique', 'Chimie'];
+  const sel = new Set(CONF.sel?.[F.lvl] || []), order = ['Maths', 'Physique', 'Chimie', 'Informatique'];
   return filtered().sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || order.indexOf(a.mat) - order.indexOf(b.mat) || a.chap.localeCompare(b.chap, 'fr'));
 }
 function renderList() {
   $('#fLvl').innerHTML = [1, 2, 3].map(n => `<button data-n="${n}" aria-pressed="${n === F.lvl}" title="${LV[n]}"><span class="dots" aria-hidden="true">${'●'.repeat(n)}${'○'.repeat(3 - n)}</span>${{1: 'CCINP', 2: 'Mines-CS', 3: 'X-ENS'}[n]}</button>`).join('');
-  $('#fMat').innerHTML = [['', 'Tout'], ['Maths', 'Maths'], ['Physique', 'Physique'], ['Chimie', 'Chimie']].map(([m, l]) => `<button data-m="${m}" aria-pressed="${m === F.mat}">${m ? ic(MAT_IC[m]) : ''}${l}</button>`).join('');
+  $('#fMat').innerHTML = [['', 'Tout'], ['Maths', 'Maths'], ['Physique', 'Physique'], ['Chimie', 'Chimie'], ['Informatique', 'Info']].map(([m, l]) => `<button data-m="${m}" aria-pressed="${m === F.mat}">${m ? ic(MAT_IC[m]) : ''}${l}</button>`).join('');
   const chaps = [...new Set(all().filter(e => e.niveau === F.lvl && (!F.mat || e.mat === F.mat)).map(e => e.chap))].sort((a, b) => a.localeCompare(b, 'fr'));
   if (F.chap && !chaps.includes(F.chap)) F.chap = '';
   $('#fChap').innerHTML = `<option value="">Tous les chapitres (${chaps.length})</option>` + chaps.map(c => `<option ${c === F.chap ? 'selected' : ''}>${esc(c)}</option>`).join('');
@@ -1149,7 +1149,7 @@ function buildProf() {
         <div class="panel form">
           ${CONFIG.IA ? `<label class="btn" style="justify-self:start;cursor:pointer;position:relative"><input type="file" id="impFile" accept="image/*" class="sr">${ic('camera')} Importer depuis une photo d’énoncé</label>
           <span class="small" id="impSt">L’IA retranscrit l’énoncé en LaTeX ; relis avant d’enregistrer.</span>` : ''}
-          <div class="row"><label class="field">Titre<input id="aT"></label><label class="field">Matière<select id="aM"><option>Maths</option><option>Physique</option><option>Chimie</option></select></label></div>
+          <div class="row"><label class="field">Titre<input id="aT"></label><label class="field">Matière<select id="aM"><option>Maths</option><option>Physique</option><option>Chimie</option><option>Informatique</option></select></label></div>
           <div class="row"><label class="field">Chapitre<input id="aC"></label><label class="field">Niveau<select id="aN"><option value="1">CCINP</option><option value="2">Mines-Centrale</option><option value="3">X-ENS</option></select></label><label class="field">Durée (min)<input id="aD" type="number" value="20" min="5" max="60"></label></div>
           <label class="field">Énoncé (formules en LaTeX entre $…$)<textarea id="aE"></textarea></label>
           <button class="btn primary" id="aSave">${ic('plus')} Ajouter à la banque</button><span class="small" id="aOk"></span>
@@ -1247,7 +1247,7 @@ async function importPhoto(file) {
   try {
     const im = await shrink(file);
     const r = await api.ia({mode: 'import', images: [im.data]});
-    $('#aT').value = r.titre || ''; $('#aM').value = ['Maths', 'Physique', 'Chimie'].includes(r.mat) ? r.mat : 'Maths'; $('#aC').value = r.chap || '';
+    $('#aT').value = r.titre || ''; $('#aM').value = ['Maths', 'Physique', 'Chimie', 'Informatique'].includes(r.mat) ? r.mat : 'Maths'; $('#aC').value = r.chap || '';
     $('#aN').value = [1, 2, 3].includes(+r.niveau) ? r.niveau : 2; $('#aD').value = r.duree || 20; $('#aE').value = r.enonce || '';
     $('#impSt').textContent = 'Énoncé retranscrit : relis-le puis clique sur « Ajouter ».';
   } catch (e) { $('#impSt').textContent = e.message; }

@@ -29,10 +29,10 @@ function para(p) {
   for (const l of L) { const m = l.match(/^\s*[-•]\s+(.*)$/); if (m) ul.push(m[1]); else if (ul.length && /^\s{2,}\S/.test(l)) ul[ul.length - 1] += ' ' + l.trim(); else { flush(); if (l.trim()) html += `<p>${inline(l)}</p>`; } }
   flush(); return html;
 }
-export const rich = t => String(t ?? '').split(/\n{2,}/).map(p => isTable(p) ? table(p) : para(p)).join('');
+const rich0 = t => String(t ?? '').split(/\n{2,}/).map(p => isTable(p) ? table(p) : para(p)).join('');
 
 // Énoncé : texte d'introduction, « Données » encadrées, questions numérotées et sous-questions (a), (b)…
-export function fmtEnonce(text) {
+function fmtEnonce0(text) {
   const lines = String(text ?? '').split('\n');
   const intro = [], qs = [];
   let cur = null;
@@ -47,13 +47,13 @@ export function fmtEnonce(text) {
       (cur.subs.length ? cur.subs.at(-1).t : cur.head).push(l.trim());
     } else intro.push(l);
   }
-  const block = arr => rich(arr.join('\n').replace(/\n{3,}/g, '\n\n').trim());
+  const block = arr => rich0(arr.join('\n').replace(/\n{3,}/g, '\n\n').trim());
   let html = '';
   const introTxt = intro.join('\n').trim();
   if (introTxt) {
     html += introTxt.split(/\n{2,}/).map(p => /^(On donne|Données|Donnée)\b/i.test(p.trim())
-      ? `<div class="donnees"><span class="dlab">Données</span>${rich(p.replace(/^(On donne|Données|Donnée)\s*:?\s*/i, ''))}</div>`
-      : rich(p)).join('');
+      ? `<div class="donnees"><span class="dlab">Données</span>${rich0(p.replace(/^(On donne|Données|Donnée)\s*:?\s*/i, ''))}</div>`
+      : rich0(p)).join('');
   }
   if (qs.length) {
     html += `<ol class="qs">${qs.map(q => `<li><span class="qn">${q.n}</span><div class="qb">${block(q.head)}${q.subs.length
@@ -63,7 +63,7 @@ export function fmtEnonce(text) {
 }
 
 // Corrigé : chaque paragraphe qui commence par **1.**, **2.(a)**, **Conclusion.** devient une étape titrée.
-export function fmtCorrige(text) {
+function fmtCorrige0(text) {
   // Un paragraphe « **Titre.** … » ouvre une étape ; les paragraphes suivants s'y rattachent.
   // Format « 6 étapes » : « **Étape 3 — Stratégie.** » ouvre une grande étape numérotée,
   // « **4.2 Titre.** » une sous-partie, et un paragraphe commençant par « > » un encadré
@@ -88,6 +88,52 @@ export function fmtCorrige(text) {
   }
   return html + (open ? '</section>' : '');
 }
+/* ---------- Code (informatique) : blocs ```python … ``` et `code en ligne` ---------- */
+// Les blocs sont mis de côté avant toute mise en forme (ils peuvent contenir des lignes vides, des « 1. »,
+// des « * » ou des « $ »), puis remis à la fin, colorés. MathJax ignore <pre> et <code>.
+const KW = new Set('False None True and as assert break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' '));
+const BI = new Set('print len range int float str list dict set tuple min max sum abs sorted enumerate zip map bool round open isinstance reversed any all divmod type'.split(' '));
+const TOK = /(#[^\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(\b\d+(?:\.\d+)?(?:e[-+]?\d+)?\b)|([A-Za-z_]\w*)|(\s+)|([\s\S])/g;
+function coloriser(code) {
+  let out = '', prev = '';
+  for (const m of code.matchAll(TOK)) {
+    const [t, com, str, num, id, sp] = m;
+    if (com) out += `<span class="c-com">${esc(t)}</span>`;
+    else if (str) out += `<span class="c-str">${esc(t)}</span>`;
+    else if (num) out += `<span class="c-num">${t}</span>`;
+    else if (id) out += KW.has(id) ? `<span class="c-kw">${id}</span>` : prev === 'def' ? `<span class="c-fn">${id}</span>` : BI.has(id) ? `<span class="c-bi">${id}</span>` : id;
+    else out += esc(t);
+    if (!sp && !com) prev = id || t;
+  }
+  return out;
+}
+const codeHTML = b => `<div class="codeblk"><pre class="code" data-lang="${esc(b.lang || 'python')}"><code>${b.lang === 'text' ? esc(b.code) : coloriser(b.code)}</code></pre><button class="cp" type="button" aria-label="Copier le code">Copier</button></div>`;
+function protect(text) {
+  const B = [];
+  let t = String(text ?? '').replace(/```([a-z]*)[ \t]*\n([\s\S]*?)\n[ \t]*```/g, (_, lang, code) => `\n\n\uE000B${B.push({lang, code}) - 1}\uE001\n\n`);
+  t = t.replace(/`([^`\n]+)`/g, (_, c) => `\uE000I${B.push({inl: c}) - 1}\uE001`);
+  return [t.replace(/\n{3,}/g, '\n\n').replace(/^\n+/, ''), B];
+}
+function restore(html, B) {
+  if (!B.length) return html;
+  return html.replace(/<p>\s*\uE000B(\d+)\uE001\s*<\/p>/g, (m, i) => B[i] ? codeHTML(B[i]) : m)
+    .replace(/\uE000([BI])(\d+)\uE001/g, (m, k, i) => !B[i] ? m : k === 'B' ? codeHTML(B[i]) : `<code>${esc(B[i].inl)}</code>`);
+}
+const avecCode = f => t => { const [x, B] = protect(t); return restore(f(x), B); };
+export const rich = avecCode(rich0);
+export const fmtEnonce = avecCode(fmtEnonce0);
+export const fmtCorrige = avecCode(fmtCorrige0);
+export const inlineC = avecCode(inline);
+// bouton « Copier » des blocs de code (une seule écoute pour toute la page)
+if (typeof document !== 'undefined' && !window.__cpCode) {
+  window.__cpCode = true;
+  document.addEventListener('click', e => {
+    const b = e.target.closest?.('.codeblk .cp'); if (!b) return;
+    const txt = b.previousElementSibling?.innerText || '';
+    navigator.clipboard?.writeText(txt).then(() => { b.textContent = 'Copié'; setTimeout(() => b.textContent = 'Copier', 1500); }).catch(() => {});
+  });
+}
+
 // Encadré : le premier mot en gras fixe le style (théorème, mise en garde, vérification, réserve).
 function callout(p) {
   const m = p.match(/^\*\*(.+?)\*\*\s*([\s\S]*)$/), t = (m ? m[1] : '').toLowerCase();
@@ -112,8 +158,8 @@ export function bilanHTML(K) {
   const th = K?.theoremes || [], as = K?.astuces || [];
   if (!th.length && !as.length) return '';
   return `<div class="co co-bilan"><div class="co-h">Bilan de l'exercice</div>
-    ${th.length ? `<h5>Théorèmes &amp; définitions utilisés</h5><ul class="thm">${th.map(t => `<li>${inline(t)}</li>`).join('')}</ul>` : ''}
-    ${as.length ? `<h5>Réflexes à retenir</h5><ul class="tips">${as.map(t => `<li>${inline(t)}</li>`).join('')}</ul>` : ''}</div>`;
+    ${th.length ? `<h5>Théorèmes &amp; définitions utilisés</h5><ul class="thm">${th.map(t => `<li>${inlineC(t)}</li>`).join('')}</ul>` : ''}
+    ${as.length ? `<h5>Réflexes à retenir</h5><ul class="tips">${as.map(t => `<li>${inlineC(t)}</li>`).join('')}</ul>` : ''}</div>`;
 }
 
 export function correctionHTML(K) {
@@ -124,8 +170,10 @@ export function correctionHTML(K) {
 /* ---------- Découpage d'un corrigé en étapes (mode guidé, outils par étape) ---------- */
 // Même règle que fmtCorrige : un paragraphe « **Titre.** … » ouvre une étape, sauf les sous-parties « **4.2 …** ».
 export function stepChunks(text) {
-  const out = [];
-  for (const p of String(text ?? '').split(/\n{2,}/)) {
+  const out = [], [t0, B] = protect(text);   // un bloc de code n'est jamais coupé entre deux étapes
+  const back = x => x.replace(/\uE000([BI])(\d+)\uE001/g, (m, k, i) => !B[i] ? m : k === 'B' ? '```' + (B[i].lang || '') + '\n' + B[i].code + '\n```' : '`' + B[i].inl + '`');
+  for (const p0 of t0.split(/\n{2,}/)) {
+    const p = back(p0);
     const m = !/^>/.test(p) && p.match(/^\*\*(.+?)\*\*/);
     const head = m && m[1].length < 90 ? m[1].replace(/\s*[.:]\s*$/, '') : '';
     if (head && !/^\d+\.\d+\s/.test(head)) {

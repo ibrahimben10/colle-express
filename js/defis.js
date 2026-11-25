@@ -33,7 +33,7 @@ export function defis({S, byId, pick, lvl}) {
     {id: 'chap', titre: 'Tour d’horizon', detail: '3 chapitres différents cette semaine', cible: 3, val: new Set(ids(sem).map(i => byId(i)?.chap).filter(Boolean)).size},
     {id: 'rep', titre: 'Au tableau', detail: 'Soumettre une réponse à ton groupe', cible: 1, val: ids(sem.filter(x => x.k === 'reponse')).length},
     {id: 'haut', titre: 'Viser plus haut', detail: `2 exercices d’un niveau au-dessus du tien`, cible: 2, val: ids(sem).filter(i => (byId(i)?.niveau || 0) > lvl).length, si: lvl < 3},
-    {id: 'mix', titre: 'Les deux faces', detail: 'Un exercice de maths et un de physique-chimie', cible: 2, val: (ids(sem).some(i => byId(i)?.mat === 'Maths') ? 1 : 0) + (ids(sem).some(i => byId(i) && byId(i).mat !== 'Maths') ? 1 : 0)}
+    {id: 'mix', titre: 'Les deux faces', detail: 'Un exercice de maths et un de physique-chimie', cible: 2, val: (ids(sem).some(i => byId(i)?.mat === 'Maths') ? 1 : 0) + (ids(sem).some(i => ['Physique', 'Chimie'].includes(byId(i)?.mat)) ? 1 : 0)}
   ].filter(x => x.si !== false);
   return {jour: choisir(D, 2, today), semaine: choisir(W, 3, 'S' + jour(w0)), cle: today, cleS: jour(w0)};
 }

@@ -24,7 +24,7 @@ create table if not exists public.suivi (
 create table if not exists public.banque (
   id          uuid primary key default gen_random_uuid(),
   titre       text not null,
-  mat         text not null check (mat in ('Maths','Physique','Chimie')),
+  mat         text not null check (mat in ('Maths','Physique','Chimie','Informatique')),
   chap        text not null default 'Divers',
   niveau      int  not null check (niveau between 1 and 3),
   duree       int  not null default 20,
@@ -34,6 +34,15 @@ create table if not exists public.banque (
   created_by  uuid references public.profiles(id) on delete set null,
   created_at  timestamptz not null default now()
 );
+-- Informatique ajoutée comme matière (exercices du professeur) — idempotent.
+do $$ declare c text; begin
+  select conname into c from pg_constraint where conrelid = 'public.banque'::regclass and contype = 'c'
+    and pg_get_constraintdef(oid) like '%mat%' and pg_get_constraintdef(oid) not like '%Informatique%';
+  if c is not null then
+    execute format('alter table public.banque drop constraint %I', c);
+    alter table public.banque add constraint banque_mat_check check (mat in ('Maths','Physique','Chimie','Informatique'));
+  end if;
+end $$;
 
 -- 4. Configuration de la classe (une seule ligne) -----------------------
 create table if not exists public.classe_config (
@@ -1035,7 +1044,33 @@ insert into public.exercices_meta (id, mat, chap, niveau) values
   ('n-s-n-ed1','Maths','Équations différentielles',2),
   ('n-s-n-ed2','Maths','Équations différentielles',2),
   ('n-s-n-transp','Maths','Calcul différentiel',1),
-  ('n-s-n-ed3','Maths','Équations différentielles',3)
+  ('n-s-n-ed3','Maths','Équations différentielles',3),
+  ('i-py-max2','Informatique','Python : listes et fichiers',1),
+  ('i-py-csv','Informatique','Python : listes et fichiers',1),
+  ('i-cx-dicho','Informatique','Complexité et preuves',1),
+  ('i-cx-expo','Informatique','Complexité et preuves',2),
+  ('i-cx-motif','Informatique','Complexité et preuves',1),
+  ('i-pile-par','Informatique','Piles, files et récursivité',1),
+  ('i-pile-rpn','Informatique','Piles, files et récursivité',2),
+  ('i-rec-fibo','Informatique','Piles, files et récursivité',2),
+  ('i-rec-hanoi','Informatique','Piles, files et récursivité',1),
+  ('i-tri-ins','Informatique','Tris',1),
+  ('i-tri-fus','Informatique','Tris',2),
+  ('i-tri-cpt','Informatique','Tris',1),
+  ('i-tri-sel','Informatique','Tris',3),
+  ('i-gr-bfs','Informatique','Graphes',1),
+  ('i-gr-cycle','Informatique','Graphes',2),
+  ('i-gr-dijk','Informatique','Graphes',2),
+  ('i-gr-bip','Informatique','Graphes',3),
+  ('i-pd-monnaie','Informatique','Programmation dynamique',2),
+  ('i-pd-plsc','Informatique','Programmation dynamique',2),
+  ('i-pd-grille','Informatique','Programmation dynamique',1),
+  ('i-pd-sac','Informatique','Programmation dynamique',3),
+  ('i-ia-knn','Informatique','Apprentissage',1),
+  ('i-ia-kmeans','Informatique','Apprentissage',3),
+  ('i-jeu-nim','Informatique','Théorie des jeux',1),
+  ('i-jeu-minmax','Informatique','Théorie des jeux',2),
+  ('i-flot','Informatique','Nombres flottants',1)
 on conflict (id) do update set mat = excluded.mat, chap = excluded.chap, niveau = excluded.niveau;
 alter table public.exercices_meta enable row level security;
 drop policy if exists "méta: lecture" on public.exercices_meta;

@@ -22,6 +22,7 @@ export function domaine(ex) {
   if (!ex) return 'Autre';
   const c = ex.chap || '';
   if (ex.mat === 'Chimie') return 'Chimie';
+  if (ex.mat === 'Informatique') return 'Informatique';
   if (ex.mat === 'Maths') {
     if (/proba/i.test(c)) return 'Probabilités';
     if (/réduction|algèbre|groupe|arithm|polyn|déterminant|matric|espaces? vect/i.test(c)) return 'Algèbre';

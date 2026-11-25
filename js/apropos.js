@@ -62,7 +62,7 @@ function envoiForm(u) {
       </div>
       <div class="row">
         <label class="field">Concours<select name="concours"><option>CCINP</option><option>Mines-Télécom</option><option>Mines-Ponts</option><option>Centrale-Supélec</option><option>X-ENS</option><option>Autre / plusieurs</option></select></label>
-        <label class="field">Matière<select name="matiere"><option>Maths</option><option>Physique</option><option>Chimie</option><option>Plusieurs</option></select></label>
+        <label class="field">Matière<select name="matiere"><option>Maths</option><option>Physique</option><option>Chimie</option><option>Informatique</option><option>Plusieurs</option></select></label>
       </div>
       <label class="field">Fichier PDF (10 Mo max.)<input type="file" name="attachment" accept="application/pdf,.pdf" required></label>
       <label class="field">Message (année, remarques…)<textarea name="message" rows="3" maxlength="2000"></textarea></label>

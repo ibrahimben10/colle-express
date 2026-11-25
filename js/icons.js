@@ -59,6 +59,7 @@ export const ic = (n, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24" a
 export function chapIcon(mat, chap) {
   const c = (chap || '').toLowerCase();
   if (mat === 'Chimie') return 'flask';
+  if (mat === 'Informatique') return /graphe/.test(c) ? 'share' : /jeu/.test(c) ? 'target' : /dynamique|complexit|preuve/.test(c) ? 'chart' : 'code';
   if (mat === 'Physique') {
     if (/méca|mécanique|fluide/.test(c)) return 'pendulum';
     if (/optique/.test(c)) return 'lens';

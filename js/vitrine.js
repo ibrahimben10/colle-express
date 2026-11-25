@@ -6,7 +6,7 @@ import { FIG } from './figures.js';
 import { countUp } from './vivant.js';
 
 const LV = {1: 'CCINP', 2: 'Mines-Centrale', 3: 'X-ENS'};
-const MAT = ['Maths', 'Physique', 'Chimie'];
+const MAT = ['Maths', 'Physique', 'Chimie', 'Informatique'];
 const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const typeset = el => { if (window.MathJax?.typesetPromise) MathJax.typesetPromise([el]).catch(() => {}); else setTimeout(() => typeset(el), 500); };
 
@@ -53,7 +53,8 @@ function vitrine(E) {
     'Nouveautés': E.filter(e => e.ajout).sort((a, b) => (b.ajout || '').localeCompare(a.ajout || '')),
     'Maths': E.filter(e => e.mat === 'Maths'),
     'Physique': E.filter(e => e.mat === 'Physique' && FIG[e.id]).concat(E.filter(e => e.mat === 'Physique' && !FIG[e.id])),
-    'Chimie': E.filter(e => e.mat === 'Chimie')
+    'Chimie': E.filter(e => e.mat === 'Chimie'),
+    'Informatique': E.filter(e => e.mat === 'Informatique')
   };
   // un échantillon varié : on alterne les chapitres et les niveaux plutôt que de prendre les premiers
   const varie = L => { const seen = new Set(), a = [], b = []; L.forEach(e => (seen.has(e.chap) ? b : (seen.add(e.chap), a)).push(e)); return a.concat(b).slice(0, 9); };

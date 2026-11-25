@@ -37,7 +37,7 @@ SIGNATURE : la ligne de marge terracotta, les numéros d'étape en italique dans
 --e1:0 1px 0 light-dark(#0000000a,#00000040),0 1px 2px light-dark(#20252214,#00000059);
 --e2:0 1px 0 light-dark(#0000000d,#0000004d),0 12px 28px -18px light-dark(#20252266,#000000cc);
 --e3:0 2px 0 light-dark(#0000000d,#0000004d),0 28px 60px -30px light-dark(#20252280,#000000e6);
---m-maths:var(--blue);--m-physique:var(--terra-ink);--m-chimie:var(--amber);
+--m-maths:var(--blue);--m-physique:var(--terra-ink);--m-chimie:var(--amber);--m-info:light-dark(#3b5f73,#8fb4c8);
 --n1:var(--green);--n2:var(--blue);--n3:var(--red);
 --spring:cubic-bezier(.34,1.56,.64,1);--d-fast:.16s;--d-med:.32s;--d-slow:.6s}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
@@ -351,7 +351,7 @@ main{max-width:1280px;margin:auto;padding:20px max(3vw,14px) 40px}
 .item{transition:background-color .15s}.item:hover{background:var(--wash)}
 .item[aria-current=true]{background:color-mix(in srgb,var(--blue) 10%,var(--card));box-shadow:inset 3px 0 0 var(--blue)}
 .tile{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;grid-row:span 2;color:#fff}
-.tile.Maths{background:var(--blue)}.tile.Physique{background:var(--red)}.tile.Chimie{background:var(--green)}
+.tile.Maths{background:var(--blue)}.tile.Physique{background:var(--red)}.tile.Chimie{background:var(--green)}.tile.Informatique{background:var(--m-info)}
 .item .t{font-weight:600;font-size:15px;line-height:1.3}
 .item .m{grid-column:2;font-size:13px;color:var(--soft)}
 .st{grid-row:span 2;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line)}
@@ -1185,7 +1185,7 @@ nav.tabs a[aria-current=page]{background:none;color:var(--ink);font-weight:600;b
 .item{border-radius:3px}
 .item[aria-current=true]{background:var(--wash);box-shadow:inset 3px 0 0 var(--terra)}
 .tile{background:none!important;border:1px solid var(--line);border-radius:4px;color:var(--soft)}
-.tile.Maths{color:var(--blue)}.tile.Physique{color:var(--terra-ink)}.tile.Chimie{color:var(--amber)}
+.tile.Maths{color:var(--blue)}.tile.Physique{color:var(--terra-ink)}.tile.Chimie{color:var(--amber)}.tile.Informatique{color:var(--m-info)}
 .item .t{font-weight:600}
 .item .m{font-family:var(--fm);font-size:11.5px;letter-spacing:.02em}
 .count{font-family:var(--fm);font-size:12px}
@@ -1674,7 +1674,7 @@ body.focus .copy{border-color:transparent;box-shadow:none}
 /* liste : la matière se lit d'un coup d'œil */
 .item{position:relative}
 .item::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:transparent;transition:background .2s}
-.item:has(.tile.Maths):hover::before{background:var(--blue)}.item:has(.tile.Physique):hover::before{background:var(--terra)}.item:has(.tile.Chimie):hover::before{background:var(--amber)}
+.item:has(.tile.Maths):hover::before{background:var(--blue)}.item:has(.tile.Physique):hover::before{background:var(--terra)}.item:has(.tile.Chimie):hover::before{background:var(--amber)}.item:has(.tile.Informatique):hover::before{background:var(--m-info)}
 .st.ok{animation:pop .4s var(--ease)}
 .pf-head{background:var(--card)!important;background-image:none!important}
 
@@ -1823,7 +1823,7 @@ a,button,summary,label,select,input,.item{touch-action:manipulation}
 .ch-row{display:grid;grid-template-columns:76px minmax(0,1fr) 40px;gap:10px;align-items:center;font-size:var(--t-sm)}
 .ch-row i{height:10px;border-radius:2px;background:currentColor;width:var(--w);transform:scaleX(0);transform-origin:left;transition:transform 1s var(--ease)}
 .ch-row b{font-family:var(--fm);font-weight:500;text-align:right}
-.ch-row .m-Maths{color:var(--m-maths)}.ch-row .m-Physique{color:var(--m-physique)}.ch-row .m-Chimie{color:var(--m-chimie)}
+.ch-row .m-Maths{color:var(--m-maths)}.ch-row .m-Physique{color:var(--m-physique)}.ch-row .m-Chimie{color:var(--m-chimie)}.ch-row .m-Informatique{color:var(--m-info)}
 .chiffres.on .ch-row i{transform:none}
 .ch-row:nth-child(2) i{transition-delay:.12s}.ch-row:nth-child(3) i{transition-delay:.24s}
 .ch-lv{grid-column:3;display:grid;grid-template-columns:repeat(3,auto auto);justify-content:space-between;gap:8px;align-items:center;font-size:var(--t-sm);border-top:1px solid var(--rule);padding-top:12px}
@@ -2033,3 +2033,21 @@ a,button,summary,label,select,input,.item{touch-action:manipulation}
  #app .work.vue-grille .item:hover{transform:translateY(-3px);box-shadow:var(--e2)}
 }
 .item .gx{display:none}#app .work.vue-grille .item .gx{display:-webkit-box}
+
+/* ===================== Code Python (informatique) ===================== */
+:root{--code-bg:light-dark(#f4f1e8,#1b1d1c);--code-ink:light-dark(#2b2d2b,#e6e3da);--c-kw:light-dark(#a6402a,#f09a7d);--c-str:light-dark(#2f6b3c,#9fd3a5);--c-num:light-dark(#8a5a00,#e8c07a);--c-com:light-dark(#7a7a72,#8f8f86);--c-fn:light-dark(#1f4f8a,#8fb8ec);--c-bi:light-dark(#5b4a8a,#c0b2ec)}
+.codeblk{position:relative;margin:var(--s3) 0}
+pre.code{margin:0;background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-left:3px solid var(--terra);border-radius:var(--r-sm);padding:14px 16px;overflow-x:auto;font:14px/1.6 var(--fm);tab-size:4;-webkit-text-size-adjust:100%}
+pre.code code{font:inherit;background:none;padding:0;white-space:pre}
+.c-kw{color:var(--c-kw);font-weight:600}.c-str{color:var(--c-str)}.c-num{color:var(--c-num)}.c-com{color:var(--c-com);font-style:italic}.c-fn{color:var(--c-fn);font-weight:600}.c-bi{color:var(--c-bi)}
+.codeblk .cp{position:absolute;top:6px;right:6px;border:1px solid var(--line);background:var(--card);color:var(--soft);font:500 12px var(--fm);border-radius:var(--r-sm);padding:4px 8px;opacity:0;transition:opacity var(--d-fast)}
+.codeblk:hover .cp,.codeblk .cp:focus-visible{opacity:1}
+@media(hover:none){.codeblk .cp{opacity:.85}}
+:not(pre)>code{font:.9em var(--fm);background:var(--code-bg);border:1px solid var(--rule);border-radius:3px;padding:.05em .35em;white-space:nowrap}
+@media(max-width:560px){pre.code{font-size:13px;padding:12px}}
+@media print{pre.code{white-space:pre-wrap;border-left-width:2px}.codeblk .cp{display:none}}
+/* code : pas de ligatures (== et >= doivent se lire tels qu'on les tape) */
+pre.code,:not(pre)>code{font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}
+/* filtre des matières : 5 choix sur une ligne */
+#app #fMat{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));flex-wrap:nowrap}
+#app #fMat button{padding-inline:2px;min-width:0;font-size:13.5px}
