@@ -433,3 +433,7 @@ Donc $y_p$ est solution, et par le théorème de structure les solutions sont ex
 $$\boxed{y_0=-\frac14\Big(e^{2x}\!\int_x^{+\infty}\!fe^{-2t}+e^{-2x}\!\int_{-\infty}^x\!fe^{2t}\Big);\quad\text{support compact}\iff\int fe^{2t}=\int fe^{-2t}=0}$$""",
 r"""Non (ajouter $\mathrm{ch}\,2x$) ; la formule donne une solution particulière, qui tend vers $0$ aux deux bouts et est l'unique telle ; support compact si et seulement si $\int fe^{2t}=\int fe^{-2t}=0$.""")
 src("D'après un oral de l'École polytechnique.", 'X')
+
+# date d'ajout (sert à la rubrique « Nouveautés »)
+for _e in E:
+    if _e['id'].startswith('n-s-n-'): _e['ajout'] = '2026-11-24'

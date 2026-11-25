@@ -442,3 +442,7 @@ Il y a $\frac n2=2^{a-1}m$ entiers impairs dans $[\![1,n-1]\!]$, donc la somme e
 $$\boxed{n\mid1^n+2^n+\dots+(n-1)^n\iff n\text{ est impair}}$$""",
 r"""Fermat pour $p$ premier ; $n$ impair : appariement $k\leftrightarrow n-k$ ; $n=2^am$ pair : somme $\equiv2^{a-1}m\not\equiv0\pmod{2^a}$. Réponse : les $n$ impairs.""")
 src(X19, 'X')
+
+# date d'ajout (sert à la rubrique « Nouveautés »)
+for _e in E:
+    if _e['id'].startswith('n-s-x-'): _e['ajout'] = '2026-11-24'

@@ -8,13 +8,15 @@ import { esc, rich, fmtEnonce, fmtCorrige, hintsHTML, hintLevels, correctionHTML
 import { presentationCourte, presentationPage } from './apropos.js';
 import { initAuth, showAuth, MSG } from './auth.js';
 import { initTheme, syncTheme, reveal, toast, THEME_ICON } from './ui.js';
-import { initProfil, renderProfil, renderEdition, profilURL } from './profil.js';
+import { initProfil, renderProfil, renderEdition, profilURL, stats as statsProfil } from './profil.js';
 import { initCarnet, renderCarnet, openNote } from './carnet.js';
 import { initBiblio, renderCollection, openCollectionsPicker } from './biblio.js';
 import { renderCorrection } from './modes.js';
 import { rotator, countUp, heroBackground, carousel, celebrate } from './vivant.js';
 import { initMouvement } from './mouvement.js';
 import { initTactile } from './tactile.js';
+import { initVitrine } from './vitrine.js';
+import { niveauHTML } from './xp.js';
 import { initCommunaute, renderCommunaute, renderSolutions, openSignalement, renderModeration } from './communaute.js';
 
 const $ = s => document.querySelector(s);
@@ -101,6 +103,7 @@ document.querySelectorAll('[data-theme-toggle]').forEach(b => b.innerHTML = THEM
 reveal();
 typeset($('#auth'));
 rotator(); heroBackground(); carousel(document.querySelector('.car'));
+initVitrine();
 document.querySelectorAll('[data-count]').forEach(e => +e.dataset.count && countUp(e, e.dataset.count));
 document.querySelectorAll('[data-nbfig]').forEach(e => countUp(e, Object.keys(FIG).length));
 // chiffres réels de la page d'accueil (fichier statique, mis en cache par le service worker)
@@ -334,13 +337,24 @@ function renderFavBtn() {
   const on = isFav(CUR); b.setAttribute('aria-pressed', on); b.title = on ? 'Retirer des favoris' : 'Enregistrer dans mes favoris';
   b.querySelector('.lbl') && (b.querySelector('.lbl').textContent = on ? 'Enregistré' : 'Enregistrer');
 }
+const norm = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const HAY = new Map();   // texte de recherche pré-calculé par exercice
+const hay = e => HAY.get(e.id) || (HAY.set(e.id, norm(e.titre + ' ' + e.chap + ' ' + e.mat + ' ' + (e.concours || '') + ' ' + e.enonce)), HAY.get(e.id));
+const match = (e, q) => !q || q.split(/\s+/).every(w => hay(e).includes(w));   // tous les mots, dans n'importe quel ordre
 function filtered() {
-  const q = F.q.trim().toLowerCase();
-  if (F.fav) return favs().map(byId).filter(Boolean).filter(e => !q || (e.titre + ' ' + e.chap + ' ' + e.enonce).toLowerCase().includes(q));
-  return all().filter(e => e.niveau === F.lvl && (!F.mat || e.mat === F.mat) && (!F.chap || e.chap === F.chap) &&
-    (!q || (e.titre + ' ' + e.chap + ' ' + e.enonce).toLowerCase().includes(q)));
+  const q = norm(F.q.trim());
+  if (F.fav) return favs().map(byId).filter(Boolean).filter(e => match(e, q));
+  return all().filter(e => e.niveau === F.lvl && (!F.mat || e.mat === F.mat) && (!F.chap || e.chap === F.chap) && match(e, q));
 }
 const statusOf = id => SUIVI.ex?.[id]?.s || '';
+const finOf = id => !!SUIVI.ex?.[id]?.fin;   // « fait » : coché par l'élève lui-même (distinct de « réussi », validé par les pairs, et de « terminé », réponse soumise)
+// exercices consultés récemment (sur cet appareil)
+const VUS = () => store.get('vus', []);
+const vu = id => store.set('vus', [id, ...VUS().filter(x => x !== id)].slice(0, 12));
+function listOrder() {
+  const sel = new Set(CONF.sel?.[F.lvl] || []), order = ['Maths', 'Physique', 'Chimie'];
+  return filtered().sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || order.indexOf(a.mat) - order.indexOf(b.mat) || a.chap.localeCompare(b.chap, 'fr'));
+}
 function renderList() {
   $('#fLvl').innerHTML = [1, 2, 3].map(n => `<button data-n="${n}" aria-pressed="${n === F.lvl}" title="${LV[n]}"><span class="dots" aria-hidden="true">${'●'.repeat(n)}${'○'.repeat(3 - n)}</span>${{1: 'CCINP', 2: 'Mines-CS', 3: 'X-ENS'}[n]}</button>`).join('');
   $('#fMat').innerHTML = [['', 'Tout'], ['Maths', 'Maths'], ['Physique', 'Physique'], ['Chimie', 'Chimie']].map(([m, l]) => `<button data-m="${m}" aria-pressed="${m === F.mat}">${m ? ic(MAT_IC[m]) : ''}${l}</button>`).join('');
@@ -350,14 +364,14 @@ function renderList() {
   if (document.activeElement !== $('#fQ')) $('#fQ').value = F.q;
   $('#fFav').setAttribute('aria-pressed', !!F.fav); $('#fFav').innerHTML = `${ic('heart')} Favoris <span class="nb">${favs().length}</span>`;
   document.querySelector('.filters').classList.toggle('favmode', !!F.fav);
-  const sel = new Set(CONF.sel?.[F.lvl] || []), order = ['Maths', 'Physique', 'Chimie'];
-  const list = filtered().sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || order.indexOf(a.mat) - order.indexOf(b.mat) || a.chap.localeCompare(b.chap, 'fr'));
+  const sel = new Set(CONF.sel?.[F.lvl] || []);
+  const list = listOrder();
   $('#items').innerHTML = list.length ? list.map(e => {
     const s = statusOf(e.id);
     return `<button class="item" data-id="${esc(e.id)}" aria-current="${e.id === CUR}">
       <span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span>
       <span class="t">${sel.has(e.id) ? `<span style="color:var(--gold)">★</span> ` : ''}${esc(e.titre)}</span>
-      <span class="st ${s === 'reussi' ? 'ok' : s ? 'go' : ''}" title="${s === 'reussi' ? 'Réussi' : s ? 'En cours' : 'À faire'}">${s === 'reussi' ? ic('check') : s ? '•' : ''}</span>
+      <span class="st ${s === 'reussi' ? 'ok' : finOf(e.id) ? 'fin' : s ? 'go' : ''}" title="${s === 'reussi' ? 'Réussi : validé par tes pairs' : finOf(e.id) ? 'Fait (coché par toi)' : s ? 'En cours' : 'À faire'}">${s === 'reussi' ? ic('check') : finOf(e.id) ? ic('check') : s ? '•' : ''}</span>
       <span class="m">${F.fav ? LV[e.niveau] + ' · ' : ''}${esc(e.chap)} · ${e.duree} min${FIG[e.id] ? ' · schéma' : ''}${isFav(e.id) ? ' · <span class="fv">♥</span>' : ''}</span></button>`;
   }).join('') : `<div class="empty">${F.fav ? 'Aucun favori pour l’instant : touche le cœur d’un exercice pour l’enregistrer.' : 'Aucun exercice pour ces filtres.'}</div>`;
   const done = list.filter(e => statusOf(e.id) === 'reussi').length;
@@ -373,7 +387,7 @@ $('#items').onclick = e => { const b = e.target.closest('.item'); if (b) openEx(
 // on commence à télécharger le corrigé dès que le doigt se pose sur l'exercice
 $('#items').addEventListener('pointerdown', e => { const b = e.target.closest('.item'); if (b) loadCorr(b.dataset.id); }, {passive: true});
 function openEx(id) {
-  loadMathJax();
+  loadMathJax(); vu(id);
   const from = CUR; CUR = id; const ex = byId(id);
   if (phone() && !from) { LISTY = scrollY; history.pushState({ce: 'ex'}, '', '#ex-' + id); }   // le geste « retour » du téléphone ramène à la liste
   else history.replaceState(history.state, '', '#ex-' + id);
@@ -397,27 +411,71 @@ async function shareEx(ex, withCorr) {
   catch { notice(`Lien à partager : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`); }
 }
 
+/* ---------- terminé, précédent / suivant ---------- */
+function toggleDone(ex) {
+  SUIVI.ex ||= {};
+  const st = SUIVI.ex[ex.id] ||= {s: 'en_cours', e: 0, i: 0, sc: 0, d: now(), t: 0};
+  st.fin = st.fin ? 0 : 1; if (st.fin) st.df = now();
+  api.saveSuivi(SUIVI); renderList(); renderCopy();
+  if (st.fin) { toast('Exercice coché comme fait.', 'ok'); const b = $('#bDone'); b?.classList.add('pop'); }
+}
+function voisins(ex) {
+  const L = listOrder(), i = L.findIndex(e => e.id === ex.id);
+  return i < 0 ? [null, null] : [L[i - 1] || null, L[i + 1] || null];
+}
+function exNavHTML(ex) {
+  const [p, n] = voisins(ex); if (!p && !n) return '';
+  const b = (e, dir) => e ? `<button class="exn ${dir}" data-open="${esc(e.id)}"><span class="k">${ic(dir === 'prev' ? 'back' : 'arrow')} ${dir === 'prev' ? 'Précédent' : 'Suivant'}</span><b>${esc(e.titre)}</b><span class="small">${esc(e.chap)} · ${e.duree} min</span></button>` : '<span></span>';
+  return `<nav class="exnav" aria-label="Exercice précédent ou suivant">${b(p, 'prev')}${b(n, 'next')}</nav>`;
+}
+// raccourcis : ← → pour passer d'un exercice à l'autre (hors saisie)
+addEventListener('keydown', e => {
+  if (!CUR || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.target.closest?.('input,textarea,select,[contenteditable=true],.vx-track,[role=tablist]')) return;
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const ex = byId(CUR); if (!ex || !document.body.classList.contains('detail') && !$('#v-exercices.on')) return;
+  const [p, n] = voisins(ex), t = e.key === 'ArrowLeft' ? p : n;
+  if (t) { e.preventDefault(); openEx(t.id); }
+});
+
+/* ---------- accueil de la bibliothèque (aucun exercice ouvert) ---------- */
+function renderAccueil(el) {
+  const lvl = F.lvl, sel = (CONF.sel?.[lvl] || []).map(byId).filter(Boolean);
+  const vus = VUS().map(byId).filter(Boolean);
+  const last = vus.find(e => !finOf(e.id) && statusOf(e.id) !== 'reussi');
+  const pour = recommend(SUIVI, lvl).filter(e => e.id !== last?.id).slice(0, 4);
+  const neufs = all().filter(e => e.ajout && e.niveau === lvl).sort((a, b) => b.ajout.localeCompare(a.ajout)).slice(0, 4);
+  const neufsAll = neufs.length ? neufs : all().filter(e => e.ajout).slice(0, 4);
+  const row = e => `<li><button class="arow" data-open="${esc(e.id)}"><span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span><span class="t">${esc(e.titre)}</span><span class="m">${esc(e.chap)} · ${e.duree} min</span>${statusOf(e.id) === 'reussi' ? `<span class="st ok">${ic('check')}</span>` : finOf(e.id) ? `<span class="st fin">${ic('check')}</span>` : ''}</button></li>`;
+  const col = (t, icon, L, vide) => `<section class="acol"><h3>${ic(icon)} ${t}</h3>${L.length ? `<ul>${L.map(row).join('')}</ul>` : `<p class="small">${vide}</p>`}</section>`;
+  el.innerHTML = `<div class="welcome accueil">
+    <div class="kicker"><span class="stamp n${lvl}">${LV[lvl]}</span><span class="small">${esc(LVD[lvl])}</span></div>
+    <h2>Une colle courte, maintenant&nbsp;?</h2>
+    ${last ? `<button class="resume" data-open="${esc(last.id)}"><span class="k">Reprendre là où tu t’es arrêté</span><b>${esc(last.titre)}</b><span class="m">${esc(last.mat)} · ${esc(last.chap)} · ${last.duree} min</span><span class="go">${ic('arrow')}</span></button>` : ''}
+    <div class="acols">
+      ${col('Pour toi', 'target', pour, 'Termine ou réussis quelques exercices : les suggestions s’adaptent à tes chapitres les moins travaillés.')}
+      ${col('Consultés récemment', 'clock', vus.filter(e => e.id !== last?.id).slice(0, 4), 'Les exercices que tu ouvres apparaîtront ici.')}
+      ${col('Nouveautés', 'star', neufsAll, 'Rien de nouveau pour l’instant.')}
+    </div>
+    ${sel.length ? `<h3 class="sec">${ic('star')} Sélection de ton professeur</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}
+    <ol class="methode" aria-label="Comment se passe une colle">
+      <li><b>Cherche</b><span>sur papier, chrono lancé</span></li>
+      <li><b>Débloque-toi</b><span>un indice, puis la correction étape par étape</span></li>
+      <li><b>Soumets</b><span>ta réponse, sur l’honneur, à ton groupe</span></li>
+      <li><b>Évalue</b><span>les copies des autres, sur 20</span></li>
+    </ol>
+  </div>`;
+  el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openEx(b.dataset.open));
+  // au téléphone, l'accueil est sous la liste : la carte « Reprendre » remonte au-dessus des filtres
+  const rm = $('#resumeM');
+  if (rm) { rm.innerHTML = last ? el.querySelector('.resume').outerHTML : ''; rm.querySelector('[data-open]')?.addEventListener('click', e => openEx(e.currentTarget.dataset.open)); }
+}
+
 const sess = id => SESS[id] ||= {imgs: [], tours: [], hint: 0, start: now(), solution: '', busy: false, note: ''};
 let tick = null;
 function renderCopy() {
   const el = $('#copy'); clearInterval(tick);
   const ex = CUR && byId(CUR);
-  if (!ex) {
-    const sel = (CONF.sel?.[F.lvl] || []).map(byId).filter(Boolean);
-    el.innerHTML = `<div class="welcome">
-      <div class="kicker"><span class="stamp n${F.lvl}">${LV[F.lvl]}</span></div>
-      <h2>Une colle courte, maintenant&nbsp;?</h2>
-      <p class="enonce">${esc(LVD[F.lvl])}. Choisis un exercice dans la liste.</p>
-      <div class="steps">
-        <div><b>${ic('pen')} 1. Cherche</b><span class="small">Sur papier, comme au tableau, en surveillant le chrono.</span></div>
-        <div><b>${ic('bulb')} 2. Débloque-toi</b><span class="small">Un indice pour avancer ? Puis la correction, une étape à la fois si tu préfères.</span></div>
-        <div><b>${ic('users')} 3. Soumets</b><span class="small">Ta réponse, sur l’honneur, devient visible par ton groupe.</span></div>
-        <div><b>${ic('msg')} 4. Évalue</b><span class="small">Note les réponses des autres sur 20, puis compare avec une rédaction de concours.</span></div>
-      </div>
-      ${sel.length ? `<h3 class="sec">${ic('star')} Sélection recommandée</h3><div class="actions">${sel.map(e => `<button class="btn" data-open="${esc(e.id)}">${ic(MAT_IC[e.mat])} ${esc(e.titre)}</button>`).join('')}</div>` : ''}</div>`;
-    el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openEx(b.dataset.open));
-    return;
-  }
+  if (!ex) { renderAccueil(el); return; }
   const S = sess(ex.id), st = SUIVI.ex?.[ex.id], fig = FIG[ex.id];
   api.track(ex.id, 'vu');
   S.openH ||= [];
@@ -432,12 +490,13 @@ function renderCopy() {
     <button class="back" id="bBack">${ic('back')} Exercices</button>
     <div class="kicker"><span class="stamp n${ex.niveau}">${LV[ex.niveau]}</span><span class="pill">${ic(MAT_IC[ex.mat])}${esc(ex.mat)}</span><span class="pill">${ic(chapIcon(ex.mat, ex.chap))}${esc(ex.chap)}</span></div>
     <div class="titlerow"><h2>${esc(ex.titre)}</h2>
-      <div class="tools"><button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
+      <div class="tools"><button class="iconbtn done" id="bDone" aria-pressed="${finOf(ex.id)}" title="Cocher l’exercice comme fait, pour ton suivi personnel">${ic('done')}<span class="lbl">${finOf(ex.id) ? 'Fait' : 'Marquer comme fait'}</span></button>
+      <button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
       <button class="iconbtn" id="bColl" title="Ranger dans une collection">${ic('book')}<span class="lbl">Collection</span></button>
       <button class="iconbtn" id="bNote" title="Ajouter au carnet de progression">${ic('pen')}<span class="lbl">Carnet</span></button>
       <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button>
       <button class="iconbtn" id="bFocus" aria-pressed="${document.body.classList.contains('focus')}" title="Mode concentration : masque tout le reste (Échap pour sortir)">${ic('target')}<span class="lbl">Concentration</span></button></div></div>
-    ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : ''}">${ic(st.s === 'reussi' ? 'trophy' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 12/20)' : mine(ex.id) ? 'Réponse soumise' : 'En cours'}</div>` : ''}
+    ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : st.fin ? 'fin' : ''}">${ic(st.s === 'reussi' ? 'trophy' : st.fin ? 'done' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 12/20)' : mine(ex.id) ? 'Réponse soumise' + (st.fin ? ' · fait' : '') : st.fin ? 'Fait' : 'En cours'}</div>` : ''}
 
     <section class="co co-enonce">
       <div class="co-h"><span class="co-e" aria-hidden="true">📘</span>Énoncé<span class="co-meta">${ic('clock')}<span class="timer" id="timer">0:00</span>&nbsp;/ ${ex.duree} min</span></div>
@@ -534,6 +593,9 @@ function renderCopy() {
   $('#bNote').onclick = () => openNote({exercice_id: ex.id, titre: ex.titre, type: 'difficile'});
   $('#bShareEx').onclick = () => shareEx(ex, false);
   $('#bFocus').onclick = () => setFocus(!document.body.classList.contains('focus'));
+  $('#bDone').onclick = () => toggleDone(ex);
+  el.insertAdjacentHTML('beforeend', exNavHTML(ex));
+  el.querySelectorAll('.exnav [data-open]').forEach(b => b.onclick = () => { openEx(b.dataset.open); if (!phone()) $('#copy').scrollIntoView({block: 'start', behavior: 'smooth'}); });
   $('#bShareCorr') && ($('#bShareCorr').onclick = () => shareEx(ex, true));
 }
 
@@ -940,6 +1002,8 @@ function calHTML(days) {
     cells.push(`<i class="h${n ? Math.min(3, n) : 0}" title="${d.toLocaleDateString('fr-FR', {weekday: 'short', day: 'numeric', month: 'short'})} : ${n ? n + ' action' + (n > 1 ? 's' : '') : 'rien'}"></i>`); }
   return `<div class="cal" role="img" aria-label="Activité des 12 dernières semaines : ${[...days.values()].length} jours travaillés">${cells.join('')}</div>`;
 }
+const streakHTML = (streak, week) => `<span class="k">Série en cours</span><b class="num">${streak}</b><span class="small">jour${streak > 1 ? 's' : ''} de travail consécutif${streak > 1 ? 's' : ''} · ${week}/7 cette semaine</span>`;
+const calBoxHTML = days => `<span class="k">Douze semaines de travail</span>${calHTML(days)}<span class="small">${days.size} jour${days.size > 1 ? 's' : ''} actif${days.size > 1 ? 's' : ''} enregistré${days.size > 1 ? 's' : ''}</span>`;
 function bentoHTML(lvl) {
   const s = SUIVI, days = activityDays(s), streak = streakOf(days), first = (api.profile.full_name || '').split(' ')[0];
   const recent = [...new Set((s.journal || []).map(j => j.id))].map(byId).filter(Boolean).slice(0, 4);
@@ -951,12 +1015,48 @@ function bentoHTML(lvl) {
     <section class="bx bx-hi"><p class="hand">${new Date().getHours() >= 18 || new Date().getHours() < 5 ? 'Bonsoir' : 'Bonjour'} ${esc(first)}</p><h3>${last ? 'On reprend où tu t’étais arrêté ?' : 'Prêt pour ta première colle ?'}</h3>
       <p class="small">${mot}</p>
       ${last ? `<button class="btn primary" data-open="${esc(last.id)}">${ic('arrow')} Reprendre : ${esc(last.titre)}</button>` : `<a class="btn primary" href="#exercices">${ic('arrow')} Choisir un exercice</a>`}</section>
-    <section class="bx bx-streak"><span class="k">Série en cours</span><b class="num">${streak}</b><span class="small">jour${streak > 1 ? 's' : ''} de travail consécutif${streak > 1 ? 's' : ''} · ${week}/7 cette semaine</span></section>
+    <section class="bx bx-streak" id="bxStreak">${streakHTML(streak, week)}</section>
     <section class="bx bx-day"><span class="k">Exercice du jour</span>${pick ? `<h3>${esc(pick.titre)}</h3><span class="small">${esc(pick.chap)} · ${LV[pick.niveau]} · ${pick.duree} min</span><button class="btn" data-open="${esc(pick.id)}">Le tenter</button>` : '<p class="small">Tout est réussi à ce niveau. Passe au niveau supérieur !</p>'}</section>
-    <section class="bx bx-cal"><span class="k">Douze semaines de travail</span>${calHTML(days)}<span class="small">${days.size} jour${days.size > 1 ? 's' : ''} actif${days.size > 1 ? 's' : ''} enregistré${days.size > 1 ? 's' : ''}</span></section>
+    <section class="bx bx-cal" id="bxCal">${calBoxHTML(days)}</section>
+    <section class="bx bx-lvl" id="bxLvl"><span class="k">Progression</span><span class="skel skel-l w60"></span><span class="skel skel-l"></span></section>
     <section class="bx bx-goal" id="bxGoal"><span class="k">Objectif en cours</span><p class="small">Chargement…</p></section>
     <section class="bx bx-recent"><span class="k">Derniers exercices</span>${recent.length ? `<ul>${recent.map(e => `<li><button class="linkbtn" data-open="${esc(e.id)}">${esc(e.titre)}</button><span class="small">${esc(e.chap)}</span></li>`).join('')}</ul>` : '<p class="small">Rien pour l’instant : ton historique apparaîtra ici.</p>'}</section>
   </div>`;
+}
+async function fillNiveau() {
+  const b = $('#bxLvl'); if (!b) return;
+  let p = null; try { p = await api.profilPublic(MYUSER || api.user.id, false); } catch {}
+  if (!$('#bxLvl')) return;
+  if (!p || p.prive) { b.innerHTML = '<span class="k">Progression</span><p class="small">Indisponible pour le moment.</p>'; return; }
+  const S = statsProfil(p);
+  b.innerHTML = `<span class="k">Progression</span>${niveauHTML(S, {self: true, compact: true})}<a class="ul small" href="#u/${esc(p.username || '')}">Détail et jalons sur ton profil ${ic('arrow')}</a>`;
+  const r = $('#rythme'); if (r) r.innerHTML = rythmeHTML(p.jours || []);
+  // le serveur connaît toute l'activité (tous appareils) : on complète la série et la carte des 12 semaines
+  if (p.jours?.length) {
+    const days = activityDays(SUIVI);
+    for (const j of p.jours) { const [y, m, d] = j.j.split('-').map(Number), k = y * 10000 + m * 100 + d; days.set(k, Math.max(days.get(k) || 0, (j.ids || []).length || 1)); }
+    const week = [...days.keys()].filter(k => k >= dayKey(now() - 6 * 864e5)).length;
+    $('#bxCal') && ($('#bxCal').innerHTML = calBoxHTML(days));
+    $('#bxStreak') && ($('#bxStreak').innerHTML = streakHTML(streakOf(days), week));
+  }
+}
+// Rythme : exercices distincts travaillés par semaine (12 dernières semaines) et par mois (6 derniers mois)
+function rythmeHTML(jours) {
+  const map = new Map(jours.map(j => [j.j, j.ids || []]));
+  const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const today = new Date(); today.setHours(12);
+  const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  const weeks = []; for (let w = 11; w >= 0; w--) { const s0 = new Date(monday); s0.setDate(monday.getDate() - 7 * w); const ids = new Set();
+    for (let k = 0; k < 7; k++) { const d = new Date(s0); d.setDate(s0.getDate() + k); (map.get(ymd(d)) || []).forEach(i => ids.add(i)); }
+    weeks.push({lab: s0.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}), n: ids.size}); }
+  const months = []; for (let m = 5; m >= 0; m--) { const d0 = new Date(today.getFullYear(), today.getMonth() - m, 1), ids = new Set(), pre = ymd(d0).slice(0, 7);
+    for (const [k, v] of map) if (k.startsWith(pre)) v.forEach(i => ids.add(i));
+    months.push({lab: d0.toLocaleDateString('fr-FR', {month: 'short'}), n: ids.size}); }
+  const bars = (L, cls) => { const mx = Math.max(1, ...L.map(x => x.n));
+    return `<div class="ry ${cls}" role="img" aria-label="${L.map(x => `${x.lab} : ${x.n}`).join(', ')}">${L.map((x, i) => `<div class="ry-c"><span class="ry-v">${x.n || ''}</span><i style="--h:${(100 * x.n / mx).toFixed(0)}%;--d:${i * 30}ms"></i><span class="ry-l">${x.lab}</span></div>`).join('')}</div>`; };
+  const tot = weeks.reduce((a, x) => a + x.n, 0);
+  if (!tot && !months.some(x => x.n)) return `<p class="small">Ton rythme apparaîtra ici dès que tu auras travaillé un exercice (indice demandé ou réponse soumise).</p>`;
+  return `<div class="ry-grid"><div><h4>Par semaine <span class="small">exercices distincts travaillés</span></h4>${bars(weeks, 'w')}</div><div><h4>Par mois</h4>${bars(months, 'm')}</div></div>`;
 }
 async function fillGoal() {
   const b = $('#bxGoal'); if (!b) return;
@@ -975,6 +1075,7 @@ function renderSuivi() {
   $('#v-suivi').innerHTML = `
     <div class="pagehead"><h2>Mon suivi</h2><span class="small">${DEMO ? 'mode démonstration' : 'enregistré sur ton compte'}</span></div>
     ${bentoHTML(lvl)}
+    <h3 class="sec">${ic('chart')} Mon rythme</h3><div class="panel rythme" id="rythme"><span class="skel skel-l"></span><span class="skel skel-l w60"></span></div>
     <div class="panel profile"><span class="ph">${avatar(api.user.id, api.profile.full_name)}</span>
       <div><b>${esc(api.profile.full_name || 'Moi')}</b><span class="small">${esc(api.user.email || '')}</span></div>
       <div class="pbtns"><button class="btn" id="phChange">${ic('camera')} ${SUIVI.photo ? 'Changer la photo' : 'Ajouter une photo'}</button>${SUIVI.photo ? `<button class="btn ghost" id="phDel">${ic('trash')} Retirer</button>` : ''}<a class="btn" href="#profil">${ic('user')} Mon profil</a></div></div>
@@ -1007,7 +1108,7 @@ function renderSuivi() {
   if ($('#phDel')) $('#phDel').onclick = () => setPhoto('');
   $('#lvlPick').onclick = async e => { const b = e.target.closest('button'); if (!b) return; F.lvl = +b.dataset.n; await api.setMyLevel(F.lvl); renderSuivi(); };
   document.querySelectorAll('#v-suivi [data-open]').forEach(b => b.onclick = () => { location.hash = 'ex-' + b.dataset.open; });
-  fillGoal();
+  fillGoal(); fillNiveau();
 }
 
 /* ================= TABLEAU DE BORD ================= */

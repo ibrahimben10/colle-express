@@ -420,3 +420,7 @@ r"""**Étape 1 — Analyse de l'énoncé.** $p$ et $q$ décomposent l'identité,
 $$\boxed{E=\mathrm{Im}\,p\oplus\mathrm{Im}\,q,\quad p\circ q=q\circ p=0,\quad p^2=p,\ q^2=q}$$""",
 r"""$E=\mathrm{Im}\,p+\mathrm{Im}\,q$ et les rangs donnent une somme directe ; $p\circ q=p-p^2=q\circ p$ est à valeurs dans l'intersection, donc nul : $p^2=p$, $q^2=q$.""")
 src("D'après un oral CCINP.", 'CCINP')
+
+# date d'ajout (sert à la rubrique « Nouveautés »)
+for _e in E:
+    if _e['id'].startswith('n-s-a-'): _e['ajout'] = '2026-11-24'

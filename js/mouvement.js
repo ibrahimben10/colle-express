@@ -87,6 +87,18 @@ function scan(root) {
   all('#copy .status.ok').forEach(success);
 }
 
+/* ---------- navigation : l'indicateur glisse jusqu'à l'onglet actif ---------- */
+function navInd() {
+  const nav = document.getElementById('nav'); if (!nav) return;
+  let ind = nav.querySelector('.nav-ind');
+  const a = nav.querySelector('a[aria-current=page]');
+  if (!a || innerWidth < 821) { ind?.remove(); nav.classList.remove('has-ind'); return; }
+  if (!ind) { ind = document.createElement('span'); ind.className = 'nav-ind'; ind.setAttribute('aria-hidden', 'true'); nav.append(ind); ind.style.transition = 'none'; requestAnimationFrame(() => ind.style.transition = ''); }
+  nav.classList.add('has-ind');
+  nav.querySelectorAll('a[title]').forEach(x => x.removeAttribute('title'));   // l'infobulle stylée remplace celle du navigateur
+  ind.style.width = a.offsetWidth + 'px'; ind.style.transform = `translateX(${a.offsetLeft}px)`;
+}
+
 export function initMouvement() {
   document.documentElement.classList.add('mv');
   new MutationObserver(ms => {
@@ -99,6 +111,9 @@ export function initMouvement() {
   addEventListener('pointerdown', ripple, {passive: true});
   addEventListener('click', e => { const f = e.target.closest('#bFav'); if (f) setTimeout(() => heart(f), 0); });
   // les changements d'onglet : l'icône du nouvel onglet sautille
+  addEventListener('hashchange', () => setTimeout(navInd, 0));
+  addEventListener('resize', () => requestAnimationFrame(navInd), {passive: true});
+  new MutationObserver(() => navInd()).observe(document.getElementById('nav') || document.body, {attributes: true, subtree: true, attributeFilter: ['aria-current'], childList: true});
   addEventListener('hashchange', () => setTimeout(() => document.querySelectorAll('.bottombar a[aria-current=page] svg, nav.tabs a[aria-current=page] svg').forEach(s => {
     s.classList.remove('hop'); void s.getBoundingClientRect(); s.classList.add('hop'); }), 0));
 }

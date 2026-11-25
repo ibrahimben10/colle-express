@@ -270,3 +270,11 @@ Le site suit une direction « carnet de colle » : papier chaud, encre, vert aca
 - MathJax se télécharge après l'affichage de la page (ou dès l'ouverture d'un exercice).
 - Le service worker sert l'application depuis le cache : **à chaque mise en ligne, incrémenter `VERSION` dans `sw.js`**. Les visiteurs reçoivent la nouvelle version automatiquement (rechargement discret, jamais pendant la saisie d'un texte).
 - `_headers` règle la durée de cache côté Cloudflare (polices et images 30 jours, données 1 heure).
+
+## Refonte 2026-11 (branche `refonte`)
+
+- **Jetons de design** centralisés en tête de `css/style.css` (espacements `--s1…--s8`, rayons, tailles de texte, élévations `--e1…--e3`, couleurs de matières et de niveaux, durées d'animation).
+- **Accueil** (`js/vitrine.js`) : « Le labo » (Taylor, oscillateur amorti, dichotomie, calculés en direct), « La bibliothèque » (chiffres calculés sur `data/exercices.json`, carrousel d'exercices réels avec commandes manuelles).
+- **Bibliothèque** : recherche sans accents et multi-mots, accueil « Reprendre / Pour toi / Consultés récemment / Nouveautés », bouton « Marquer comme fait » (suivi personnel, distinct de « terminé » et « réussi »), navigation précédent / suivant (et touches ← →).
+- **Progression** (`js/xp.js`) : XP et niveaux (Bizuth → Major) calculés sur les statistiques publiques du profil, jalons, rythme par semaine et par mois. Aucune modification de la base.
+- Champ facultatif `ajout` (date) dans `data/exercices.json` pour la rubrique « Nouveautés ».

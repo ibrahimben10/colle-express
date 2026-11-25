@@ -1,6 +1,7 @@
 // Profils personnels : page « carnet » (#u/identifiant), édition et confidentialité.
 // Toutes les données viennent du serveur (fonction profil_public) qui applique la confidentialité ;
 // rien n'est inventé : une section sans données affiche un état vide.
+import { niveauHTML, jalons, jalonsHTML } from './xp.js';
 import { bannerSVG } from './vivant.js';
 import { api } from './api.js';
 import { ic } from './icons.js';
@@ -57,6 +58,7 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
   let n = 0; const sec = (id, titre, html, note = '') => { n++; sections.push(`<section class="pf-sec" id="pf-${id}" aria-labelledby="pf-${id}-t">
     <header class="pf-sh"><span class="pf-num">${String(n).padStart(2,"0")}</span><h2 id="pf-${id}-t">${titre}</h2>${note ? `<span class="pf-note">${note}</span>` : ''}</header>${html}</section>`); };
 
+  if (p.travailles) sec('niveau', 'Niveau', niveauHTML(S, {self: p.self}), 'calculé sur l’activité publique');
   if (p.travailles) sec('stats', 'En chiffres', statsHTML(S, p), 'activité réelle, comptée depuis l’inscription');
   if (p.jours) sec('activite', 'Carte d’activité', heatHTML(p.jours), 'jours où des exercices ont été travaillés');
   if (p.travailles) sec('parcours', 'Parcours scientifique', parcoursHTML(p), 'couverture des chapitres, pas un niveau de maîtrise');
@@ -64,7 +66,8 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
     + (p.favoris ? `<h3 class="pf-h3">Exercices favoris</h3>${favorisHTML(p.favoris, p.self)}` : ''));
   if (p.solutions && (p.solutions.length || p.self)) sec('solutions', 'Solutions publiées', solutionsHTML(p.solutions, p.self), 'rédigées par l’élève, non vérifiées sauf mention');
   if (p.carnet && (p.carnet.length || p.self)) sec('carnet', 'Pages du carnet', carnetPublicHTML(p.carnet, p.self), 'notes publiées volontairement');
-  if (p.badges && (p.badges.length || p.self)) sec('badges', 'Réalisations', badgesHTML(p.badges, p.self), 'critères publics et vérifiables');
+  const J = p.reussis || p.travailles ? jalonsHTML(jalons({...p, _S: S}, D.byId, domaine), p.self) : '';
+  if ((p.badges && (p.badges.length || p.self)) || J) sec('badges', 'Réalisations', (p.badges ? badgesHTML(p.badges, p.self) : '') + (J ? `<h3 class="pf-h3">Jalons</h3>${J}` : ''), 'critères publics et vérifiables');
   if (p.commentaires) sec('paroles', 'Commentaires publics', parolesHTML(p.commentaires));
 
   el.innerHTML = `
@@ -116,7 +119,7 @@ function liensHTML(l = {}) {
 }
 
 /* ---------- statistiques ---------- */
-function stats(p) {
+export function stats(p) {
   const days = (p.jours || []).map(j => j.j).sort();
   const set = new Set(days);
   let serie = 0; const d = new Date();

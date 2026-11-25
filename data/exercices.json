@@ -2337,7 +2337,8 @@
   "concours": "X",
   "titre": "Racines de module au plus 1 d’un polynôme entier",
   "enonce": "Soit $P\\in\\mathbb Z[X]$ unitaire de degré $d\\ge1$, dont toutes les racines complexes $\\lambda_1,\\dots,\\lambda_d$ (comptées avec multiplicité) vérifient $|\\lambda_k|\\le1$. Pour $n\\in\\mathbb N$, on pose $s_n=\\sum_{k=1}^d\\lambda_k^n$.\n\n1. Montrer que $s_n\\in\\mathbb Z$ pour tout $n$, puis que la suite $(s_n)$ est périodique à partir d'un certain rang.\n2. En déduire que chaque $\\lambda_k$ est nul ou est une racine de l'unité.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 30
+  "duree": 30,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-newton",
@@ -2347,7 +2348,8 @@
   "concours": "X",
   "titre": "Inégalités de Newton pour un polynôme scindé sur ℝ",
   "enonce": "Soit $P=\\sum_{k=0}^na_kX^k\\in\\mathbb R[X]$ de degré $n\\ge2$, dont toutes les racines sont réelles.\n\n1. Montrer que $QQ''\\le Q'^2$ sur $\\mathbb R$ pour tout polynôme $Q$ non constant scindé sur $\\mathbb R$.\n2. En déduire que $a_{k-1}a_{k+1}\\le a_k^2$ pour tout $k\\in[\\![1,n-1]\\!]$.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-fekete",
@@ -2357,7 +2359,8 @@
   "concours": "X",
   "titre": "Suites sous-additives (lemme de Fekete)",
   "enonce": "Soit $(x_n)_{n\\ge1}$ une suite réelle **sous-additive** : $x_{n+m}\\le x_n+x_m$ pour tous $n,m\\ge1$. On pose $\\ell=\\inf_{n\\ge1}\\frac{x_n}n\\in[-\\infty,+\\infty[$.\n\n1. On suppose $x_n\\ge0$ pour tout $n$. Montrer que $\\frac{x_n}n\\to\\ell$.\n2. Montrer que la conclusion subsiste sans hypothèse de signe, la limite pouvant valoir $-\\infty$.\n3. Application : si $u_n>0$ et $u_{n+m}\\le u_nu_m$, montrer que $u_n^{1/n}$ converge.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-ideaux",
@@ -2367,7 +2370,8 @@
   "concours": "X",
   "titre": "Idéaux maximaux de C([0,1])",
   "enonce": "On note $A=\\mathcal C([0,1],\\mathbb R)$, anneau commutatif pour les opérations usuelles. Pour $a\\in[0,1]$, on pose $M_a=\\{f\\in A,\\ f(a)=0\\}$.\n\n1. Montrer que $M_a$ est un idéal maximal de $A$ (un idéal $I\\neq A$ tel que le seul idéal contenant strictement $I$ soit $A$).\n2. Soit $I$ un idéal de $A$ distinct de $A$. Montrer qu'il existe $a\\in[0,1]$ tel que $I\\subset M_a$.\n3. En déduire tous les idéaux maximaux de $A$.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-comm",
@@ -2377,7 +2381,8 @@
   "concours": "X",
   "titre": "Famille commutative : tous polynômes en un seul endomorphisme",
   "enonce": "Soient $E$ un $\\mathbb C$-espace vectoriel de dimension finie $n$ et $\\mathcal F\\subset\\mathcal L(E)$ une famille (éventuellement infinie) d'endomorphismes diagonalisables qui commutent deux à deux.\n\n1. Montrer qu'il existe une base de $E$ dans laquelle tous les éléments de $\\mathcal F$ sont diagonaux.\n2. Montrer qu'il existe $g\\in\\mathcal L(E)$ tel que tout $f\\in\\mathcal F$ soit un polynôme en $g$.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-unip",
@@ -2387,7 +2392,8 @@
   "concours": "X",
   "titre": "Matrices unipotentes et racine carrée rationnelle",
   "enonce": "Soit $A\\in\\mathcal M_n(\\mathbb C)$.\n\n1. Montrer l'équivalence : (i) toutes les valeurs propres de $A$ valent $1$ ; (ii) $A=I_n+N$ avec $N^n=0$.\n2. On suppose de plus $A\\in\\mathcal M_n(\\mathbb Q)$ et (i). Montrer qu'il existe $B\\in\\mathcal M_n(\\mathbb Q)$ telle que $B^2=A$.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-traces",
@@ -2397,7 +2403,8 @@
   "concours": "X",
   "titre": "Traces des puissances bornées",
   "enonce": "Soit $u$ un endomorphisme d'un $\\mathbb C$-espace vectoriel $V$ de dimension $d\\ge1$. On suppose qu'il existe $C\\ge0$ tel que $|\\mathrm{Tr}(u^n)|\\le C$ pour tout $n\\in\\mathbb N$.\n\n1. On note $\\lambda_1,\\dots,\\lambda_d$ les valeurs propres de $u$ (avec multiplicité). Montrer que la série entière $S(t)=\\sum_{n\\ge0}\\mathrm{Tr}(u^n)t^n$ a un rayon au moins $1$, et que $S(t)=\\sum_k\\frac1{1-\\lambda_kt}$ pour $|t|$ petit.\n2. En déduire que $|\\lambda_k|\\le1$ pour tout $k$, puis que $|\\mathrm{Tr}(u^n)|\\le d$ pour tout $n$.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-hoeff",
@@ -2407,7 +2414,8 @@
   "concours": "X",
   "titre": "Inégalité de Hoeffding",
   "enonce": "1. Soit $X$ une variable aléatoire réelle centrée, à valeurs dans $[a,b]$. Montrer que pour tout $t\\in\\mathbb R$ :\n$$\\mathbb E\\big(e^{tX}\\big)\\le\\exp\\Big(\\frac{t^2(b-a)^2}8\\Big).$$\n2. Soient $X_1,\\dots,X_n$ indépendantes, $X_i$ à valeurs dans $[a_i,b_i]$, et $S_n=X_1+\\dots+X_n$. Montrer que pour tout $s>0$ :\n$$\\mathbb P\\big(S_n-\\mathbb E(S_n)\\ge s\\big)\\le\\exp\\Big(-\\frac{2s^2}{\\sum_i(b_i-a_i)^2}\\Big).$$\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 30
+  "duree": 30,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-derang",
@@ -2417,7 +2425,8 @@
   "concours": "X",
   "titre": "Dérangements : nombre et somme des signatures",
   "enonce": "Un dérangement de $[\\![1,n]\\!]$ ($n\\ge1$) est une permutation sans point fixe. On note $D(n)$ leur nombre.\n\n1. Montrer que $D(n)=n!\\sum_{k=0}^n\\frac{(-1)^k}{k!}$, puis que $D(n)$ est l'entier le plus proche de $\\frac{n!}e$.\n2. On note $S(n)=\\sum_{\\sigma}\\varepsilon(\\sigma)$, la somme portant sur les dérangements. Calculer $S(n)$.\n3. Combien de permutations de $[\\![1,n]\\!]$ ont exactement $m$ points fixes ? Quelle est la limite de la proportion correspondante quand $n\\to\\infty$ ?\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-x-sompuis",
@@ -2427,7 +2436,8 @@
   "concours": "X",
   "titre": "Quand n divise-t-il 1ⁿ + 2ⁿ + … + (n−1)ⁿ ?",
   "enonce": "1. Soit $p$ un nombre premier. Montrer que $p$ divise $1^{p-1}+2^{p-1}+\\dots+(p-1)^{p-1}+1$.\n2. Déterminer tous les entiers $n\\ge1$ tels que $n$ divise $1^n+2^n+\\dots+(n-1)^n$.\n\n*D'après un oral de l'École polytechnique (MP, 2019).*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-expo",
@@ -2437,7 +2447,8 @@
   "concours": "X",
   "titre": "Exposant d’un groupe abélien fini",
   "enonce": "Soit $G$ un groupe abélien fini, noté multiplicativement.\n\n1. Soient $a,b\\in G$ d'ordres $m$ et $n$ premiers entre eux. Montrer que $ab$ est d'ordre $mn$. Que dire de l'ordre de $ab$ en général ? Montrer qu'il existe toujours un élément d'ordre $\\mathrm{ppcm}(m,n)$.\n2. Soit $r$ le ppcm des ordres des éléments de $G$. Montrer qu'il existe un élément d'ordre $r$.\n3. Le résultat subsiste-t-il si $G$ n'est pas abélien ?\n4. Soit $K$ un corps. Montrer que tout sous-groupe fini de $(K^*,\\times)$ est cyclique.\n\n*D'après un oral de l'École polytechnique.*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-deuxn",
@@ -2447,7 +2458,8 @@
   "concours": "Mines-Ponts",
   "titre": "Le groupe des inversibles de ℤ/2ⁿℤ",
   "enonce": "Soit $a$ un entier impair.\n\n1. Montrer que $a^{2^{n-2}}\\equiv1\\pmod{2^n}$ pour tout entier $n\\ge3$.\n2. En déduire les entiers $n\\ge1$ pour lesquels le groupe $(\\mathbb Z/2^n\\mathbb Z)^*$ est cyclique.\n\n*D'après un oral Mines-Ponts.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-heis",
@@ -2457,7 +2469,8 @@
   "concours": "Mines-Ponts",
   "titre": "Matrices unitriangulaires sur ℤ/pℤ",
   "enonce": "Soit $p\\ge3$ un nombre premier et $K=\\mathbb Z/p\\mathbb Z$. Pour $(a,b,c)\\in K^3$, on pose\n$$M(a,b,c)=\\begin{pmatrix}1&a&b\\\\0&1&c\\\\0&0&1\\end{pmatrix},\\qquad G=\\{M(a,b,c),\\ (a,b,c)\\in K^3\\}.$$\n\n1. Montrer que $G$ est un sous-groupe de $GL_3(K)$, non commutatif. Quel est son cardinal ?\n2. Déterminer l'ordre de chaque élément de $G$.\n3. Que se passe-t-il pour $p=2$ ?\n\n*D'après un oral Mines-Ponts.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-pxx",
@@ -2467,7 +2480,8 @@
   "concours": "Mines-Ponts",
   "titre": "Équation P(X²) = P(X)P(X+1)",
   "enonce": "On cherche les polynômes $P\\in\\mathbb C[X]$ non nuls tels que $P(X^2)=P(X)\\,P(X+1)$.\n\n1. Montrer qu'un tel $P$ est unitaire.\n2. Montrer que si $\\lambda$ est racine de $P$, alors $\\lambda^2$ et $(\\lambda-1)^2$ le sont aussi.\n3. En déduire que toute racine $\\lambda$ vérifie : $\\lambda=0$ ou $|\\lambda|=1$, et $\\lambda=1$ ou $|\\lambda-1|=1$.\n4. Déterminer les complexes $z$ tels que $|z|=|z-1|=1$, et montrer qu'ils ne sont pas racines.\n5. Déterminer tous les polynômes solutions.\n\n*D'après un oral Mines-Ponts.*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-pu",
@@ -2477,7 +2491,8 @@
   "concours": "Mines-Ponts",
   "titre": "Polynômes qui laissent stable le cercle unité",
   "enonce": "On note $\\mathbb U=\\{z\\in\\mathbb C,\\ |z|=1\\}$. Pour $P=\\sum_{k=0}^na_kX^k\\in\\mathbb C[X]$ de degré $n$, on pose $P^*=X^n\\overline P\\big(\\tfrac1X\\big)=\\sum_{k=0}^n\\overline{a_{n-k}}X^k$.\n\n1. Montrer que si $P(\\mathbb U)\\subset\\mathbb U$, alors $P(z)P^*(z)=z^n$ pour tout $z\\in\\mathbb U$.\n2. En déduire tous les polynômes $P$ tels que $P(\\mathbb U)\\subset\\mathbb U$.\n3. Lesquels vérifient $P(\\mathbb U)=\\mathbb U$ ?\n\n*D'après un oral Mines-Ponts.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-pprime",
@@ -2487,7 +2502,8 @@
   "concours": "Centrale",
   "titre": "P′² − PP″ n’a pas de racine réelle",
   "enonce": "Soit $P\\in\\mathbb C[X]$ de degré $n\\ge2$ dont toutes les racines sont réelles et simples. Montrer que le polynôme $Q=P'^2-PP''$ n'a aucune racine réelle.\n\n*D'après un oral Centrale.*",
-  "duree": 15
+  "duree": 15,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-quot",
@@ -2497,7 +2513,8 @@
   "concours": "Centrale",
   "titre": "Un quotient à coefficients entiers",
   "enonce": "Soient $p,q\\ge1$ deux entiers premiers entre eux. On pose $A=(1-X^p)(1-X^q)$ et $B=(1-X^{pq})(1-X)$.\n\n1. Montrer que $A$ divise $B$ dans $\\mathbb C[X]$, puis que le quotient $Q=\\frac BA$ est à coefficients entiers.\n2. Calculer $\\deg Q$, $Q(0)$ et $Q(1)$.\n\n*D'après un oral Centrale.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-mahler",
@@ -2507,7 +2524,8 @@
   "concours": "Centrale",
   "titre": "Coefficients et mesure de Mahler",
   "enonce": "Soit $P=\\sum_{k=0}^na_kX^k\\in\\mathbb C[X]$ unitaire de degré $n$, de racines $\\lambda_1,\\dots,\\lambda_n$ (avec multiplicité). On pose $M(P)=\\prod_{k=1}^n\\max(1,|\\lambda_k|)$.\n\n1. Montrer que $|a_k|\\le\\binom nk M(P)$ pour tout $k\\in[\\![0,n]\\!]$.\n2. En déduire que $\\sum_{k=0}^n|a_k|\\le2^nM(P)$. Cas d'égalité pour un exemple simple ?\n\n*D'après un oral Centrale.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-cinq",
@@ -2517,7 +2535,8 @@
   "concours": "X",
   "titre": "Dimension de l’espace engendré par les racines cinquièmes",
   "enonce": "Soit $\\omega=e^{2i\\pi/5}$. On considère $\\mathbb C$ comme un $\\mathbb Q$-espace vectoriel et $F=\\mathrm{Vect}_{\\mathbb Q}(1,\\omega,\\omega^2,\\omega^3,\\omega^4)$.\n\n1. Montrer que $\\dim_{\\mathbb Q}F\\le4$.\n2. Montrer que $\\Phi=X^4+X^3+X^2+X+1$ est irréductible dans $\\mathbb Q[X]$. On pourra utiliser $c=\\omega+\\omega^4=2\\cos\\frac{2\\pi}5$.\n3. En déduire $\\dim_{\\mathbb Q}F$.\n\n*D'après un oral de l'École polytechnique.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-a-proj",
@@ -2527,7 +2546,8 @@
   "concours": "CCINP",
   "titre": "p + q = Id et rangs : deux projecteurs",
   "enonce": "Soit $E$ un espace vectoriel de dimension finie $n$ et $p,q\\in\\mathcal L(E)$ tels que $p+q=\\mathrm{Id}_E$ et $\\mathrm{rg}(p)+\\mathrm{rg}(q)\\le n$.\n\n1. Montrer que $E=\\mathrm{Im}\\,p\\oplus\\mathrm{Im}\\,q$.\n2. Montrer que $p\\circ q=q\\circ p=0$.\n3. En déduire que $p$ et $q$ sont des projecteurs.\n\n*D'après un oral CCINP.*",
-  "duree": 15
+  "duree": 15,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-se1",
@@ -2537,7 +2557,8 @@
   "concours": "CCINP",
   "titre": "Somme de Σ 2xⁿ/(n² − 1)",
   "enonce": "On considère la série entière $\\displaystyle\\sum_{n\\ge2}\\frac{2}{n^2-1}\\,x^n$, de somme $S$.\n\n1. Déterminer son rayon de convergence $R$.\n2. Calculer $S(x)$ pour $x\\in\\,]-R,R[$.\n3. Montrer que $S$ admet une limite en $1^-$ et la calculer. Comparer avec $\\sum_{n\\ge2}\\frac2{n^2-1}$.\n\n*D'après un oral CCINP.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-arcsin",
@@ -2547,7 +2568,8 @@
   "concours": "Mines-Ponts",
   "titre": "Développement de arcsin x / √(1 − x²)",
   "enonce": "1. Développer $f:t\\mapsto\\frac1{\\sqrt{1-t}}$ en série entière ; préciser le rayon et écrire les coefficients à l'aide de $\\binom{2n}n$.\n2. Soit $g(x)=\\dfrac{\\arcsin x}{\\sqrt{1-x^2}}$ sur $]-1,1[$.\n   (a) Justifier que $g$ est développable en série entière sur $]-1,1[$.\n   (b) Montrer que $(1-x^2)g'(x)-xg(x)=1$.\n   (c) En déduire le développement de $g$.\n\n*D'après un oral Mines-Ponts.*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-nfact",
@@ -2557,7 +2579,8 @@
   "concours": "Centrale",
   "titre": "La série Σ n! xⁿ / nⁿ⁺¹ et sa représentation intégrale",
   "enonce": "Soit $f(x)=\\displaystyle\\sum_{n\\ge1}\\frac{n!}{n^{n+1}}x^n$.\n\n1. Déterminer le rayon de convergence $R$, et montrer que $\\displaystyle\\int_0^{+\\infty}t^ne^{-nt}\\,dt=\\frac{n!}{n^{n+1}}$.\n2. Étudier la convergence de la série en $x=R$ et en $x=-R$.\n3. Montrer que pour $|x|<R$ : $\\displaystyle f(x)=\\int_0^{+\\infty}\\frac{xt}{e^t-xt}\\,dt$.\n\n*D'après un oral Centrale.*",
-  "duree": 30
+  "duree": 30,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-interv",
@@ -2567,7 +2590,8 @@
   "concours": "CCINP",
   "titre": "Une interversion série-intégrale interdite",
   "enonce": "Sur $I=\\,]0,+\\infty[$, on pose $f_n(x)=e^{-nx}-2e^{-2nx}$ pour $n\\ge1$.\n\n1. Montrer que $f_n$ est intégrable sur $I$ et calculer $\\int_If_n$. Que vaut $\\sum_{n\\ge1}\\int_If_n$ ?\n2. Montrer que $\\sum f_n$ converge simplement sur $I$, calculer sa somme $S$, et montrer que $S$ est intégrable. Calculer $\\int_IS$.\n3. Expliquer pourquoi le théorème d'intégration terme à terme ne s'applique pas.\n\n*D'après un oral CCINP.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-conj",
@@ -2577,7 +2601,8 @@
   "concours": "CCINP",
   "titre": "Une loi conjointe en (i + j)/2^(i+j+3)",
   "enonce": "1. Montrer que la famille $\\Big(\\dfrac{i+j}{2^{i+j}}\\Big)_{(i,j)\\in\\mathbb N^2}$ est sommable et calculer sa somme.\n2. Soient $X$, $Y$ deux variables aléatoires à valeurs dans $\\mathbb N$ telles que $\\mathbb P(X=i,Y=j)=\\dfrac{i+j}{2^{i+j+3}}$ pour tous $i,j\\in\\mathbb N$.\n   (a) Vérifier que l'on définit bien ainsi une loi conjointe.\n   (b) Déterminer la loi de $X$ et celle de $Y$.\n   (c) $X$ et $Y$ sont-elles indépendantes ?\n   (d) Calculer $\\mathbb E(X)$.\n\n*D'après un oral CCINP.*",
-  "duree": 20
+  "duree": 20,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-poisson",
@@ -2587,7 +2612,8 @@
   "concours": "CCINP",
   "titre": "De la loi binomiale à la loi de Poisson",
   "enonce": "Soit $\\lambda\\in\\,]0,1[$ et, pour $n\\ge2$, $X_n$ une variable aléatoire de loi binomiale $\\mathcal B\\big(n,\\frac\\lambda n\\big)$.\n\n1. Pour $k\\in\\mathbb N$ fixé, montrer que $\\dfrac{n(n-1)\\cdots(n-k+1)}{n^k}\\xrightarrow[n\\to\\infty]{}1$.\n2. Déterminer $\\lim_{n\\to\\infty}\\mathbb P(X_n=k)$ pour tout $k\\in\\mathbb N$.\n3. Application : une machine produit des pièces défectueuses avec probabilité $0{,}01$. Estimer la probabilité qu'un lot de $100$ pièces n'en contienne aucune défectueuse, et comparer à la valeur exacte.\n\n*D'après un oral CCINP.*",
-  "duree": 15
+  "duree": 15,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-ed1",
@@ -2597,7 +2623,8 @@
   "concours": "Mines-Ponts",
   "titre": "Équation xy″ − y′ − 4x³y = 0 sur ℝ",
   "enonce": "On considère l'équation différentielle $(E)$ : $xy''-y'-4x^3y=0$.\n\n1. Déterminer les solutions de $(E)$ développables en série entière au voisinage de $0$.\n2. Résoudre $(E)$ sur $]0,+\\infty[$ et sur $]-\\infty,0[$.\n3. Résoudre $(E)$ sur $\\mathbb R$.\n\n*D'après un oral Mines-Ponts.*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-ed2",
@@ -2607,7 +2634,8 @@
   "concours": "X",
   "titre": "Variation des constantes : y″ − y = 1/sh x et th x",
   "enonce": "1. Résoudre sur $]0,+\\infty[$ l'équation $y''-y=\\dfrac1{\\mathrm{sh}\\,x}$.\n2. Résoudre sur $\\mathbb R$ l'équation $y''-y=\\mathrm{th}\\,x$.\n\n*D'après un oral de l'École polytechnique.*",
-  "duree": 25
+  "duree": 25,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-transp",
@@ -2617,7 +2645,8 @@
   "concours": "Mines-Ponts",
   "titre": "Équation de transport ∂f/∂x + ∂f/∂y = 0",
   "enonce": "1. Soit $f\\in\\mathcal C^1(\\mathbb R^2,\\mathbb R)$ telle que $\\dfrac{\\partial f}{\\partial x}+\\dfrac{\\partial f}{\\partial y}=0$. Montrer qu'il existe $\\varphi\\in\\mathcal C^1(\\mathbb R,\\mathbb R)$ telle que $f(x,y)=\\varphi(x-y)$ pour tout $(x,y)$.\n2. Déterminer les $f\\in\\mathcal C^1(\\mathbb R^2,\\mathbb R)$ telles que $\\dfrac{\\partial f}{\\partial x}+\\dfrac{\\partial f}{\\partial y}=f$.\n\n*D'après un oral Mines-Ponts.*",
-  "duree": 15
+  "duree": 15,
+  "ajout": "2026-11-24"
  },
  {
   "id": "n-s-n-ed3",
@@ -2627,6 +2656,7 @@
   "concours": "X",
   "titre": "y″ − 4y = f avec f à support compact",
   "enonce": "Soit $f:\\mathbb R\\to\\mathbb R$ de classe $\\mathcal C^\\infty$, nulle en dehors d'un segment $[-a,a]$. On considère $(E)$ : $y''-4y=f$.\n\n1. Une solution de $(E)$ est-elle nécessairement nulle en dehors d'un segment ?\n2. Montrer que $y$ est solution de $(E)$ sur $\\mathbb R$ si et seulement s'il existe $(\\lambda,\\mu)\\in\\mathbb R^2$ tel que\n$$y(x)=\\lambda e^{2x}+\\mu e^{-2x}-\\frac{e^{2x}}4\\int_x^{+\\infty}f(t)e^{-2t}\\,dt-\\frac{e^{-2x}}4\\int_{-\\infty}^xf(t)e^{2t}\\,dt .$$\n3. En déduire qu'il existe une unique solution $y_0$ de $(E)$ qui tend vers $0$ en $+\\infty$ et en $-\\infty$.\n4. Donner une condition nécessaire et suffisante sur $f$ pour que $(E)$ admette une solution nulle en dehors d'un segment.\n\n*D'après un oral de l'École polytechnique.*",
-  "duree": 30
+  "duree": 30,
+  "ajout": "2026-11-24"
  }
 ]

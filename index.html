@@ -30,7 +30,7 @@
   <header class="lnav"><div class="lin">
     <a class="lbrand" href="#top" aria-label="Colle express, accueil"><img class="logo logo-l " loading="lazy" decoding="async" src="img/logo.webp" alt="Colle express" height="40" width="193"><img class="logo logo-d " loading="lazy" decoding="async" src="img/logo-dark.webp" alt="" aria-hidden="true" height="40" width="193"></a>
     <nav class="llinks" aria-label="Accueil">
-      <a class="ul" href="#recit">Une colle, racontée</a><a class="ul" href="#slides">Ce que tu trouveras</a><a class="ul" href="#lectures">Trois lectures</a><a class="ul" href="#auteur">Pourquoi ce site</a>
+      <a class="ul" href="#recit">Une colle</a><a class="ul" href="#labo">Le labo</a><a class="ul" href="#biblio">La bibliothèque</a><a class="ul" href="#lectures">Trois lectures</a><a class="ul" href="#auteur">Pourquoi ce site</a>
     </nav>
     <div class="lcta">
       <button class="themebtn" type="button" data-theme-toggle aria-label="Changer de thème"></button>
@@ -177,9 +177,16 @@
     </div>
   </section>
 
+  <section class="lsec" id="labo" aria-labelledby="xT">
+    <div class="lin">
+      <div class="shead reveal"><span class="num">II. Le labo</span><div><h2 id="xT">Avant d’ouvrir un exercice, touche aux objets.</h2><p class="small shead-sub">Trois expériences de deux secondes, calculées en direct dans ton navigateur.</p></div></div>
+      <div class="lab reveal" id="laboBox"></div>
+    </div>
+  </section>
+
   <section class="lsec" id="slides" aria-labelledby="sT">
     <div class="lin">
-      <div class="shead reveal"><span class="num">II. Ce que tu trouveras ici</span><div><h2 id="sT">Six raisons d’y revenir chaque soir.</h2></div></div>
+      <div class="shead reveal"><span class="num">III. Ce que tu trouveras ici</span><div><h2 id="sT">Six raisons d’y revenir chaque soir.</h2></div></div>
       <div class="car reveal" role="region" aria-roledescription="carrousel" aria-label="Fonctionnalités de Colle express">
         <div class="car-bar" aria-hidden="true"><i></i></div>
         <div class="car-track" tabindex="0" aria-live="off">
@@ -218,9 +225,17 @@
     </div>
   </section>
 
+  <section class="lsec" id="biblio" aria-labelledby="bT">
+    <div class="lin">
+      <div class="shead reveal"><span class="num">IV. La bibliothèque</span><div><h2 id="bT">Ce qu’il y a vraiment dedans.</h2><p class="small shead-sub">Les chiffres sont calculés sur la bibliothèque elle-même, à chaque visite.</p></div></div>
+      <div class="chiffres reveal" id="chiffresBox"></div>
+      <div class="vx reveal" id="vitrineBox" role="region" aria-label="Exercices de la bibliothèque"></div>
+    </div>
+  </section>
+
   <section class="lsec" id="lectures" aria-labelledby="lT">
     <div class="lin">
-      <div class="shead reveal"><span class="num">III. Trois lectures</span><div><h2 id="lT">La même correction, lue de trois façons.</h2><p>Tu choisis selon le moment : en pleine recherche, en révision, ou à la veille du concours.</p></div></div>
+      <div class="shead reveal"><span class="num">V. Trois lectures</span><div><h2 id="lT">La même correction, lue de trois façons.</h2><p>Tu choisis selon le moment : en pleine recherche, en révision, ou à la veille du concours.</p></div></div>
       <div class="modes3">
         <div class="reveal"><span class="k">01</span><h3>Guidée <i>·</i></h3><p>Des indices et des questions. La correction se dévoile une étape à la fois, quand tu le demandes.</p><blockquote>« Quel théorème pourrait servir ici ? »</blockquote></div>
         <div class="reveal"><span class="k">02</span><h3>Détaillée <i>·</i></h3><p>Six étapes : analyse, rappels, stratégie, calculs, vérification, conclusion encadrée. Rien n’est passé sous silence.</p><blockquote>« Voici pourquoi cette méthode fonctionne. »</blockquote></div>
@@ -231,7 +246,7 @@
 
   <section class="lsec" id="groupe" aria-labelledby="gT">
     <div class="lin">
-      <div class="shead reveal"><span class="num">IV. À plusieurs</span><div><h2 id="gT">On apprend mieux en se relisant les uns les autres.</h2></div></div>
+      <div class="shead reveal"><span class="num">VI. À plusieurs</span><div><h2 id="gT">On apprend mieux en se relisant les uns les autres.</h2></div></div>
       <dl class="defs">
         <div class="reveal"><span data-ic="users"></span><dt>Un groupe de colle</dt><dd>Tu le rejoins avec un code. Chacun son rôle : responsable, modérateurs, membres.</dd></div>
         <div class="reveal"><span data-ic="check"></span><dt>Une réponse sur l’honneur</dt><dd>Tu t’engages à avoir cherché seul, puis ta réponse devient visible par ton groupe.</dd></div>
@@ -277,6 +292,7 @@
     <div class="notice" id="notice"></div>
     <section class="view" id="v-exercices">
       <div class="strip" id="strip"></div>
+      <div id="resumeM" class="resume-m"></div>
       <div class="work">
         <aside class="panel list" aria-label="Liste des exercices">
           <div class="filters">
