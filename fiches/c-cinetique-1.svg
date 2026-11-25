@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 170" role="img" aria-label="Méthode intégrale : on trace la grandeur qui doit varier linéairement avec t selon l’ordre supposé — [A] (ordre 0), ln[A] (ordre 1), 1/[A] (ordre 2)" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <line x1="20" y1="140" x2="140" y2="140" class="s soft" marker-end="url(#ah)"/><text x="142" y="158" class="lb " text-anchor="end"><tspan class="it">t</tspan></text><line x1="20" y1="140" x2="20" y2="20" class="s soft" marker-end="url(#ah)"/><text x="28" y="26" class="lb " text-anchor="start">[A]</text><line x1="20" y1="40" x2="125" y2="130" class="s b"/><text x="80" y="165" class="lb nt" text-anchor="middle">ordre 0</text>
+  <line x1="165" y1="140" x2="285" y2="140" class="s soft" marker-end="url(#ah)"/><text x="287" y="158" class="lb " text-anchor="end"><tspan class="it">t</tspan></text><line x1="165" y1="140" x2="165" y2="20" class="s soft" marker-end="url(#ah)"/><text x="173" y="26" class="lb " text-anchor="start">ln[A]</text><line x1="165" y1="40" x2="280" y2="125" class="s b"/><text x="225" y="165" class="lb nt" text-anchor="middle">ordre 1</text>
+  <line x1="310" y1="140" x2="430" y2="140" class="s soft" marker-end="url(#ah)"/><text x="432" y="158" class="lb " text-anchor="end"><tspan class="it">t</tspan></text><line x1="310" y1="140" x2="310" y2="20" class="s soft" marker-end="url(#ah)"/><text x="318" y="26" class="lb " text-anchor="start">1/[A]</text><line x1="310" y1="120" x2="420" y2="40" class="s b"/><text x="370" y="165" class="lb nt" text-anchor="middle">ordre 2</text></svg>

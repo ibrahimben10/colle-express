@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 220" role="img" aria-label="Atmosphère isotherme : la densité de particules décroît exponentiellement avec l’altitude, n(z) = n₀ exp(−mgz/(kBT)), hauteur caractéristique H = kBT/(mg)" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <line x1="40" y1="200" x2="360" y2="200" class="s soft" marker-end="url(#ah)"/><text x="362" y="218" class="lb " text-anchor="end"><tspan class="it">n</tspan></text><line x1="40" y1="200" x2="40" y2="15" class="s soft" marker-end="url(#ah)"/><text x="48" y="21" class="lb " text-anchor="start"><tspan class="it">z</tspan></text>
+  <path d="M320,200 L310.1,198.2 L300.55,196.4 L291.34,194.6 L282.45,192.8 L273.88,191 L265.61,189.2 L257.63,187.4 L249.93,185.6 L242.51,183.8 L235.35,182 L228.44,180.2 L221.78,178.4 L215.35,176.6 L209.15,174.8 L203.17,173 L197.4,171.2 L191.83,169.4 L186.47,167.6 L181.29,165.8 L176.29,164 L171.47,162.2 L166.82,160.4 L162.34,158.6 L158.01,156.8 L153.84,155 L149.81,153.2 L145.93,151.4 L142.19,149.6 L138.57,147.8 L135.09,146 L131.72,144.2 L128.48,142.4 L125.35,140.6 L122.33,138.8 L119.42,137 L116.61,135.2 L113.91,133.4 L111.29,131.6 L108.77,129.8 L106.34,128 L103.99,126.2 L101.73,124.4 L99.55,122.6 L97.44,120.8 L95.41,119 L93.45,117.2 L91.56,115.4 L89.74,113.6 L87.98,111.8 L86.28,110 L84.65,108.2 L83.07,106.4 L81.55,104.6 L80.08,102.8 L78.66,101 L77.29,99.2 L75.97,97.4 L74.7,95.6 L73.47,93.8 L72.29,92 L71.15,90.2 L70.05,88.4 L68.99,86.6 L67.96,84.8 L66.97,83 L66.02,81.2 L65.1,79.4 L64.21,77.6 L63.35,75.8 L62.53,74 L61.73,72.2 L60.96,70.4 L60.22,68.6 L59.51,66.8 L58.82,65 L58.15,63.2 L57.51,61.4 L56.89,59.6 L56.29,57.8 L55.72,56 L55.16,54.2 L54.63,52.4 L54.11,50.6 L53.61,48.8 L53.13,47 L52.66,45.2 L52.22,43.4 L51.78,41.6 L51.37,39.8 L50.97,38 L50.58,36.2 L50.2,34.4 L49.84,32.6 L49.5,30.8 L49.16,29 L48.84,27.2 L48.52,25.4 L48.22,23.6 L47.93,21.8 L47.65,20" class="s b"/>
+  <line x1="40" y1="150" x2="143.01" y2="150" class="s dash soft"/><line x1="143.01" y1="150" x2="143.01" y2="200" class="s dash soft"/>
+  <text x="34" y="154" class="lb " text-anchor="end"><tspan class="it">H</tspan></text><text x="143.01" y="214" class="lb " text-anchor="middle"><tspan class="it">n</tspan><tspan baseline-shift="sub" font-size="10">0</tspan>/e</text><text x="320" y="214" class="lb " text-anchor="middle"><tspan class="it">n</tspan><tspan baseline-shift="sub" font-size="10">0</tspan></text></svg>

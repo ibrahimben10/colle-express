@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 180" role="img" aria-label="Liaison hydrogène entre deux molécules d’eau : un H lié à un O (donneur) interagit avec un doublet non liant d’un autre O (accepteur) ; les trois atomes sont presque alignés" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <line x1="110" y1="90" x2="150" y2="90" class="s "/><line x1="110" y1="90" x2="99.98" y2="51.27" class="s "/><circle cx="150" cy="90" r="8" class="s fillW"/><circle cx="99.98" cy="51.27" r="8" class="s fillW"/><circle cx="110" cy="90" r="13" class="s fillR"/><text x="110" y="95" class="lb " text-anchor="middle">O</text><text x="150" y="94" class="lb " text-anchor="middle">H</text><text x="99.98" y="55.27" class="lb " text-anchor="middle">H</text>
+  <line x1="158" y1="90" x2="247" y2="90" class="s dash r thick"/>
+  <line x1="260" y1="90" x2="284.63" y2="58.48" class="s "/><line x1="260" y1="90" x2="284.63" y2="121.52" class="s "/><circle cx="284.63" cy="58.48" r="8" class="s fillW"/><circle cx="284.63" cy="121.52" r="8" class="s fillW"/><circle cx="260" cy="90" r="13" class="s fillR"/><text x="260" y="95" class="lb " text-anchor="middle">O</text>
+  <text x="110" y="150" class="lb nt" text-anchor="middle">donneur</text><text x="260" y="150" class="lb nt" text-anchor="middle">accepteur</text><text x="203" y="80" class="lb r" text-anchor="middle">liaison H</text><line x1="150" y1="115" x2="260" y2="115" class="s dim" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="0" y="0" class="lb " text-anchor="middle"></text><text x="205" y="132" class="lb nt" text-anchor="middle">≈ 0,28 nm (O···O)</text>
+</svg>

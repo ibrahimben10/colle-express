@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" role="img" aria-label="Dipôle oscillant p(t) = p₀ cos(ωt) u_z : on étudie le champ en M, repéré en coordonnées sphériques (r, θ), dans la zone de rayonnement d ≪ λ ≪ r" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <line x1="120" y1="200" x2="120" y2="20" class="s soft" marker-end="url(#ah)"/><text x="128" y="28" class="lb " text-anchor="start"><tspan class="it">z</tspan></text><line x1="120" y1="140" x2="120" y2="100" class="s thick b" marker-end="url(#ahb)"/><text x="108" y="116" class="lb b" text-anchor="end"><tspan class="it">p</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan></text><circle cx="120" cy="140" r="3.2" class="pt "/><text x="112" y="156" class="lb " text-anchor="end"><tspan class="it">O</tspan></text>
+  <line x1="120" y1="140" x2="273.21" y2="11.44" class="s dash soft"/><circle cx="273.21" cy="11.44" r="3.2" class="pt "/><text x="281.21" y="27.439999999999998" class="lb " text-anchor="start"><tspan class="it">M</tspan></text><line x1="273.21" y1="11.44" x2="311.51" y2="-20.7" class="s " marker-end="url(#ah)"/><text x="320.7" y="-28.41" class="lb " text-anchor="middle"><tspan class="it">u</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan><tspan baseline-shift="sub" font-size="10"><tspan class="it">r</tspan></tspan></text><line x1="273.21" y1="11.44" x2="305.35" y2="49.74" class="s r" marker-end="url(#ahr)"/><text x="313.06" y="58.93" class="lb r" text-anchor="middle"><tspan class="it">u</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan><tspan baseline-shift="sub" font-size="10">θ</tspan></text>
+  <path d="M120,90 A50,50 0 0 1 158.3,107.86" class="s b"/><text x="145.22" y="83.36" class="lb b" text-anchor="middle"><tspan class="it">θ</tspan></text><text x="193.6" y="58.25" class="lb " text-anchor="middle"><tspan class="it">r</tspan></text>
+  <text x="290" y="225" class="lb " text-anchor="middle"><tspan class="it">d</tspan> ≪ <tspan class="it">λ</tspan> ≪ <tspan class="it">r</tspan></text></svg>

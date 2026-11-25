@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" role="img" aria-label="Poids et pesanteur : le poids est la somme de l’attraction gravitationnelle (vers le centre) et de la force d’inertie d’entraînement (perpendiculaire à l’axe, exagérée ici) ; il dépend de la latitude λ" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <circle cx="170" cy="125" r="95" class="s fillA"/><line x1="170" y1="10" x2="170" y2="240" class="s axis"/><line x1="170" y1="40" x2="170" y2="12" class="s b" marker-end="url(#ahb)"/><text x="178" y="22" class="lb b" text-anchor="start"><tspan class="it">Ω</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan></text>
+  <line x1="170" y1="125" x2="290" y2="125" class="s dash soft"/><line x1="170" y1="125" x2="242.77" y2="63.94" class="s "/><path d="M196,125 A26,26 0 0 0 189.92,108.29" class="s b"/><text x="204.93" y="116.29" class="lb b" text-anchor="middle"><tspan class="it">λ</tspan></text>
+  <circle cx="242.77" cy="63.94" r="3.2" class="pt "/><text x="244.77" y="55.94" class="lb " text-anchor="start"><tspan class="it">M</tspan></text><line x1="170" y1="63.94" x2="242.77" y2="63.94" class="s dash soft"/><text x="164" y="67.94" class="lb " text-anchor="end"><tspan class="it">H</tspan></text><line x1="242.77" y1="63.94" x2="204.47" y2="96.08" class="s " marker-end="url(#ah)"/><text x="198.47" y="100.08" class="lb " text-anchor="end"><tspan class="it">F</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan><tspan baseline-shift="sub" font-size="10">g</tspan></text><line x1="242.77" y1="63.94" x2="264.77" y2="63.94" class="s r" marker-end="url(#ahr)"/><text x="268.77" y="68.94" class="lb r" text-anchor="start"><tspan class="it">F</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan><tspan baseline-shift="sub" font-size="10">ie</tspan></text><line x1="242.77" y1="63.94" x2="226.47" y2="96.08" class="s thick" marker-end="url(#ah)"/><text x="232.47" y="108.08" class="lb " text-anchor="start"><tspan class="it">m</tspan><tspan class="it">g</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan></text>
+  <text x="296" y="129" class="lb nt" text-anchor="start">équateur</text></svg>
