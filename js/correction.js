@@ -33,7 +33,7 @@ async function load() {
   const fig = FIG[id];
   $('#sheet').innerHTML = `
     <header class="sh-head">
-      <div class="t"><img class="shlogo" src="img/logo.png" alt="Colle express" width="232" height="48"><small>Prépa scientifique · ${esc(CONFIG.NOM_PROF)}</small></div>
+      <div class="t"><img class="shlogo" src="img/logo.png" alt="Colle express" width="262" height="48"><small>Prépa scientifique · ${esc(CONFIG.NOM_PROF)}</small></div>
       <div class="lvl"><span class="stamp n${EX.niveau}">${LV[EX.niveau]}</span><br>${esc(EX.mat)} · ${esc(EX.chap)}</div>
     </header>
     <h1>${esc(EX.titre)}</h1>
