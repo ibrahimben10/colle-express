@@ -25,7 +25,7 @@ function appliquer(t) {
 }
 export function syncTheme() {
   const dark = themeActuel() === 'dark';
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#151A19' : '#F8F7F3');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#0B0B0D' : '#F5F5F7');
   document.querySelectorAll('[data-theme-toggle]').forEach(b => {
     b.setAttribute('aria-pressed', dark);
     b.setAttribute('aria-label', dark ? 'Passer en mode clair' : 'Passer en mode sombre');
