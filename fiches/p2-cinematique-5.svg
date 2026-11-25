@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-label="Mouvement circulaire de rayon R : vitesse tangente, accélération = tangentielle dv/dt + normale v²/R vers le centre" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <circle cx="160" cy="125" r="95" class="s "/><circle cx="160" cy="125" r="3.2" class="pt "/><text x="150" y="140" class="lb " text-anchor="end"><tspan class="it">O</tspan></text>
+  <line x1="160" y1="125" x2="227" y2="58" class="s dash soft"/><text x="186" y="84" class="lb " text-anchor="end"><tspan class="it">R</tspan></text><circle cx="227" cy="58" r="3.2" class="pt "/><text x="234" y="52" class="lb " text-anchor="start"><tspan class="it">M</tspan></text>
+  <line x1="227" y1="58" x2="287" y2="118" class="s b" marker-end="url(#ahb)"/><text x="292" y="124" class="lb b" text-anchor="start"><tspan class="it">v</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan></text>
+  <line x1="227" y1="58" x2="197" y2="88" class="s r" marker-end="url(#ahr)"/><text x="200" y="108" class="lb r" text-anchor="end"><tspan class="it">a</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan><tspan baseline-shift="sub" font-size="10"><tspan class="it">n</tspan></tspan></text><line x1="227" y1="58" x2="257" y2="88" class="s r dash" marker-end="url(#ahr)"/><text x="262" y="82" class="lb r" text-anchor="start"><tspan class="it">a</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan><tspan baseline-shift="sub" font-size="10"><tspan class="it">t</tspan></tspan></text>
+  <text x="330" y="200" class="lb nt" text-anchor="end"><tspan class="it">a</tspan><tspan baseline-shift="sub" font-size="10"><tspan class="it">n</tspan></tspan> = <tspan class="it">v</tspan>²/<tspan class="it">R</tspan></text><text x="330" y="218" class="lb nt" text-anchor="end"><tspan class="it">a</tspan><tspan baseline-shift="sub" font-size="10"><tspan class="it">t</tspan></tspan> = d<tspan class="it">v</tspan>/d<tspan class="it">t</tspan></text></svg>

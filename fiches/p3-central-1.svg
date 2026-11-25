@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 240" role="img" aria-label="Loi des aires : le rayon vecteur balaie des aires égales pendant des durées égales (C = r²θ̇ constante)" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs><ellipse cx="180" cy="118" rx="140" ry="112" class="s"/><path d="M264,118 L306.06,166.72 L308.9,161.71 L311.43,156.59 L313.64,151.38 L315.52,146.1 L317.08,140.74 L318.31,135.33 L319.21,129.88 L319.77,124.39 L320,118.9 L319.88,113.4 L319.43,107.91 L318.64,102.45 L317.52,97.02 L316.07,91.65 L314.29,86.33 L312.18,81.1 L309.76,75.95 L307.02,70.91 L303.98,65.98 L300.64,61.17 L297.01,56.5 L293.09,51.98 L288.9,47.62 L284.45,43.43 L279.75,39.41 L274.81,35.59 L269.64,31.97 L264.25,28.55 L258.66,25.35 L252.88,22.37 Z" class="s fillA"/><path d="M264,118 L46.25,84.9 L45.66,86.47 L45.1,88.05 L44.56,89.63 L44.06,91.22 L43.58,92.82 L43.14,94.42 L42.72,96.03 L42.33,97.64 L41.98,99.25 L41.65,100.87 L41.35,102.49 L41.08,104.12 L40.84,105.75 L40.63,107.38 L40.45,109.01 L40.3,110.65 L40.18,112.29 L40.09,113.93 L40.03,115.56 L40,117.2 L40,118.84 L40.03,120.48 L40.09,122.12 L40.19,123.76 L40.31,125.4 L40.46,127.04 L40.64,128.67 L40.85,130.3 L41.09,131.93 L41.36,133.56 Z" class="s fillA"/>
+  <circle cx="264" cy="118" r="7" class="s fill"/><text x="264" y="252" class="lb nt" text-anchor="middle">foyer : centre attracteur</text><line x1="264" y1="128" x2="264" y2="238" class="s dash soft"/><text x="328.29" y="78.33" class="lb " text-anchor="start">Δ<tspan class="it">t</tspan></text><text x="28.450000000000003" y="103.01" class="lb " text-anchor="end">Δ<tspan class="it">t</tspan></text></svg>

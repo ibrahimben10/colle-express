@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 210" role="img" aria-label="Électron entrant entre deux plaques chargées : force −eE vers la plaque positive, trajectoire parabolique" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <rect x="80" y="40" width="220" height="8" rx="0" class="s fill"/><rect x="80" y="162" width="220" height="8" rx="0" class="s fill"/><text x="70" y="50" class="lb " text-anchor="end">+</text><text x="70" y="172" class="lb " text-anchor="end">−</text>
+  <line x1="120" y1="56" x2="120" y2="150" class="s soft" marker-end="url(#ah)"/><line x1="180" y1="56" x2="180" y2="150" class="s soft" marker-end="url(#ah)"/><line x1="240" y1="56" x2="240" y2="150" class="s soft" marker-end="url(#ah)"/><text x="258" y="110" class="lb " text-anchor="start"><tspan class="it">E</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan></text>
+  <line x1="20" y1="105" x2="70" y2="105" class="s r" marker-end="url(#ahr)"/><text x="30" y="96" class="lb r" text-anchor="start"><tspan class="it">v</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan><tspan baseline-shift="sub" font-size="10">0</tspan></text><circle cx="80" cy="105" r="3.2" class="pt "/>
+  <path d="M80,105 L82.75,104.99 L85.5,104.97 L88.25,104.93 L91,104.87 L93.75,104.79 L96.5,104.7 L99.25,104.59 L102,104.47 L104.75,104.33 L107.5,104.17 L110.25,103.99 L113,103.8 L115.75,103.59 L118.5,103.37 L121.25,103.13 L124,102.87 L126.75,102.6 L129.5,102.3 L132.25,102 L135,101.67 L137.75,101.33 L140.5,100.97 L143.25,100.6 L146,100.21 L148.75,99.8 L151.5,99.38 L154.25,98.94 L157,98.48 L159.75,98 L162.5,97.51 L165.25,97.01 L168,96.48 L170.75,95.94 L173.5,95.38 L176.25,94.81 L179,94.22 L181.75,93.61 L184.5,92.99 L187.25,92.35 L190,91.69 L192.75,91.02 L195.5,90.33 L198.25,89.62 L201,88.89 L203.75,88.15 L206.5,87.4 L209.25,86.62 L212,85.83 L214.75,85.03 L217.5,84.2 L220.25,83.36 L223,82.51 L225.75,81.63 L228.5,80.74 L231.25,79.84 L234,78.91 L236.75,77.97 L239.5,77.02 L242.25,76.04 L245,75.05 L247.75,74.05 L250.5,73.02 L253.25,71.98 L256,70.93 L258.75,69.85 L261.5,68.76 L264.25,67.66 L267,66.53 L269.75,65.39 L272.5,64.24 L275.25,63.07 L278,61.88 L280.75,60.67 L283.5,59.45 L286.25,58.21 L289,56.95 L291.75,55.68 L294.5,54.39 L297.25,53.08 L300,51.76" class="s b"/><line x1="300" y1="51.76" x2="380" y2="13.04" class="s b dash"/>
+  <text x="150" y="100" class="lb b" text-anchor="middle">e⁻</text><line x1="190" y1="92" x2="190" y2="66" class="s r" marker-end="url(#ahr)"/><text x="196" y="72" class="lb r" text-anchor="start"><tspan class="it">F</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan> = −<tspan class="it">e</tspan><tspan class="it">E</tspan><tspan class="vec" dx="-6.5" dy="-9">→</tspan><tspan dy="9"> </tspan></text></svg>
