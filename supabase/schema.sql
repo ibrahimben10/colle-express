@@ -1070,7 +1070,25 @@ insert into public.exercices_meta (id, mat, chap, niveau) values
   ('i-ia-kmeans','Informatique','Apprentissage',3),
   ('i-jeu-nim','Informatique','Théorie des jeux',1),
   ('i-jeu-minmax','Informatique','Théorie des jeux',2),
-  ('i-flot','Informatique','Nombres flottants',1)
+  ('i-flot','Informatique','Nombres flottants',1),
+  ('n-pc-radiateur','Physique','Thermodynamique',1),
+  ('n-pc-deuxcond','Physique','Électrocinétique',1),
+  ('n-pc-elastique','Physique','Mécanique',1),
+  ('n-pc-filtre-id','Physique','Électrocinétique',2),
+  ('n-pc-decollage','Physique','Mécanique',1),
+  ('n-pc-barre2sources','Physique','Diffusion thermique',2),
+  ('n-pc-armatures','Physique','Électrocinétique',2),
+  ('n-pc-pac','Physique','Thermodynamique',1),
+  ('n-pc-etoiledouble','Physique','Optique ondulatoire',2),
+  ('n-pc-deuxopph','Physique','Ondes électromagnétiques',2),
+  ('n-pc-spire','Physique','Magnétostatique',1),
+  ('n-pc-troisfils','Physique','Magnétostatique',1),
+  ('n-pc-cylressort','Physique','Mécanique',2),
+  ('n-pc-langevin','Physique','Physique statistique',3),
+  ('n-pc-shannon','Physique','Électrocinétique',1),
+  ('n-pc-fresnel','Physique','Optique ondulatoire',2),
+  ('n-pc-troisondes','Physique','Optique ondulatoire',3),
+  ('n-pc-cielbleu','Physique','Rayonnement',2)
 on conflict (id) do update set mat = excluded.mat, chap = excluded.chap, niveau = excluded.niveau;
 alter table public.exercices_meta enable row level security;
 drop policy if exists "méta: lecture" on public.exercices_meta;

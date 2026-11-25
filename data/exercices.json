@@ -2944,5 +2944,203 @@
   "enonce": "1. Expliquer pourquoi `0.1 + 0.2 == 0.3` vaut `False` en Python, alors que `0.5 + 0.25 == 0.75` vaut `True`.\n2. Écrire une fonction `proches(x, y, eps=1e-9)` qui teste l'égalité de deux flottants à une tolérance relative près.\n3. On calcule la somme $\\sum_{k=1}^{n}\\frac1k$ avec une boucle `s += 1 / k`, de deux façons : de $k=1$ à $n$, puis de $k=n$ à $1$. Pour $n=10^6$, les résultats diffèrent dans les derniers chiffres. Expliquer quelle somme est la plus précise.\n\n*Exercice original sur le chapitre « Divers : les nombres flottants » du cours d'informatique MP de D. Rupprecht (lycée Pierre-de-Fermat).*",
   "duree": 15,
   "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-radiateur",
+  "mat": "Physique",
+  "chap": "Thermodynamique",
+  "niveau": 1,
+  "concours": "CCINP",
+  "titre": "Radiateur d’un composant électronique",
+  "enonce": "Un radiateur de capacité thermique $C$, de température uniforme $T(t)$, reçoit d'un composant électronique une puissance thermique constante $P$. Il cède à l'air ambiant, de température constante $T_0$, la puissance $\\varphi=h\\,(T-T_0)$. À $t=0$, $T=T_0$.\n\n1. Faire un bilan d'énergie pour le radiateur entre $t$ et $t+\\mathrm dt$ et en déduire l'équation différentielle vérifiée par $T$. Faire apparaître une durée caractéristique $\\tau$.\n2. Résoudre, tracer $T(t)$ et calculer $T(\\tau)-T_0$.\n3. Au bout de combien de temps le radiateur atteint-il sa température finale à 1 % près (de l'écart) ?\n\nOn donne $C=2{,}0\\ \\mathrm{kJ\\cdot K^{-1}}$, $h=10\\ \\mathrm{W\\cdot K^{-1}}$, $P=100\\ \\mathrm W$.\n\n*D'après une planche d'oral CCINP (MP). Le rapport du jury Centrale-Supélec 2025 insiste : définir le système et l'intervalle de temps avant tout bilan.*",
+  "duree": 15,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-deuxcond",
+  "mat": "Physique",
+  "chap": "Électrocinétique",
+  "niveau": 1,
+  "concours": "CCINP",
+  "titre": "Partage de charge entre deux condensateurs",
+  "enonce": "Un condensateur de capacité $C_0$, chargé ($q_0=Q$), est relié à $t=0$, par l'intermédiaire d'une résistance $R$, à un condensateur de capacité $C_1$ initialement déchargé ($q_1=0$).\n\n1. Quelle grandeur se conserve ? En déduire les charges finales $q_0(\\infty)$ et $q_1(\\infty)$.\n2. Établir l'équation différentielle vérifiée par $q_1(t)$ et la résoudre. Tracer $q_0$ et $q_1$ sur un même graphique.\n3. Calculer l'énergie dissipée dans la résistance. Dépend-elle de $R$ ?\n\nOn donne $C_0=1{,}0\\ \\mu\\mathrm F$, $C_1=2{,}0\\ \\mu\\mathrm F$, $Q=1{,}0\\times10^{-4}\\ \\mathrm C$, $R=1{,}0\\ \\mathrm{k\\Omega}$.\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 20,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-elastique",
+  "mat": "Physique",
+  "chap": "Mécanique",
+  "niveau": 1,
+  "concours": "CCINP",
+  "titre": "Force centrale élastique et potentiel effectif",
+  "enonce": "Un point matériel $M$ de masse $m$, astreint à se déplacer dans un plan horizontal $(Oxy)$ sans frottement, est soumis à la force $\\vec F=-k\\,\\overrightarrow{OM}$ ($k>0$). On utilise les coordonnées polaires $(r,\\theta)$.\n\n1. Montrer que le moment cinétique en $O$ se conserve, et l'exprimer à l'aide de la constante $\\mathcal C=r^2\\dot\\theta$. Conséquences ?\n2. Montrer que l'énergie mécanique se conserve et l'écrire en fonction de $r$, $\\dot r$, $\\mathcal C$, $m$, $k$. Définir l'énergie potentielle effective et tracer son allure.\n3. Montrer que, pour $\\mathcal C\\neq0$, le mouvement se fait entre deux valeurs $r_1\\le r\\le r_2$. À quelle condition est-il circulaire ? Quelle est alors sa période ?\n4. Résoudre en coordonnées cartésiennes et décrire la trajectoire.\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 20,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-filtre-id",
+  "mat": "Physique",
+  "chap": "Électrocinétique",
+  "niveau": 2,
+  "concours": "CCINP",
+  "titre": "Identifier un filtre RLC à partir de mesures",
+  "enonce": "Un quadripôle est formé de deux dipôles $D_1$ (entre l'entrée et la sortie) et $D_2$ (aux bornes de la sortie), qui contiennent à eux deux une résistance $R$, une bobine idéale $L$ et un condensateur $C$, chacun pouvant être associé en série ou en parallèle. La sortie est ouverte.\n\n1. On applique en entrée une tension continue $E=12\\ \\mathrm V$ ; un ampèremètre placé dans la maille d'entrée indique $I=12\\ \\mathrm{mA}$. Quelles configurations sont compatibles avec cette mesure ? Que vaut $R$ ?\n2. L'expérience montre que le montage est un passe-bande. Parmi les configurations restantes, laquelle est-ce ? Justifier par une étude en basses et hautes fréquences.\n3. Établir la fonction de transfert sous la forme $H=\\dfrac{1}{1+jQ\\big(\\frac\\omega{\\omega_0}-\\frac{\\omega_0}\\omega\\big)}$.\n4. On mesure $f_0=1{,}59\\ \\mathrm{kHz}$ et une bande passante à $-3\\ \\mathrm{dB}$ de largeur $\\Delta f=159\\ \\mathrm{Hz}$. En déduire $L$ et $C$.\n\n*D'après une planche d'oral CCINP (MP). Démarche (analyse basses et hautes fréquences avant tout calcul) recommandée par le rapport du jury Centrale-Supélec 2025.*",
+  "duree": 25,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-decollage",
+  "mat": "Physique",
+  "chap": "Mécanique",
+  "niveau": 1,
+  "concours": "CCINP",
+  "titre": "Glissade sur un dôme : où décolle-t-on ?",
+  "enonce": "Un point matériel de masse $m$ glisse sans frottement sur la face extérieure d'un quart de cercle vertical de rayon $R$ et de centre $O$ (un dôme). Sa position est repérée par l'angle $\\theta$ entre la verticale ascendante et $\\overrightarrow{OM}$. Il est lâché sans vitesse en $\\theta_0$, avec $0<\\theta_0\\ll1$.\n\n1. Justifier la conservation de l'énergie mécanique. En déduire $\\dot\\theta^2$ en fonction de $\\theta$, tant que le contact dure.\n2. Exprimer la réaction normale $N(\\theta)$. En déduire l'angle $\\theta_d$ de décollage. Que vaut-il pour $\\theta_0\\to0$ ?\n3. Pour $\\theta_0\\ll1$, montrer que la durée avant le décollage est de l'ordre de $\\sqrt{R/g}\\ \\ln\\big(\\frac{\\text{cte}}{\\theta_0}\\big)$ : elle diverge quand $\\theta_0\\to0$. Interpréter.\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 20,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-barre2sources",
+  "mat": "Physique",
+  "chap": "Diffusion thermique",
+  "niveau": 2,
+  "concours": "CCINP",
+  "titre": "Barre entre deux corps de capacités finies",
+  "enonce": "Une barre de longueur $L$, de section $S$, de conductivité thermique $\\lambda$ et de capacité thermique négligeable, relie deux corps de capacités thermiques $C_1$ et $C_2$, de températures initiales $T_{10}>T_{20}$. L'ensemble est isolé de l'extérieur.\n\n1. Justifier que, dans la barre, le profil de température est affine à chaque instant, et exprimer la puissance $\\Phi$ qui la traverse à l'aide de la résistance thermique $R_{th}=\\frac L{\\lambda S}$.\n2. Établir les équations d'évolution de $T_1(t)$ et $T_2(t)$, puis les résoudre. Donner la température finale et la constante de temps.\n3. Calculer la variation d'entropie de l'ensemble entre $t=0$ et $t\\to\\infty$, et vérifier son signe.\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 25,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-armatures",
+  "mat": "Physique",
+  "chap": "Électrocinétique",
+  "niveau": 2,
+  "concours": "CCINP",
+  "titre": "On écarte brusquement les armatures",
+  "enonce": "Un condensateur de capacité $C$, en série avec une résistance $R$, est chargé par un générateur idéal de tension $E_0$.\n\n1. Établir la loi $i(t)$ pendant la charge, puis faire le bilan d'énergie de la charge complète.\n2. Le régime permanent étant atteint, on écarte brusquement les armatures (en un temps très court devant $RC$) : la capacité passe de $C$ à $C_1<C$. Quelle grandeur est continue lors de cette opération ? Quel travail l'opérateur a-t-il fourni ?\n3. On prend cet instant comme origine des temps. Déterminer $i(t)$ ensuite, et le sens du courant.\n4. Faire le bilan énergétique de cette seconde phase : énergie reçue par le générateur, variation d'énergie du condensateur, énergie dissipée par effet Joule.\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 25,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-pac",
+  "mat": "Physique",
+  "chap": "Thermodynamique",
+  "niveau": 1,
+  "concours": "CCINP",
+  "titre": "Pompe à chaleur : cycle de Carnot d’un gaz parfait",
+  "enonce": "Une pompe à chaleur fait décrire à $n$ moles de gaz parfait ($\\gamma$ constant) le cycle réversible suivant, entre une source froide $T_f$ et une source chaude $T_c$ :\n- compression isentropique de $(V_1,T_f)$ à $(V_2,T_c)$ ;\n- compression isotherme à $T_c$ de $V_2$ à $V_3$ ;\n- détente isentropique de $(V_3,T_c)$ à $(V_4,T_f)$ ;\n- détente isotherme à $T_f$ de $V_4$ à $V_1$.\n\n1. Expliquer à l'aide d'un schéma le principe d'une pompe à chaleur. Tracer le cycle en diagramme de Clapeyron $(V,P)$ et en diagramme entropique $(S,T)$, et préciser le sens de parcours.\n2. Montrer que $\\dfrac{V_1V_3}{V_2V_4}=1$.\n3. Calculer les transferts thermiques $Q_c$ et $Q_f$, puis l'efficacité. Faire le bilan entropique du cycle.\n4. Application : $T_f=275\\ \\mathrm K$ (sol en hiver), $T_c=318\\ \\mathrm K$ (eau de chauffage). Efficacité maximale ?\n\n*D'après une planche d'oral CCINP (MP). Le rapport du jury Centrale-Supélec 2025 note que l'établissement de l'efficacité de Carnot est souvent trop laborieux.*",
+  "duree": 20,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-etoiledouble",
+  "mat": "Physique",
+  "chap": "Optique ondulatoire",
+  "niveau": 2,
+  "concours": "CCINP",
+  "titre": "Mesurer l’écart d’une étoile double avec des trous d’Young",
+  "enonce": "On observe une étoile double, formée de deux étoiles $S_1$ (sur l'axe) et $S_2$ (vue sous l'angle $\\varepsilon$ faible), à travers deux trous d'Young distants de $a$ placés devant une lentille convergente de focale $f'$ ; on observe dans le plan focal image, à l'abscisse $x$. Les deux étoiles ont la même intensité et la même longueur d'onde $\\lambda$.\n\n1. Exprimer l'éclairement $\\mathcal E_1(x)$ dû à $S_1$ seule, puis $\\mathcal E_2(x)$ dû à $S_2$ seule.\n2. Les deux étoiles peuvent-elles interférer entre elles ? En déduire l'éclairement total et le contraste $V(a)$.\n3. Montrer qu'en faisant varier $a$ on peut mesurer $\\varepsilon$. Pour $\\lambda=550\\ \\mathrm{nm}$ et $\\varepsilon=5{,}0\\ \\mu\\mathrm{rad}$, pour quelle valeur de $a$ le contraste s'annule-t-il pour la première fois ?\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 25,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-deuxopph",
+  "mat": "Physique",
+  "chap": "Ondes électromagnétiques",
+  "niveau": 2,
+  "concours": "CCINP",
+  "titre": "Deux ondes planes symétriques : une onde guidée",
+  "enonce": "Dans le vide, on superpose les deux ondes $\\underline{\\vec B}_1=B_0\\,e^{i(\\omega t-\\vec k_1\\cdot\\vec r)}\\vec e_z$ et $\\underline{\\vec B}_2=B_0\\,e^{i(\\omega t-\\vec k_2\\cdot\\vec r)}\\vec e_z$, avec $\\|\\vec k_1\\|=\\|\\vec k_2\\|=k_0=\\frac\\omega c=\\frac{2\\pi}{\\lambda_0}$, les vecteurs $\\vec k_1$ et $\\vec k_2$ étant dans le plan $(Oxy)$ et faisant les angles $+\\alpha$ et $-\\alpha$ avec $\\vec e_x$.\n\n1. Déterminer le champ magnétique résultant. Caractériser l'onde obtenue : direction de propagation, vitesse de phase, longueur d'onde selon $Ox$, amplitude. Est-ce une onde plane ?\n2. Calculer le champ électrique associé (en réel).\n3. Calculer la moyenne temporelle du vecteur de Poynting, puis la vitesse de propagation de l'énergie. Comparer à la vitesse de phase et commenter.\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 30,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-spire",
+  "mat": "Physique",
+  "chap": "Magnétostatique",
+  "niveau": 1,
+  "concours": "CCINP",
+  "titre": "Champ d’une spire sur son axe",
+  "enonce": "Une spire circulaire de centre $O$, de rayon $R$, d'axe $(Ox)$, est parcourue par un courant $I$. On repère un point $M$ de l'axe par son abscisse $x$.\n\n1. Par des arguments de symétrie, déterminer la direction de $\\vec B(M)$.\n2. À l'aide de la loi de Biot et Savart, exprimer $B(x)$ sous forme d'intégrale, puis la calculer.\n3. Donner les expressions approchées pour $x\\ll R$ et pour $x\\gg R$. Commenter le second résultat à l'aide du moment magnétique de la spire.\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 15,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-troisfils",
+  "mat": "Physique",
+  "chap": "Magnétostatique",
+  "niveau": 1,
+  "concours": "CCINP",
+  "titre": "Trois fils aux sommets d’un carré",
+  "enonce": "Dans un plan $\\Pi$, on considère un carré $PQRS$ de côté $a$ (sommets dans cet ordre). Trois fils rectilignes infinis, perpendiculaires à $\\Pi$, passent par $P$, $S$ et $Q$ et sont parcourus par des courants $I_1$, $I_2$, $I_3$ (comptés positivement dans le même sens, vers l'avant de $\\Pi$).\n\n1. Rappeler le champ créé par un fil infini.\n2. Trouver une relation entre $I_1$, $I_2$, $I_3$ pour que le champ magnétique soit nul au quatrième sommet $R$.\n3. On ajoute en $R$ un quatrième fil parcouru par $I'$. Quelle force par unité de longueur subit-il ?\n\n*D'après une planche d'oral CCINP (MP).*",
+  "duree": 15,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-cylressort",
+  "mat": "Physique",
+  "chap": "Mécanique",
+  "niveau": 2,
+  "concours": "CCINP",
+  "titre": "Cylindre roulant retenu par un ressort",
+  "enonce": "Un cylindre homogène de masse $M$, de rayon $R$ (moment d'inertie $J=\\frac12MR^2$ par rapport à son axe), roule sans glisser sur un plan incliné d'un angle $\\alpha$. Son axe est relié, vers le haut de la pente, à un ressort de raideur $k$ et de longueur à vide $\\ell_0$, parallèle à la pente. On note $x$ l'écart (compté vers le bas de la pente) de la longueur du ressort à sa longueur d'équilibre $\\ell_e$, et $\\varphi$ l'angle de rotation du cylindre. Le coefficient de frottement est $f$.\n\n1. Écrire la condition de roulement sans glissement reliant $\\dot x$ et $\\dot\\varphi$.\n2. À l'aide des théorèmes de la résultante dynamique et du moment cinétique, établir l'équation différentielle vérifiée par $x$. Exprimer $\\ell_e$.\n3. Le cylindre est lâché sans vitesse avec $x(0)=X_0$. Donner $x(t)$, puis la condition sur $f$ pour que le roulement sans glissement soit toujours assuré.\n4. Retrouver l'équation du mouvement par une méthode énergétique.\n\n*D'après une planche d'oral CCINP (MP). Remarque du rapport du jury Centrale-Supélec 2025 sur l'orientation du frottement.*",
+  "duree": 25,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-langevin",
+  "mat": "Physique",
+  "chap": "Physique statistique",
+  "niveau": 3,
+  "concours": "Centrale",
+  "titre": "Paramagnétisme de Langevin et loi de Curie",
+  "enonce": "Un matériau contient $n$ moments magnétiques par unité de volume, indépendants, de norme $\\mu$, à l'équilibre à la température $T$ dans un champ $\\vec B=B\\vec e_z$. L'énergie d'un moment est $\\varepsilon=-\\vec\\mu\\cdot\\vec B$. On cherche l'aimantation $M$ (moment moyen par unité de volume) et l'on compare à la loi de Curie $M=\\frac{C_{\\text{Curie}}}TB$.\n\n1. **Modèle à deux niveaux.** Le moment ne peut valoir que $\\pm\\mu\\vec e_z$. Calculer $\\langle\\mu_z\\rangle$ par la loi de Boltzmann, puis $M$ à haute température.\n2. **Modèle de Langevin.** Le moment peut prendre toutes les orientations ; la probabilité qu'il fasse un angle compris entre $\\theta$ et $\\theta+\\mathrm d\\theta$ avec $\\vec e_z$ est proportionnelle à $e^{\\beta\\mu B\\cos\\theta}\\sin\\theta\\,\\mathrm d\\theta$, avec $\\beta=\\frac1{k_BT}$. Justifier le facteur $\\sin\\theta$, puis montrer que $\\langle\\mu_z\\rangle=\\mu\\,\\mathcal L(\\beta\\mu B)$ avec $\\mathcal L(y)=\\coth y-\\frac1y$.\n3. Étudier $\\mathcal L$ pour $y\\ll1$ et $y\\gg1$. En déduire la constante de Curie dans chaque modèle, et comparer.\n4. Application : $\\mu=\\mu_B=9{,}27\\times10^{-24}\\ \\mathrm{J\\cdot T^{-1}}$, $B=1\\ \\mathrm T$, $T=300\\ \\mathrm K$. Quel régime ?\n\n*D'après un exercice de préparation aux oraux MP (type CCS / CCMP).*",
+  "duree": 30,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-shannon",
+  "mat": "Physique",
+  "chap": "Électrocinétique",
+  "niveau": 1,
+  "concours": "Centrale",
+  "titre": "Échantillonnage et repliement de spectre",
+  "enonce": "On échantillonne un signal à la fréquence $f_e$.\n\n1. Énoncer le critère de Nyquist-Shannon. Que se passe-t-il s'il n'est pas respecté ?\n2. Un signal sinusoïdal de fréquence $f=3{,}0\\ \\mathrm{kHz}$ est échantillonné à $f_e=4{,}0\\ \\mathrm{kHz}$. Quelle fréquence apparente lit-on sur le spectre calculé, qui s'étend de $0$ à $f_e/2$ ?\n3. Une roue de vélo comporte une valve, qui tourne à 50 tours par seconde. Elle est filmée à 48 images par seconde, puis à 52 images par seconde. Que voit-on ?\n4. Pour numériser de la musique (fréquences audibles jusqu'à $20\\ \\mathrm{kHz}$), on échantillonne à $44{,}1\\ \\mathrm{kHz}$. Pourquoi faut-il placer un filtre analogique avant l'échantillonneur ? Quelles caractéristiques doit-il avoir ?\n\n*Thème signalé par le rapport du jury Centrale-Supélec 2025 (épreuve orale de physique-chimie) : condition de Nyquist-Shannon et repliement de spectre.*",
+  "duree": 15,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-fresnel",
+  "mat": "Physique",
+  "chap": "Optique ondulatoire",
+  "niveau": 2,
+  "concours": "CCINP",
+  "titre": "Miroirs de Fresnel",
+  "enonce": "Deux miroirs plans $M_1$ et $M_2$ ont une arête commune $(Oz)$ et font entre eux un angle $\\pi-\\alpha$, avec $\\alpha=0{,}080\\ \\mathrm{mrad}$. Une source ponctuelle monochromatique $S$, de longueur d'onde $\\lambda_0=576{,}9\\ \\mathrm{nm}$, est placée à la distance $OS=R=80\\ \\mathrm{cm}$ de l'arête. On observe sur un écran parallèle à l'arête, perpendiculaire au plan médiateur des images $S_1$ et $S_2$ de $S$ par les miroirs, à la distance $d=1{,}20\\ \\mathrm m$ de $O$.\n\n1. Faire une figure. Montrer que $S_1$ et $S_2$ sont sur le cercle de centre $O$ et de rayon $R$, et que $S_1S_2\\approx2R\\alpha$.\n2. En déduire l'éclairement $\\mathcal E(x)$ sur l'écran ($x$ repère un point de l'écran à partir du plan médiateur de $S_1S_2$) et l'interfrange. Application numérique.\n3. La source est maintenant blanche. Décrire la figure observée.\n\n*D'après un exercice de préparation aux oraux MP (type CCINP / CCS).*",
+  "duree": 25,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-troisondes",
+  "mat": "Physique",
+  "chap": "Optique ondulatoire",
+  "niveau": 3,
+  "concours": "X",
+  "titre": "Interférences à trois ondes",
+  "enonce": "Trois fentes fines, parallèles et équidistantes (pas $a$), sont éclairées en incidence normale par une onde plane monochromatique de longueur d'onde $\\lambda$. On observe à l'infini dans la direction $\\theta$ et l'on note $\\varphi=\\frac{2\\pi a\\sin\\theta}\\lambda$ le déphasage entre deux fentes voisines. On néglige la diffraction par chaque fente.\n\n1. Les trois ondes ont la même amplitude. Montrer que l'intensité vaut $I(\\varphi)=I_0(1+2\\cos\\varphi)^2$. Étudier ses maxima principaux, ses zéros et ses maxima secondaires, et tracer l'allure.\n2. Comparer avec deux fentes ($I=2I_0(1+\\cos\\varphi)$ pour la même amplitude par fente) : position et largeur des maxima principaux.\n3. On place devant la fente centrale un filtre qui multiplie son amplitude par $\\beta>0$. Exprimer l'intensité et le contraste $V=\\frac{I_{\\max}-I_{\\min}}{I_{\\max}+I_{\\min}}$ en fonction de $\\beta$.\n4. Généraliser la question 1 à $N$ fentes et justifier qu'un réseau sépare d'autant mieux deux longueurs d'onde que $N$ est grand.\n\n*D'après un exercice de préparation aux oraux MP (type CCMP / X / ENS).*",
+  "duree": 30,
+  "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-pc-cielbleu",
+  "mat": "Physique",
+  "chap": "Rayonnement",
+  "niveau": 2,
+  "concours": "Centrale",
+  "titre": "Pourquoi le ciel est-il bleu ?",
+  "enonce": "On modélise un électron d'une molécule de l'air par un oscillateur : $m\\ddot{\\vec r}=-m\\omega_0^2\\vec r-e\\vec E$, où $\\vec E=E_0\\cos(\\omega t)\\,\\vec e_x$ est le champ de l'onde solaire. On néglige l'amortissement. La pulsation propre $\\omega_0$ correspond à une longueur d'onde dans l'ultraviolet ($\\lambda_0\\approx100\\ \\mathrm{nm}$).\n\n1. Déterminer le dipôle induit $\\vec p(t)=-e\\vec r(t)$ en régime forcé. Le simplifier pour la lumière visible.\n2. On admet qu'un dipôle oscillant $p_0\\cos\\omega t$ rayonne la puissance moyenne $\\mathcal P=\\frac{\\mu_0p_0^2\\omega^4}{12\\pi c}$. Justifier l'approximation dipolaire, puis montrer que la puissance diffusée varie en $\\frac1{\\lambda^4}$.\n3. Calculer le rapport des puissances diffusées pour le bleu ($450\\ \\mathrm{nm}$) et le rouge ($700\\ \\mathrm{nm}$). Expliquer la couleur du ciel, et celle du Soleil couchant.\n4. La lumière diffusée à $90^\\circ$ de la direction du Soleil est-elle polarisée ? Justifier.\n\n*Thème signalé par le rapport du jury Centrale-Supélec 2025 (épreuve orale de physique-chimie) : rayonnement dipolaire et modèle de l’électron élastiquement lié.*",
+  "duree": 25,
+  "ajout": "2026-11-25"
  }
 ]
