@@ -1,5 +1,6 @@
 // Jeu d'icônes au trait (24×24), dessinées pour Colle express.
 const P = {
+  db: '<ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/>',
   book: '<path d="M3 5.5C3 4.7 3.7 4 4.5 4H10a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4.5c-.8 0-1.5-.7-1.5-1.5z"/><path d="M21 5.5c0-.8-.7-1.5-1.5-1.5H14a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h5.5c.8 0 1.5-.7 1.5-1.5z"/>',
   camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
   bulb: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
@@ -59,7 +60,7 @@ export const ic = (n, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24" a
 export function chapIcon(mat, chap) {
   const c = (chap || '').toLowerCase();
   if (mat === 'Chimie') return 'flask';
-  if (mat === 'Informatique') return /graphe/.test(c) ? 'share' : /jeu/.test(c) ? 'target' : /dynamique|complexit|preuve/.test(c) ? 'chart' : 'code';
+  if (mat === 'Informatique') return /sql|données/.test(c) ? 'db' : /graphe/.test(c) ? 'share' : /jeu/.test(c) ? 'target' : /dynamique|complexit|preuve/.test(c) ? 'chart' : 'code';
   if (mat === 'Physique') {
     if (/méca|mécanique|fluide/.test(c)) return 'pendulum';
     if (/optique/.test(c)) return 'lens';

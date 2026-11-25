@@ -5,7 +5,7 @@ les résultats annoncés dans les corrigés. À lancer après toute modification
 import re, sys, os, math, random, tempfile, itertools
 sys.path.insert(0, os.path.dirname(__file__))
 import newlib
-import new_info_1, new_info_2  # noqa: F401  (remplissent newlib.E / newlib.C)
+import new_info_1, new_info_2, new_info_3, new_info_4  # noqa: F401  (remplissent newlib.E / newlib.C)
 
 def blocs(t):
     return re.findall(r"```python[ \t]*\n(.*?)\n[ \t]*```", t, re.S)
@@ -251,6 +251,224 @@ ex_ = math.fsum(1 / k for k in range(1, n + 1))
 print('flottants : écart', s1 - s2, ' |croissant-exact|', abs(s1 - ex_), ' |décroissant-exact|', abs(s2 - ex_))
 check('flot somme', abs(s2 - ex_) < abs(s1 - ex_) and 5e-13 < abs(s1 - s2) < 1e-12 and 5e-13 < abs(s1 - ex_) < 1e-12 and abs(s2 - ex_) < 1e-13 and abs(ex_ - 14.39272672286572) < 1e-13)
 check('flot 0.3', repr(0.1 + 0.2) == '0.30000000000000004')
+
+# ================= 3e et 4e séries =================
+from collections import deque
+import sqlite3
+# --- RLE
+ns = NS['i-py-rle']
+check('rle ex', ns['compresser']('aaabccdddd') == [('a', 3), ('b', 1), ('c', 2), ('d', 4)] and ns['compresser']('') == [] and len(ns['compresser']('abab')) == 4)
+for _ in range(300):
+    t = ''.join(R.choice('ab') for _ in range(R.randint(0, 15)))
+    check('rle aller-retour', ns['decompresser'](ns['compresser'](t)) == t)
+# --- matrices
+ns = NS['i-py-matrice']
+check('matrice piège', ns['M'] == [[1, 0, 0]] * 3)
+z = ns['zeros'](2, 3); z[0][0] = 1; check('zeros', z == [[1, 0, 0], [0, 0, 0]])
+check('produit ex', ns['produit']([[1, 2], [3, 4]], [[0, 1], [1, 0]]) == [[2, 1], [4, 3]] and ns['transposee']([[1, 2, 3]]) == [[1], [2], [3]])
+for _ in range(50):
+    n_, p_, q_ = R.randint(1, 4), R.randint(1, 4), R.randint(1, 4)
+    A = [[R.randint(-3, 3) for _ in range(p_)] for _ in range(n_)]; Bm = [[R.randint(-3, 3) for _ in range(q_)] for _ in range(p_)]
+    P_ = ns['produit'](A, Bm)
+    check('produit', all(P_[i][j] == sum(A[i][k] * Bm[k][j] for k in range(p_)) for i in range(n_) for j in range(q_)))
+    check('transposée', ns['transposee'](ns['transposee'](A)) == A)
+# --- Euclide
+ns = NS['i-cx-euclide']
+check('division', all(ns['division'](a, b) == divmod(a, b) for a in range(60) for b in range(1, 12)))
+def pgcd_tours(a, b):
+    k = 0
+    while b != 0: a, b = b, a % b; k += 1
+    return k
+Fb = [0, 1]
+while len(Fb) < 40: Fb.append(Fb[-1] + Fb[-2])
+check('euclide fibo', all(pgcd_tours(Fb[k + 1], Fb[k]) == k - 1 for k in range(2, 38)) and pgcd_tours(89, 55) == 9 and Fb[10] == 55)
+check('euclide pgcd', all(ns['pgcd'](a, b) == math.gcd(a, b) for a in range(1, 50) for b in range(1, 50)))
+# --- tranche max
+ns = NS['i-cx-maxsub']
+check('maxsub ex', ns['tranche_max']([2, -5, 3, -1, 4, -6, 2]) == 6 and ns['tranche_max']([-3, -1, -2]) == -1)
+for _ in range(300):
+    L = [R.randint(-9, 9) for _ in range(R.randint(1, 10))]
+    v = max(sum(L[i:j]) for i in range(len(L)) for j in range(i + 1, len(L) + 1))
+    check('maxsub', ns['tranche_max'](L) == ns['tranche_max_quad'](L) == ns['tranche_max_naif'](L) == v)
+cs = []; c_ = None
+for x in [2, -5, 3, -1, 4, -6, 2]:
+    c_ = x if c_ is None else max(x, c_ + x); cs.append(c_)
+check('maxsub ci', cs == [2, -3, 3, 2, 6, 0, 2])
+check('maxsub cubique', all(sum(j - i for i in range(n) for j in range(i + 1, n + 1)) == n * (n + 1) * (n + 2) // 6 for n in range(1, 30)))
+# --- deux somme
+ns = NS['i-cx-deuxsomme']
+check('2somme ex', ns['deux_somme']([1, 3, 4, 6, 9], 10) == (0, 4) and ns['deux_somme']([1, 3, 4, 6, 9], 8) is None)
+for _ in range(400):
+    L = sorted(R.randint(0, 20) for _ in range(R.randint(0, 9))); s_ = R.randint(0, 40)
+    exist = any(L[i] + L[j] == s_ for i in range(len(L)) for j in range(i + 1, len(L)))
+    for f_ in ('deux_somme', 'deux_somme_dict'):
+        r = ns[f_](L, s_)
+        check('2somme ' + f_, (r is None and not exist) or (r is not None and r[0] < r[1] and L[r[0]] + L[r[1]] == s_))
+# --- file avec deux piles
+ns = NS['i-pile-file2']
+F_ = ns['file_vide']()
+for x in (1, 2, 3): ns['enfiler'](F_, x)
+out = [ns['defiler'](F_)]; ns['enfiler'](F_, 4); out += [ns['defiler'](F_) for _ in range(3)]
+check('file2 ex', out == [1, 2, 3, 4])
+for _ in range(100):
+    F_ = ns['file_vide'](); D_ = deque(); good = True
+    for _ in range(60):
+        if D_ and R.random() < 0.45: good &= ns['defiler'](F_) == D_.popleft()
+        else: x = R.randint(0, 99); ns['enfiler'](F_, x); D_.append(x)
+    check('file2', good)
+# --- permutations
+ns = NS['i-rec-perm']
+check('perm ex', ns['permutations']([1, 2, 3]) == [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]])
+check('perm', all(sorted(map(tuple, ns['permutations'](list(range(n))))) == sorted(itertools.permutations(range(n))) for n in range(1, 7)))
+def A_(n): return 1 if n <= 1 else 1 + n * A_(n - 1)
+check('perm appels', all(A_(n) == sum(math.factorial(n) // math.factorial(k) for k in range(1, n + 1)) and A_(n) <= (math.e - 1) * math.factorial(n) for n in range(1, 15)) and A_(4) == 41 and A_(3) == 10)
+cnt = [0]; orig = ns['permutations']
+def compte(L):
+    cnt[0] += 1
+    if len(L) <= 1: return [L[:]]
+    res = []
+    for i in range(len(L)):
+        for p in compte(L[:i] + L[i + 1:]): res.append([L[i]] + p)
+    return res
+compte([1, 2, 3, 4]); check('perm A(4) réel', cnt[0] == 41)
+# --- epsilon
+ns = NS['i-flot-eps']
+check('epsilon', ns['epsilon']() == 2 ** -52 == sys.float_info.epsilon and ns['proches'](0.1 + 0.2, 0.3) and (1.0 + 1e-17) - 1.0 == 0.0 and 1e-17 + (1.0 - 1.0) == 1e-17 and 1.0 + 2 ** -53 == 1.0)
+# --- bulles
+ns = NS['i-tri-bulle']
+def inv(L): return sum(L[i] > L[j] for i in range(len(L)) for j in range(i + 1, len(L)))
+check('bulles ex', ns['tri_bulles']([3, 1, 2]) == 2 and ns['tri_bulles']([5, 4, 3, 2, 1]) == 10 and ns['tri_bulles']([1, 2, 3]) == 0)
+for _ in range(300):
+    L = [R.randint(0, 9) for _ in range(R.randint(0, 10))]; L0 = L[:]
+    check('bulles', ns['tri_bulles'](L) == inv(L0) and L == sorted(L0))
+moy = sum(inv(list(p)) for p in itertools.permutations(range(6))) / math.factorial(6)
+check('bulles moyenne', moy == 6 * 5 / 4)
+# --- inversions n log n
+ti = NS['i-tri-inv']['tri_inv']
+check('inv ex', ti([2, 4, 1, 3, 5]) == ([1, 2, 3, 4, 5], 3))
+for _ in range(300):
+    L = [R.randint(0, 9) for _ in range(R.randint(0, 14))]
+    check('inv', ti(L) == (sorted(L), inv(L)))
+# --- tri topologique
+ns = NS['i-gr-topo']
+check('topo ex', ns['tri_topologique'](ns['G']) == ['algebre', 'analyse', 'proba', 'edo'])
+check('topo cycle', ns['tri_topologique']({'a': ['b'], 'b': ['c'], 'c': ['a'], 'd': ['a']}) is None)
+for _ in range(200):
+    n_ = R.randint(1, 7); G_ = {s: [t for t in range(n_) if t != s and R.random() < 0.3] for s in range(n_)}
+    o = ns['tri_topologique'](G_)
+    def cyc(G):
+        col = {s: 0 for s in G}
+        def dfs(s):
+            col[s] = 1
+            for t in G[s]:
+                if col[t] == 1 or (col[t] == 0 and dfs(t)): return True
+            col[s] = 2; return False
+        return any(col[s] == 0 and dfs(s) for s in G)
+    if cyc(G_): check('topo rnd cycle', o is None)
+    else:
+        pos = {s: k for k, s in enumerate(o)}
+        check('topo rnd', len(o) == n_ and all(pos[s] < pos[t] for s in G_ for t in G_[s]))
+# --- graphe inverse
+ns = NS['i-gr-inverse']; d_ = ns['d']
+check('inverse', ns['degre_max'](d_) == 2 and ns['graphe_inverse'](d_) == {0: [3], 1: [0], 2: [0], 3: [1, 2], 4: [2, 5], 5: []})
+check('coloration', ns['coloration_valide'](d_, [0, 1, 1, 2, 0, 1]) and not ns['coloration_valide'](d_, [0, 1, 0, 2, 0, 1]) and ns['coloration_valide'](ns['graphe_inverse'](d_), [0, 1, 1, 2, 0, 1]))
+# --- labyrinthe
+ns = NS['i-gr-chemin']
+check('laby ex', ns['chemin'](ns['lab'], (0, 0), (0, 3)) == [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (2, 3), (1, 3), (0, 3)])
+lab2 = ns['lab'][:]; lab2[2] = '#...'
+check('laby none', ns['chemin'](lab2, (0, 0), (0, 3)) is None)
+for _ in range(150):
+    n_, p_ = R.randint(1, 6), R.randint(1, 6)
+    lb = [''.join('#' if R.random() < 0.3 else '.' for _ in range(p_)) for _ in range(n_)]
+    fr = [(i, j) for i in range(n_) for j in range(p_) if lb[i][j] == '.']
+    if len(fr) < 2: continue
+    a, b = R.choice(fr), R.choice(fr)
+    dist = {a: 0}; Q = deque([a])
+    while Q:
+        c = Q.popleft()
+        for v in ns['voisins'](lb, c):
+            if v not in dist: dist[v] = dist[c] + 1; Q.append(v)
+    r = ns['chemin'](lb, a, b)
+    if b not in dist: check('laby rnd none', r is None)
+    else:
+        check('laby rnd', r[0] == a and r[-1] == b and len(r) == dist[b] + 1 and all(abs(r[k][0] - r[k + 1][0]) + abs(r[k][1] - r[k + 1][1]) == 1 and lb[r[k][0]][r[k][1]] == '.' for k in range(len(r) - 1)))
+# --- Levenshtein
+ns = NS['i-pd-levensh']
+check('lev ex', [ns['distance']('kayak', 'yak'), ns['distance']('', 'abc'), ns['distance']('chien', 'niche'), ns['distance']('colle', 'collet')] == [2, 3, 4, 1])
+for _ in range(300):
+    a = ''.join(R.choice('abc') for _ in range(R.randint(0, 7))); b = ''.join(R.choice('abc') for _ in range(R.randint(0, 7)))
+    dd = ns['distance'](a, b)
+    check('lev', dd == ns['distance_lignes'](a, b) == ns['distance'](b, a) and abs(len(a) - len(b)) <= dd <= max(len(a), len(b)) and (dd == 0) == (a == b))
+# --- escalier
+ns = NS['i-pd-escalier']
+check('escalier', all(ns['W_rec'](n) == ns['W_memo'](n) == ns['W_iter'](n) == ns['nb_facons'](n, [1, 2]) for n in range(0, 22)) and ns['nb_facons'](10, [1, 2]) == 89 and ns['nb_facons'](10, [1, 2, 3]) == 274 and ns['W_iter'](4) == 5 and [ns['W_iter'](n) for n in (1, 2, 3)] == [1, 2, 3])
+calls = [0]
+def Wc(n):
+    calls[0] += 1
+    return 1 if n <= 1 else Wc(n - 1) + Wc(n - 2)
+# appels(n) = 2 W(n) - 1 ; pour n = 40, 2 F_41 - 1 > 3e8
+check('escalier appels', all((calls.__setitem__(0, 0), Wc(n), calls[0])[2] == 2 * ns['W_iter'](n) - 1 for n in range(0, 18)) and 2 * ns['W_iter'](40) - 1 > 3e8)
+# --- plus longue sous-suite croissante
+ns = NS['i-pd-pls']
+check('pls ex', ns['pssc']([3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]) == [3, 4, 5, 9])
+def est_ss(S, L):
+    it = iter(L); return all(x in it for x in S)
+for _ in range(200):
+    L = [R.randint(0, 9) for _ in range(R.randint(0, 10))]
+    best = max((len(c) for k in range(len(L) + 1) for c in itertools.combinations(L, k) if all(c[i] < c[i + 1] for i in range(len(c) - 1))), default=0)
+    S = ns['pssc'](L)
+    check('pls', len(S) == best and est_ss(S, L) and all(S[i] < S[i + 1] for i in range(len(S) - 1)))
+# --- confusion
+ns = NS['i-ia-confusion']
+C_ = ns['confusion'](ns['vrais'], ns['predits'], ['chat', 'chien', 'lapin'])
+pr_, rp_ = ns['precision_rappel'](C_, 1)
+check('confusion', C_ == [[3, 1, 0], [1, 2, 0], [0, 1, 2]] and sum(C_[i][i] for i in range(3)) / 10 == 0.7 and pr_ == 0.5 and abs(rp_ - 2 / 3) < 1e-12)
+check('confusion sommes', [sum(r) for r in C_] == [4, 3, 3] and [sum(C_[i][j] for i in range(3)) for j in range(3)] == [4, 4, 2])
+# --- attracteur
+ns = NS['i-jeu-attr']
+check('attr ex', ns['attracteur'](ns['succ'], ns['joueur'], ns['F']) == {0, 1, 3, 4, 5} == ns['attracteur_lineaire'](ns['succ'], ns['joueur'], ns['F']))
+def gagne0(succ, joueur, F, s0):
+    # jeu d'accessibilité résolu par point fixe sur les couches A_k (définition, sans optimisation)
+    A = set(F)
+    while True:
+        B = A | {s for s in succ if (joueur[s] == 0 and any(t in A for t in succ[s])) or (joueur[s] == 1 and all(t in A for t in succ[s]))}
+        if B == A: return s0 in A
+        A = B
+for _ in range(300):
+    n_ = R.randint(1, 8)
+    sc = {s: sorted(set(R.choice(range(n_)) for _ in range(R.randint(1, 3)))) for s in range(n_)}
+    jr = [R.randint(0, 1) for _ in range(n_)]; Fs = {s for s in range(n_) if R.random() < 0.25}
+    a1, a2 = ns['attracteur'](sc, jr, Fs), ns['attracteur_lineaire'](sc, jr, Fs)
+    check('attr rnd', a1 == a2 == {s for s in range(n_) if gagne0(sc, jr, Fs, s)})
+# --- SQL
+def sql_blocs(t):
+    return re.findall(r"```sql[ \t]*\n(.*?)\n[ \t]*```", t, re.S)
+db = sqlite3.connect(':memory:')
+db.executescript("""
+CREATE TABLE films(idf INTEGER PRIMARY KEY, titre TEXT, annee INTEGER);
+CREATE TABLE locations(idc INTEGER, idf INTEGER REFERENCES films, debut TEXT, duree REAL, PRIMARY KEY(idc, idf, debut));
+INSERT INTO films VALUES (1,'Les Intégrales',2012),(2,'Le Pivot de Gauss',2001),(3,'Taylor-Lagrange',2011),(4,'La Colle',1995);
+INSERT INTO locations VALUES (10,1,'2026-01-03',1.0),(11,1,'2026-01-05',2.0),(10,2,'2026-02-01',3.5),(12,2,'2026-02-02',4.5),(11,3,'2026-02-10',1.5);
+""")
+q = sql_blocs(newlib.C['i-sql-films']['corrige'])
+res = [db.execute(x).fetchall() for x in q]
+check('sql films', len(q) == 4 and res[0] == [(4.5,)] and res[1] == [('Les Intégrales', 2012), ('Taylor-Lagrange', 2011), ('Le Pivot de Gauss', 2001)]
+      and sorted(res[2]) == [(1, 'Les Intégrales', 1.5), (3, 'Taylor-Lagrange', 1.5)] and res[3] == [(4,)])
+db2 = sqlite3.connect(':memory:')
+db2.executescript("""
+CREATE TABLE eleves(ide INTEGER PRIMARY KEY, nom TEXT, classe TEXT);
+CREATE TABLE notes(ide INTEGER REFERENCES eleves, matiere TEXT, note REAL);
+INSERT INTO eleves VALUES (1,'Amine','MP'),(2,'Lina','MP'),(3,'Yanis','PC'),(4,'Sara','MP'),(5,'Noé','PC');
+INSERT INTO notes VALUES (1,'maths',14),(1,'physique',9),(1,'info',16),(2,'maths',12),(2,'physique',15),(2,'info',13),(3,'maths',8),(3,'physique',11),(4,'maths',17),(4,'physique',16),(4,'info',18);
+""")
+q = sql_blocs(newlib.C['i-sql-notes']['corrige'])
+res = [db2.execute(x).fetchall() for x in q]
+moys = {n: m for n, m in res[0]}
+check('sql notes', len(q) == 5 and moys['Amine'] == 13 and abs(moys['Lina'] - 40 / 3) < 1e-9 and moys['Yanis'] == 9.5 and moys['Sara'] == 17 and 'Noé' not in moys
+      and res[1] == [('Sara',)] and sorted(res[2]) == [('Lina',), ('Sara',)] and sorted(res[3]) == [('MP', 3), ('PC', 1)] and len(res[4]) == 4)
+# tables de l'énoncé = données du test
+for idx, txt in (('i-sql-films', 'Les Intégrales | 2012'), ('i-sql-notes', '| 4 | info | 18 |')):
+    check('sql énoncé ' + idx, txt in next(e for e in newlib.E if e['id'] == idx)['enonce'])
 
 print(f'{ok} vérifications réussies, {len(fails)} échec(s)', sorted(set(fails)))
 sys.exit(1 if fails else 0)

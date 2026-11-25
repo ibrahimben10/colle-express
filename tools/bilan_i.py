@@ -61,3 +61,46 @@ B['i-jeu-minmax'] = ([r"**Min-max.** Max prend le maximum des valeurs des fils, 
   [r"Alterner le rôle du joueur à chaque niveau de la récursion.", r"Taille de l'arbre exploré : $\frac{b^{h+1}-1}{b-1}$.", r"Profondeur limitée + heuristique pour les vrais jeux."])
 B['i-flot'] = ([r"**Flottants.** Mantisse de 53 bits : erreur relative d'arrondi au plus $2^{-53}\approx1{,}1\times10^{-16}$ ; seuls les nombres dyadiques sont exacts."],
   [r"Ne jamais tester l'égalité de deux flottants avec `==` : utiliser une tolérance (`math.isclose`).", r"Sommer les petits termes d'abord.", r"`math.fsum` somme sans perte."])
+
+# ---- 3e et 4e séries
+SQL = r"**Ordre logique d'une requête SQL.** `FROM`/`JOIN`, puis `WHERE` (lignes), `GROUP BY`, `HAVING` (groupes), `SELECT`, `ORDER BY`, `LIMIT`."
+B['i-py-rle'] = ([r"**Chaînes.** Non mutables ; `''.join(...)` construit une chaîne en temps linéaire."],
+  [r"Comparer le caractère lu à la dernière plage construite.", r"Un couple n'est pas mutable : remplacer `L[-1]` par un nouveau couple.", r"Compression utile seulement si $2r<n$."])
+B['i-py-matrice'] = ([r"**Références.** `[x] * n` contient $n$ fois la même référence ; une modification d'un objet mutable est vue partout.", r"**Produit matriciel.** $(AB)_{ij}=\sum_ka_{ik}b_{kj}$."],
+  [r"Créer une matrice avec `[[0] * p for _ in range(n)]`.", r"Trois boucles pour le produit : $npq$ multiplications.", r"Tester sur une petite matrice de permutation."])
+B['i-cx-euclide'] = ([VAR, INV, r"**Lamé.** L'algorithme d'Euclide fait $O(\log b)$ tours ; les pires cas sont deux termes consécutifs de Fibonacci."],
+  [r"Invariant $a=bq+r$, $r\ge0$ ; variant $r$.", r"Un nombre de tours proportionnel à la **valeur** de $a$ est exponentiel en sa **taille**.", r"$F_{k+1}\bmod F_k=F_{k-1}$ pour $k\ge3$."])
+B['i-cx-maxsub'] = ([INV, r"**Ordres de grandeur.** $O(n^3)$, $O(n^2)$, $O(n)$ : supprimer les calculs redondants."],
+  [r"Allonger une somme au lieu de la recalculer.", r"Sous-problème « qui se termine en $i$ » : $c_i=\max(L_i,c_{i-1}+L_i)$.", r"Tranche non vide : initialiser avec `L[0]`, pas avec 0."])
+B['i-cx-deuxsomme'] = ([VAR, INV, r"**Dichotomie.** $O(\log n)$ par recherche dans une liste triée."],
+  [r"Deux indices qui se rapprochent : variant $j-i$.", r"Invariant « s'il existe une solution, il en existe une dans $[i,j]$ ».", r"Liste non triée : dictionnaire des valeurs vues, $O(n)$ en moyenne."])
+B['i-pile-file2'] = ([PILE, FILE],
+  [r"Ne transférer `entree` dans `sortie` que lorsque `sortie` est vide.", r"Coût amorti : compter les mouvements de chaque élément sur toute sa vie.", r"Un appel peut coûter $O(n)$ alors que la moyenne est $O(1)$."])
+B['i-rec-perm'] = ([r"**Récurrence $A(n)=1+nA(n-1)$.** Diviser par $n!$ : $A(n)=\sum_{k=1}^n\frac{n!}{k!}$.", r"**Exponentielle.** $\sum_{k\ge0}\frac1{k!}=e$."],
+  [r"Choisir le premier élément, puis permuter récursivement le reste.", r"Prouver la correction par récurrence sur la longueur.", r"Engendrer $n!$ objets coûte au moins $n!$ : $O(n\cdot n!)$ est optimal."])
+B['i-flot-eps'] = ([r"**Double précision.** Écart entre $1$ et le flottant suivant : $\varepsilon=2^{-52}\approx2{,}2\times10^{-16}$."],
+  [r"Ne jamais tester `x == y` entre flottants calculés.", r"Un terme plus petit que $\varepsilon/2$ relativement à l'autre est absorbé.", r"L'addition flottante n'est pas associative : l'ordre des calculs compte."])
+B['i-tri-bulle'] = ([INV, r"**Inversions.** Au plus $\binom n2$, atteint par la liste décroissante."],
+  [r"Un échange de voisins mal ordonnés retire exactement une inversion.", r"Arrêt anticipé si un passage ne fait aucun échange.", r"Moyenne par linéarité de l'espérance : $\frac{n(n-1)}4$."])
+B['i-tri-inv'] = ([DPR],
+  [r"Compter les inversions croisées pendant la fusion : ajouter `len(A) - i`.", r"Utiliser `<=` pour ne pas compter les égalités.", r"Distance de Kendall entre deux classements = nombre d'inversions."])
+B['i-gr-topo'] = ([FILE, r"**Graphe orienté acyclique.** Il admet un ordre topologique si et seulement s'il n'a pas de cycle."],
+  [r"Commencer par les sommets de degré entrant nul.", r"Si des sommets ne sont jamais placés, il y a un cycle.", r"Coût $O(n+p)$ : chaque arc est traité une fois."])
+B['i-gr-inverse'] = ([r"**Liste d'adjacence.** La somme des longueurs des listes est le nombre d'arcs $M$."],
+  [r"Initialiser une liste vide pour chaque sommet avant d'ajouter les arcs retournés.", r"Renvoyer `False` dès le premier arc monochrome.", r"Parcourir tous les arcs : $O(N+M)$."])
+B['i-gr-chemin'] = ([BFS, FILE],
+  [r"Grille = graphe implicite : calculer les voisins à la volée.", r"Le dictionnaire des prédécesseurs sert aussi de marque.", r"Reconstruire le chemin à l'envers puis le renverser."])
+B['i-pd-levensh'] = ([PD],
+  [r"Raisonner sur la dernière opération : suppression, insertion ou alignement.", r"Bords du tableau : $D(i,0)=i$ et $D(0,j)=j$.", r"Deux lignes suffisent pour la valeur, pas pour reconstruire les opérations."])
+B['i-pd-escalier'] = ([PD, r"**Mémoïsation.** Un dictionnaire des valeurs déjà calculées."],
+  [r"Classer les façons selon le dernier pas.", r"La récursion directe est exponentielle, la boucle est linéaire.", r"Généraliser : $W(k)=\sum_{p\le k}W(k-p)$."])
+B['i-pd-pls'] = ([PD],
+  [r"Sous-problème « qui se termine en $j$ ».", r"Mémoriser `pred[j]` pour reconstruire la sous-suite.", r"Répondre avec le maximum des $\ell_j$, pas $\ell_{n-1}$."])
+B['i-ia-confusion'] = ([r"**Matrice de confusion.** Lignes : vraies classes ; colonnes : classes prédites."],
+  [r"Taux de bonnes réponses : trace divisée par l'effectif.", r"Précision : diagonale sur la colonne ; rappel : diagonale sur la ligne.", r"Classes déséquilibrées : le taux global est trompeur."])
+B['i-jeu-attr'] = ([r"**Attracteur.** $A_{k+1}$ ajoute les sommets du joueur 0 ayant un successeur dans $A_k$ et ceux du joueur 1 dont tous les successeurs sont dans $A_k$."],
+  [r"Le rang d'un sommet borne le nombre de coups pour atteindre $F$.", r"Hors de l'attracteur, le joueur 1 a toujours un coup qui y reste.", r"Compteurs de successeurs non attirés et graphe inverse : $O(n+p)$."])
+B['i-sql-films'] = ([SQL],
+  [r"Condition sur un agrégat : `HAVING`, pas `WHERE`.", r"Joindre sur la clé commune avec `JOIN ... ON`.", r"« Jamais » : différence ensembliste avec `EXCEPT`."])
+B['i-sql-notes'] = ([SQL, r"**Autojointure.** Une table jointe avec elle-même, sous deux alias."],
+  [r"« Toutes les notes $\ge10$ » : `HAVING MIN(note) >= 10`.", r"Après une jointure, `COUNT(DISTINCT ...)` pour compter des individus.", r"`e1.ide < e2.ide` : chaque couple une seule fois, sans couple réflexif."])

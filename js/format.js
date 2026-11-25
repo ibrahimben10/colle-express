@@ -94,7 +94,23 @@ function fmtCorrige0(text) {
 const KW = new Set('False None True and as assert break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' '));
 const BI = new Set('print len range int float str list dict set tuple min max sum abs sorted enumerate zip map bool round open isinstance reversed any all divmod type'.split(' '));
 const TOK = /(#[^\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(\b\d+(?:\.\d+)?(?:e[-+]?\d+)?\b)|([A-Za-z_]\w*)|(\s+)|([\s\S])/g;
-function coloriser(code) {
+const KW_SQL = new Set('SELECT FROM WHERE AND OR NOT AS JOIN ON INNER LEFT GROUP BY HAVING ORDER ASC DESC LIMIT OFFSET DISTINCT IN IS NULL LIKE BETWEEN UNION INTERSECT EXCEPT EXISTS'.split(' '));
+const FN_SQL = new Set('COUNT SUM AVG MIN MAX ROUND'.split(' '));
+const TOK_SQL = /(--[^\n]*)|('(?:''|[^'])*')|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)|(\s+)|([\s\S])/g;
+function colorierSQL(code) {
+  let out = '';
+  for (const m of code.matchAll(TOK_SQL)) {
+    const [t, com, str, num, id] = m;
+    if (com) out += `<span class="c-com">${esc(t)}</span>`;
+    else if (str) out += `<span class="c-str">${esc(t)}</span>`;
+    else if (num) out += `<span class="c-num">${t}</span>`;
+    else if (id) { const u = id.toUpperCase(); out += KW_SQL.has(u) ? `<span class="c-kw">${id}</span>` : FN_SQL.has(u) ? `<span class="c-bi">${id}</span>` : id; }
+    else out += esc(t);
+  }
+  return out;
+}
+function coloriser(code, lang) {
+  if (lang === 'sql') return colorierSQL(code);
   let out = '', prev = '';
   for (const m of code.matchAll(TOK)) {
     const [t, com, str, num, id, sp] = m;
@@ -107,7 +123,7 @@ function coloriser(code) {
   }
   return out;
 }
-const codeHTML = b => `<div class="codeblk"><pre class="code" data-lang="${esc(b.lang || 'python')}"><code>${b.lang === 'text' ? esc(b.code) : coloriser(b.code)}</code></pre><button class="cp" type="button" aria-label="Copier le code">Copier</button></div>`;
+const codeHTML = b => `<div class="codeblk"><pre class="code" data-lang="${esc(b.lang || 'python')}"><code>${b.lang === 'text' ? esc(b.code) : coloriser(b.code, b.lang)}</code></pre><button class="cp" type="button" aria-label="Copier le code">Copier</button></div>`;
 function protect(text) {
   const B = [];
   let t = String(text ?? '').replace(/```([a-z]*)[ \t]*\n([\s\S]*?)\n[ \t]*```/g, (_, lang, code) => `\n\n\uE000B${B.push({lang, code}) - 1}\uE001\n\n`);
