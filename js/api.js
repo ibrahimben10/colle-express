@@ -30,7 +30,7 @@ function demoProfil(ref, apercu, A) {
   mes.forEach(r => (jours[r.created_at.slice(0, 10)] ||= new Set()).add(r.exercice_id));
   const vis = k => !apercu || p['vis_' + k] !== false;
   const o = {id: 'demo', username: p.username || 'demo', nom: A.profile.full_name, photo: sv.photo || '', bio: p.bio || '', etablissement: p.etablissement || '', filiere: p.filiere || '',
-    annee: p.annee || null, matieres: p.matieres || [], objectif: p.objectif || '', liens: {github: p.lien_github || '', linkedin: p.lien_linkedin || '', site: p.lien_site || ''},
+    annee: p.annee || null, matieres: p.matieres || [], objectif: p.objectif || '', banniere: p.banniere || '', liens: {github: p.lien_github || '', linkedin: p.lien_linkedin || '', site: p.lien_site || ''},
     public: !!p.public, self: !apercu, admin: true, role: 'admin', membre_depuis: new Date(sv.cree || Date.now()).toISOString(), contributions: ls.get('demo-contrib', 0) || 0};
   if (!apercu) o.vis = {stats: p.vis_stats !== false, activite: p.vis_activite !== false, parcours: p.vis_parcours !== false, favoris: p.vis_favoris !== false, commentaires: p.vis_commentaires !== false, etoiles: p.vis_etoiles !== false};
   if (vis('stats') || vis('parcours')) Object.assign(o, {
@@ -204,6 +204,12 @@ export const api = {
       if (error.code === '23514') throw new Error(/username/.test(error.message) ? 'Identifiant invalide : 3 à 20 caractères, lettres minuscules, chiffres ou _.' : /lien/.test(error.message) ? 'Lien invalide : utilise l’adresse complète, commençant par https://.' : 'Une valeur est invalide ou trop longue.');
       throw new Error(errFr(error));
     }
+  },
+  // Bannière : enregistrée à part pour ne jamais bloquer le reste du profil si la colonne n'existe pas encore.
+  async majBanniere(v) {
+    if (DEMO) { ls.set('demo-profil', {...ls.get('demo-profil', {}), banniere: v}); return true; }
+    const { error } = await sb.from('profils').update({banniere: v}).eq('user_id', this.user.id);
+    return !error;
   },
   // Lecture d'un profil (confidentialité appliquée par le serveur). apercu = « voir comme les autres »
   async profilPublic(ref, apercu = false) {

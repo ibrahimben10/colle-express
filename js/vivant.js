@@ -145,11 +145,31 @@ export function stepNav(box) {
 }
 
 /* ---------- bannière de profil : un tracé scientifique propre à chaque membre ---------- */
-export function bannerSVG(seed = '') {
+// Bannière de profil : un motif scientifique tracé à partir de l'identifiant (stable d'une visite à l'autre).
+// choix = « motif:couleur » choisi par l'élève ; vide = onde amortie terracotta.
+export const BANNIERES = {motifs: [['onde', 'Onde amortie'], ['lissajous', 'Courbe de Lissajous'], ['champ', 'Lignes de champ'], ['grille', 'Papier millimétré']],
+  couleurs: [['terra', 'Terracotta'], ['vert', 'Vert académique'], ['encre', 'Encre'], ['ambre', 'Ambre']]};
+export function bannerSVG(seed = '', choix = '') {
   let h = 2166136261; for (const c of String(seed)) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
   const rnd = () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) ^ Math.imul(h ^ (h >>> 13), 3266489909)) >>> 0) / 4294967296;
+  const [m0, c0] = String(choix).split(':'), motif = BANNIERES.motifs.some(x => x[0] === m0) ? m0 : 'onde', coul = BANNIERES.couleurs.some(x => x[0] === c0) ? c0 : 'terra';
   const a = 18 + rnd() * 26, f = 1.5 + rnd() * 3, ph = rnd() * 6.28, d = .3 + rnd() * .7;
-  const pts = Array.from({length: 61}, (_, k) => { const x = k * 20, t = k / 60; return `${x},${(70 + a * Math.exp(-d * t * 2) * Math.sin(f * 6.28 * t + ph)).toFixed(1)}`; }).join(' ');
-  const pts2 = Array.from({length: 61}, (_, k) => { const x = k * 20, t = k / 60; return `${x},${(70 + a * .55 * Math.cos(f * 4.1 * t + ph)).toFixed(1)}`; }).join(' ');
-  return `<svg class="pf-banner" viewBox="0 0 1200 140" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" class="b1"/><polyline points="${pts2}" class="b2"/><line x1="0" y1="70" x2="1200" y2="70" class="b0"/></svg>`;
+  const poly = (fn, n = 240) => Array.from({length: n + 1}, (_, k) => { const [x, y] = fn(k / n); return `${x.toFixed(1)},${y.toFixed(1)}`; }).join(' ');
+  let body = '';
+  if (motif === 'onde') {
+    body = `<polyline points="${poly(t => [1200 * t, 70 + a * Math.exp(-d * t * 2) * Math.sin(f * 6.28 * t + ph)], 60)}" class="b1"/>
+      <polyline points="${poly(t => [1200 * t, 70 + a * .55 * Math.cos(f * 4.1 * t + ph)], 60)}" class="b2"/>`;
+  } else if (motif === 'lissajous') {
+    const p = 3 + Math.floor(rnd() * 3), q = p + 1 + Math.floor(rnd() * 2);
+    body = `<polyline points="${poly(t => [600 + 540 * Math.sin(p * 6.2832 * t + ph), 70 + 52 * Math.sin(q * 6.2832 * t)], 600)}" class="b1"/>`;
+  } else if (motif === 'champ') {
+    // lignes de champ d'un dipôle : familles de courbes y = k·sin(πx/L)^2 (vue schématique)
+    body = Array.from({length: 7}, (_, i) => { const k = (i - 3) * 22 + (rnd() - .5) * 6;
+      return `<polyline points="${poly(t => [1200 * t, 70 + k * Math.sin(Math.PI * t) ** (1.4 + rnd() * .2)], 80)}" class="${i === 3 ? 'b1' : 'b2'}"/>`; }).join('');
+  } else {
+    const x0 = 200 + rnd() * 800;
+    body = Array.from({length: 25}, (_, i) => `<line x1="${i * 50}" x2="${i * 50}" y1="0" y2="140" class="b0 g"/>`).join('') + Array.from({length: 4}, (_, i) => `<line x1="0" x2="1200" y1="${i * 35 + 17}" y2="${i * 35 + 17}" class="b0 g"/>`).join('')
+      + `<polyline points="${poly(t => [1200 * t, 125 - 110 * ((1200 * t - x0) / 700) ** 2], 120)}" class="b1"/><line x1="${x0 - 300}" x2="${x0 + 300}" y1="125" y2="125" class="b2"/>`;
+  }
+  return `<svg class="pf-banner bn-${coul}" viewBox="0 0 1200 140" preserveAspectRatio="none" aria-hidden="true">${motif === 'grille' ? '' : '<line x1="0" y1="70" x2="1200" y2="70" class="b0"/>'}${body}</svg>`;
 }

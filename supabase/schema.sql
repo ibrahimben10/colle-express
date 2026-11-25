@@ -679,6 +679,10 @@ create policy "commentaires: supprimer" on public.commentaires for delete
 
 -- 15. Lecture d'un profil : une seule porte d'entrée, qui applique la confidentialité ----
 -- p_ref : @identifiant ou identifiant interne ; p_apercu : voir son propre profil "comme les autres"
+-- Bannière de profil choisie par l'élève : « motif:couleur » (vide = bannière par défaut)
+alter table public.profils add column if not exists banniere text not null default ''
+  check (banniere = '' or banniere ~ '^(onde|lissajous|champ|grille):(terra|vert|encre|ambre)$');
+
 create or replace function public.profil_public(p_ref text, p_apercu boolean default false) returns jsonb
 language plpgsql stable security definer set search_path = public as $$
 declare
@@ -707,7 +711,7 @@ begin
   r := jsonb_build_object(
     'id', u, 'username', pr.username, 'nom', pf.full_name, 'photo', coalesce(sv->>'photo', ''),
     'bio', pr.bio, 'etablissement', pr.etablissement, 'filiere', pr.filiere, 'annee', pr.annee,
-    'matieres', to_jsonb(pr.matieres), 'objectif', pr.objectif,
+    'matieres', to_jsonb(pr.matieres), 'objectif', pr.objectif, 'banniere', coalesce(pr.banniere, ''),
     'liens', jsonb_build_object('github', pr.lien_github, 'linkedin', pr.lien_linkedin, 'site', pr.lien_site),
     'public', pr.public, 'self', self, 'admin', public.is_prof(), 'membre_depuis', pf.created_at,
     'role', case when pf.role = 'prof' then 'admin' else 'eleve' end,

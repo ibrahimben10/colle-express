@@ -11,7 +11,7 @@ const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const typeset = el => { if (window.MathJax?.typesetPromise) MathJax.typesetPromise([el]).catch(() => {}); else setTimeout(() => typeset(el), 500); };
 
 /* ---------- extrait d'énoncé : on coupe hors des formules ---------- */
-function extrait(t, max = 230) {
+export function extrait(t, max = 230) {
   const p = String(t).trim().split(/\n{2,}/)[0].replace(/\n/g, ' ');
   if (p.length <= max) return p;
   let out = '', inMath = false;

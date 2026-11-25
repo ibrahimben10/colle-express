@@ -2,7 +2,7 @@
 // Toutes les données viennent du serveur (fonction profil_public) qui applique la confidentialité ;
 // rien n'est inventé : une section sans données affiche un état vide.
 import { niveauHTML, jalons, jalonsHTML } from './xp.js';
-import { bannerSVG } from './vivant.js';
+import { bannerSVG, BANNIERES } from './vivant.js';
 import { api } from './api.js';
 import { ic } from './icons.js';
 import { esc, rich } from './format.js';
@@ -73,7 +73,7 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
   el.innerHTML = `
     ${apercu ? `<div class="pf-preview" role="status">${ic('eye')} Aperçu : voici ce que voient les autres membres. <a href="#profil">Revenir à mon profil</a></div>` : ''}
     <article class="pf" style="--h:${hue(p.id)}">
-      ${bannerSVG(p.username || p.nom || '')}
+      ${bannerSVG(p.username || p.nom || '', p.banniere || '')}
       <header class="pf-head">
         <div class="pf-margin" aria-hidden="true"><span>∑</span><span>∫</span><span>∂</span></div>
         ${avatarXL(p)}
@@ -317,6 +317,14 @@ export async function renderEdition(el) {
         <p class="small" id="peUserH">3 à 20 caractères : lettres minuscules, chiffres, _. Adresse : <code>${esc(location.host)}/#u/<span id="peUserV">${esc(p.username || '')}</span></code></p></div>
       <div class="fld"><label for="peBio">Présentation <span class="small" id="peBioN"></span></label><textarea id="peBio" name="bio" maxlength="280" rows="3" placeholder="Ce que tu prépares, ce qui te plaît en sciences…">${esc(p.bio)}</textarea></div>
     </fieldset>
+    <fieldset class="panel pe-sec"><legend>Bannière</legend>
+      <div class="bn-pick">
+        <div class="bn-prev" id="bnPrev">${bannerSVG(p.username || '', p.banniere || '')}</div>
+        <div class="bn-opts" role="radiogroup" aria-label="Motif">${BANNIERES.motifs.map(([k, l]) => `<label><input type="radio" name="bnM" value="${k}" ${(p.banniere || 'onde:terra').startsWith(k + ':') ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>
+        <div class="bn-opts" role="radiogroup" aria-label="Couleur">${BANNIERES.couleurs.map(([k, l]) => `<label><input type="radio" name="bnC" value="${k}" ${(p.banniere || 'onde:terra').endsWith(':' + k) ? 'checked' : ''}><span><i class="bn-sw ${k}"></i>${l}</span></label>`).join('')}</div>
+        <p class="small">Le motif est tracé à partir de ton identifiant : chaque élève a le sien.</p>
+      </div>
+    </fieldset>
     <fieldset class="panel pe-sec"><legend><span class="pf-num">02</span> Parcours</legend>
       <div class="frow3">
         <div class="fld"><label for="peFil">Filière</label><select id="peFil" name="filiere"><option value="">—</option>${FILIERES.map(f => `<option ${p.filiere === f ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
@@ -372,9 +380,16 @@ export async function renderEdition(el) {
       matieres: mats.filter(x => x.checked).map(x => x.value), lien_github: v('lien_github'), lien_linkedin: v('lien_linkedin'), lien_site: v('lien_site'),
       public: f.public.checked, ...Object.fromEntries(['annuaire', 'vis_stats', 'vis_activite', 'vis_parcours', 'vis_favoris', 'vis_commentaires', 'vis_etoiles', 'vis_collections', 'vis_carnet', 'vis_badges'].filter(k => f[k]).map(k => [k, f[k].checked]))};
     busy = true; const b = el.querySelector('#peSave'); b.disabled = true; b.textContent = 'Enregistrement…';
-    try { await api.majProfil(champs); D.setUsername?.(champs.username); toast('Profil enregistré.', 'ok'); location.hash = '#profil'; }
+    try {
+      await api.majProfil(champs); D.setUsername?.(champs.username);
+      const bn = `${f.bnM.value}:${f.bnC.value}`, bnOk = bn === (p.banniere || 'onde:terra') || await api.majBanniere(bn === 'onde:terra' ? '' : bn);
+      toast(bnOk ? 'Profil enregistré.' : 'Profil enregistré. La bannière sera enregistrée quand l’administrateur aura mis à jour la base (supabase/banniere.sql).', bnOk ? 'ok' : 'info', bnOk ? 3800 : 7000);
+      location.hash = '#profil';
+    }
     catch (x) { showErr(x.message || 'Enregistrement impossible.'); }
     finally { busy = false; b.disabled = false; b.textContent = 'Enregistrer'; }
   };
+  const bnUpd = () => { const prev = el.querySelector('#bnPrev'); if (prev) prev.innerHTML = bannerSVG(el.querySelector('#pfForm').username?.value || p.username || '', `${f.bnM.value}:${f.bnC.value}`); };
+  f.querySelectorAll('[name=bnM],[name=bnC]').forEach(r => r.addEventListener('change', bnUpd));
   function showErr(m, field) { err.hidden = false; err.className = 'alert error'; err.innerHTML = `<span class="alert-ic">!</span><span></span>`; err.lastChild.textContent = m; field?.focus(); err.scrollIntoView({block: 'nearest'}); }
 }

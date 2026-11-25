@@ -15,8 +15,9 @@ import { renderCorrection } from './modes.js';
 import { rotator, countUp, heroBackground, carousel, celebrate } from './vivant.js';
 import { initMouvement } from './mouvement.js';
 import { initTactile } from './tactile.js';
-import { initVitrine } from './vitrine.js';
+import { initVitrine, extrait } from './vitrine.js';
 import { niveauHTML } from './xp.js';
+import { defis, defisHTML, nouveaux } from './defis.js';
 import { initCommunaute, renderCommunaute, renderSolutions, openSignalement, renderModeration } from './communaute.js';
 
 const $ = s => document.querySelector(s);
@@ -364,6 +365,8 @@ function renderList() {
   if (document.activeElement !== $('#fQ')) $('#fQ').value = F.q;
   $('#fFav').setAttribute('aria-pressed', !!F.fav); $('#fFav').innerHTML = `${ic('heart')} Favoris <span class="nb">${favs().length}</span>`;
   document.querySelector('.filters').classList.toggle('favmode', !!F.fav);
+  $('#fVue').innerHTML = [['liste', 'list', 'Liste'], ['grille', 'grid', 'Grille']].map(([v, i, l]) => `<button data-vue="${v}" aria-pressed="${(F.vue || 'liste') === v}" title="Affichage en ${l.toLowerCase()}">${ic(i)}<span class="sr">${l}</span></button>`).join('');
+  document.querySelector('.work')?.classList.toggle('vue-grille', F.vue === 'grille' && !CUR && innerWidth >= 1000);
   const sel = new Set(CONF.sel?.[F.lvl] || []);
   const list = listOrder();
   $('#items').innerHTML = list.length ? list.map(e => {
@@ -372,8 +375,9 @@ function renderList() {
       <span class="tile ${e.mat}">${ic(chapIcon(e.mat, e.chap))}</span>
       <span class="t">${sel.has(e.id) ? `<span style="color:var(--gold)">★</span> ` : ''}${esc(e.titre)}</span>
       <span class="st ${s === 'reussi' ? 'ok' : finOf(e.id) ? 'fin' : s ? 'go' : ''}" title="${s === 'reussi' ? 'Réussi : validé par tes pairs' : finOf(e.id) ? 'Fait (coché par toi)' : s ? 'En cours' : 'À faire'}">${s === 'reussi' ? ic('check') : finOf(e.id) ? ic('check') : s ? '•' : ''}</span>
-      <span class="m">${F.fav ? LV[e.niveau] + ' · ' : ''}${esc(e.chap)} · ${e.duree} min${FIG[e.id] ? ' · schéma' : ''}${isFav(e.id) ? ' · <span class="fv">♥</span>' : ''}</span></button>`;
+      <span class="m">${F.fav ? LV[e.niveau] + ' · ' : ''}${esc(e.chap)} · ${e.duree} min${FIG[e.id] ? ' · schéma' : ''}${isFav(e.id) ? ' · <span class="fv">♥</span>' : ''}</span>${F.vue === 'grille' && !CUR ? `<span class="gx">${fmtEnonce(extrait(String(e.enonce).trim().replace(/^\s*(\d+|[a-z])[.)]\s+/gm, '').replace(/\n(?!\n)/g, ' '), 160)).replace(/<\/?(p|ol|ul|li)[^>]*>/g, ' ')}</span>` : ''}</button>`;
   }).join('') : `<div class="empty">${F.fav ? 'Aucun favori pour l’instant : touche le cœur d’un exercice pour l’enregistrer.' : 'Aucun exercice pour ces filtres.'}</div>`;
+  if (F.vue === 'grille' && !CUR) typeset($('#items'));
   const done = list.filter(e => statusOf(e.id) === 'reussi').length;
   $('#count').textContent = `${list.length} exercice${list.length > 1 ? 's' : ''} · ${done} réussi${done > 1 ? 's' : ''}`;
   store.set('filters', F);
@@ -383,6 +387,7 @@ $('#fMat').onclick = e => { const b = e.target.closest('button'); if (b) { F.mat
 $('#fChap').onchange = e => { F.chap = e.target.value; renderList(); };
 $('#fQ').oninput = e => { F.q = e.target.value; renderList(); };
 $('#fFav').onclick = () => { F.fav = !F.fav; renderList(); };
+$('#fVue').onclick = e => { const b = e.target.closest('[data-vue]'); if (b && b.dataset.vue !== (F.vue || 'liste')) { F.vue = b.dataset.vue; renderList(); } };
 $('#items').onclick = e => { const b = e.target.closest('.item'); if (b) openEx(b.dataset.id); };
 // on commence à télécharger le corrigé dès que le doigt se pose sur l'exercice
 $('#items').addEventListener('pointerdown', e => { const b = e.target.closest('.item'); if (b) loadCorr(b.dataset.id); }, {passive: true});
@@ -411,13 +416,19 @@ async function shareEx(ex, withCorr) {
   catch { notice(`Lien à partager : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`); }
 }
 
+/* ---------- défis du jour et de la semaine ---------- */
+const lesDefis = () => defis({S: SUIVI, byId, pick: dailyPick(api.profile.niveau || F.lvl || 1, SUIVI), lvl: api.profile.niveau || F.lvl || 1});
+function feterDefis(anchor) {
+  const N = nouveaux(lesDefis(), store);
+  if (N.length) { toast(N.length > 1 ? `${N.length} défis réussis : ${N.map(d => d.titre).join(', ')}.` : `Défi réussi : ${N[0].titre}.`, 'ok', 5000); if (anchor) celebrate(anchor, 'Défi réussi'); }
+}
 /* ---------- terminé, précédent / suivant ---------- */
 function toggleDone(ex) {
   SUIVI.ex ||= {};
   const st = SUIVI.ex[ex.id] ||= {s: 'en_cours', e: 0, i: 0, sc: 0, d: now(), t: 0};
   st.fin = st.fin ? 0 : 1; if (st.fin) st.df = now();
   api.saveSuivi(SUIVI); renderList(); renderCopy();
-  if (st.fin) { toast('Exercice coché comme fait.', 'ok'); const b = $('#bDone'); b?.classList.add('pop'); }
+  if (st.fin) { const b = $('#bDone'); b?.classList.add('pop'); const before = store.get('defis-ok', []).length; feterDefis(b); if (store.get('defis-ok', []).length === before) toast('Exercice coché comme fait.', 'ok'); }
 }
 function voisins(ex) {
   const L = listOrder(), i = L.findIndex(e => e.id === ex.id);
@@ -451,6 +462,7 @@ function renderAccueil(el) {
     <div class="kicker"><span class="stamp n${lvl}">${LV[lvl]}</span><span class="small">${esc(LVD[lvl])}</span></div>
     <h2>Une colle courte, maintenant&nbsp;?</h2>
     ${last ? `<button class="resume" data-open="${esc(last.id)}"><span class="k">Reprendre là où tu t’es arrêté</span><b>${esc(last.titre)}</b><span class="m">${esc(last.mat)} · ${esc(last.chap)} · ${last.duree} min</span><span class="go">${ic('arrow')}</span></button>` : ''}
+    <div class="acc-defis">${defisHTML(lesDefis(), {compact: true})}</div>
     <div class="acols">
       ${col('Pour toi', 'target', pour, 'Termine ou réussis quelques exercices : les suggestions s’adaptent à tes chapitres les moins travaillés.')}
       ${col('Consultés récemment', 'clock', vus.filter(e => e.id !== last?.id).slice(0, 4), 'Les exercices que tu ouvres apparaîtront ici.')}
@@ -1075,6 +1087,7 @@ function renderSuivi() {
   $('#v-suivi').innerHTML = `
     <div class="pagehead"><h2>Mon suivi</h2><span class="small">${DEMO ? 'mode démonstration' : 'enregistré sur ton compte'}</span></div>
     ${bentoHTML(lvl)}
+    <h3 class="sec">${ic('target')} Défis</h3><div class="panel defis-p" id="defisP">${defisHTML(lesDefis())}</div>
     <h3 class="sec">${ic('chart')} Mon rythme</h3><div class="panel rythme" id="rythme"><span class="skel skel-l"></span><span class="skel skel-l w60"></span></div>
     <div class="panel profile"><span class="ph">${avatar(api.user.id, api.profile.full_name)}</span>
       <div><b>${esc(api.profile.full_name || 'Moi')}</b><span class="small">${esc(api.user.email || '')}</span></div>

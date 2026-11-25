@@ -278,3 +278,4 @@ Le site suit une direction « carnet de colle » : papier chaud, encre, vert aca
 - **Bibliothèque** : recherche sans accents et multi-mots, accueil « Reprendre / Pour toi / Consultés récemment / Nouveautés », bouton « Marquer comme fait » (suivi personnel, distinct de « terminé » et « réussi »), navigation précédent / suivant (et touches ← →).
 - **Progression** (`js/xp.js`) : XP et niveaux (Bizuth → Major) calculés sur les statistiques publiques du profil, jalons, rythme par semaine et par mois. Aucune modification de la base.
 - Champ facultatif `ajout` (date) dans `data/exercices.json` pour la rubrique « Nouveautés ».
+- **Étape 2** : affichage des exercices en grille (ordinateur), défis du jour et de la semaine (`js/defis.js`, validés seulement par des exercices cochés « fait » ou des réponses soumises), bannière de profil personnalisable (4 motifs × 4 couleurs ; migration `supabase/banniere.sql`, sans risque, à lancer une fois).
