@@ -2251,3 +2251,4 @@ pre.code{border:1px solid var(--line-soft);border-left:1px solid var(--line-soft
 .sitefoot b{font-weight:600;letter-spacing:0;text-transform:none}
 .pf-margin{display:none}
 .pf-bio{border-left-style:solid;border-left-color:var(--line)}
+.lnav .btn,.top .btn{white-space:nowrap;flex:none}
