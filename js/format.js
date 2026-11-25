@@ -151,7 +151,7 @@ if (typeof document !== 'undefined' && !window.__cpCode) {
 }
 
 // Encadré : le premier mot en gras fixe le style (théorème, mise en garde, vérification, réserve).
-function callout(p) {
+export function callout(p) {
   const m = p.match(/^\*\*(.+?)\*\*\s*([\s\S]*)$/), t = (m ? m[1] : '').toLowerCase();
   const k = /^(théorème|propriété|définition|lemme|rappel|formule|loi|principe|relation|corollaire)/.test(t) ? 'thm'
     : /^(hypothèse|attention|piège|condition)/.test(t) ? 'warn' : /^(vérification|contrôle|cohérence)/.test(t) ? 'chk'
