@@ -25,7 +25,7 @@ export const CONFIG = {
     initiales: 'IB',
     accroche: 'Élève ingénieur en 1re année à l’ENSEEIHT (Sciences du Numérique), Toulouse.',
     texte: [
-      'Je m’appelle Ibrahim Ben Yakhlef. Je suis élève ingénieur en première année à l’ENSEEIHT, à Toulouse, dans le département Sciences du Numérique, après deux années de classes préparatoires MPSI puis MP au lycée Omar Ibn Abdelaziz, à Oujda.',
+      'Je m’appelle Ibrahim Ben Yakhlef. Je suis élève ingénieur en première année à l’ENSEEIHT, à Toulouse, dans le département Sciences du Numérique, après un baccalauréat Sciences Mathématiques obtenu avec la mention Très bien, puis deux années de classes préparatoires MPSI et MP au lycée Omar Ibn Abdelaziz, à Oujda.',
       'J’ai créé Colle express pour vous faire travailler comme en colle : des exercices courts et ciblés, des indices progressifs plutôt que la solution toute faite, et un corrigé détaillé une fois que vous avez vraiment cherché. C’est la méthode qui m’a le plus fait progresser pendant ma prépa.',
     ],
     // Parcours, du plus récent au plus ancien.
@@ -33,7 +33,7 @@ export const CONFIG = {
       {quand: 'Aujourd’hui', quoi: 'ENSEEIHT — 1re année, Sciences du Numérique', ou: 'Informatique, logique formelle, mathématiques appliquées, signal et image, allemand LV2', ic: 'cap'},
       {quand: 'CPGE — 2e année', quoi: 'Classe préparatoire MP', ou: 'Lycée Omar Ibn Abdelaziz, Oujda', ic: 'book'},
       {quand: 'CPGE — 1re année', quoi: 'Classe préparatoire MPSI', ou: 'Lycée Omar Ibn Abdelaziz, Oujda', ic: 'sigma'},
-      {quand: 'Lycée', quoi: 'Baccalauréat', ou: '', ic: 'pen'},
+      {quand: 'Lycée', quoi: 'Baccalauréat Sciences Mathématiques — mention Très bien', ou: '', ic: 'pen'},
     ],
     pourquoi: [
       'Des énoncés de type oral, classés par niveau : CCINP, Mines-Centrale, X-ENS.',

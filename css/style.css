@@ -1606,12 +1606,6 @@ html.theme-anim *,html.theme-anim *::before{transition:background-color .4s ease
 /* entrée d'un exercice */
 .copy.ex-in>*{animation:in .4s var(--ease) both}
 .copy.ex-in>:nth-child(2){animation-delay:.03s}.copy.ex-in>:nth-child(3){animation-delay:.06s}.copy.ex-in>:nth-child(4){animation-delay:.09s}.copy.ex-in>:nth-child(5){animation-delay:.12s}
-/* mode concentration */
-body.focus .strip,body.focus .list,body.focus .top nav.tabs,body.focus .bottombar,body.focus .sitefoot,body.focus #grpSec,body.focus #solSec,body.focus #discSec,body.focus #actions,body.focus .demo{display:none!important}
-body.focus .work{grid-template-columns:minmax(0,1fr);max-width:860px;margin:0 auto}
-body.focus .copy{border-color:transparent;box-shadow:none}
-.iconbtn[aria-pressed=true]#bFocus{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.focus-exit{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:50;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:10px 14px;font-weight:600;display:flex;gap:8px;align-items:center;box-shadow:var(--sh2);animation:in .3s var(--ease)}
 /* progression de lecture */
 .read-prog{position:fixed;left:0;right:0;top:0;height:3px;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none}
 .read-prog.on{opacity:1}
@@ -2051,3 +2045,21 @@ pre.code,:not(pre)>code{font-variant-ligatures:none;font-feature-settings:"liga"
 /* filtre des matières : 5 choix sur une ligne */
 #app #fMat{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));flex-wrap:nowrap}
 #app #fMat button{padding-inline:2px;min-width:0;font-size:13.5px}
+
+/* ===================== Barre d'outils de l'exercice : jamais de libellé tronqué ===================== */
+/* Les boutons gardent leur largeur naturelle ; quand la place manque, les libellés deviennent invisibles
+   (mais restent lus par les lecteurs d'écran) et il ne reste que les icônes, avec une infobulle. */
+.titlerow{container-type:inline-size}
+.tools{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 100%}
+.tools .iconbtn{flex:none;white-space:nowrap;min-height:44px}
+@media(max-width:600px){.tools .lbl{display:inline}}
+@container (max-width:520px){
+ .tools .iconbtn:not(.done) .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .tools .iconbtn:not(.done){padding:0 12px;min-width:44px;justify-content:center}
+}
+@container (max-width:420px){
+ .tools .iconbtn.done .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .tools .iconbtn.done{padding:0 12px;min-width:44px;justify-content:center}
+ .tools{justify-content:space-between;gap:6px}
+}
+@container (max-width:300px){.tools{gap:4px}.tools .iconbtn,.tools .iconbtn.done{min-width:38px;padding:0 8px}}

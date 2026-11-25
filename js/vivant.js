@@ -1,5 +1,5 @@
 // Animations et composants vivants : mot tournant, compteurs, fond scientifique, carrousel,
-// célébration, progression de lecture, navigation entre étapes, mode concentration, bannière de profil.
+// célébration, progression de lecture, navigation entre étapes, bannière de profil.
 // Tout est en CSS + IntersectionObserver + rAF ; rien ne tourne quand l'élément est hors écran
 // ou quand l'utilisateur a demandé moins d'animations.
 const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;

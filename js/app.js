@@ -503,11 +503,10 @@ function renderCopy() {
     <div class="kicker"><span class="stamp n${ex.niveau}">${LV[ex.niveau]}</span><span class="pill">${ic(MAT_IC[ex.mat])}${esc(ex.mat)}</span><span class="pill">${ic(chapIcon(ex.mat, ex.chap))}${esc(ex.chap)}</span></div>
     <div class="titlerow"><h2>${esc(ex.titre)}</h2>
       <div class="tools"><button class="iconbtn done" id="bDone" aria-pressed="${finOf(ex.id)}" title="Cocher l’exercice comme fait, pour ton suivi personnel">${ic('done')}<span class="lbl">${finOf(ex.id) ? 'Fait' : 'Marquer comme fait'}</span></button>
-      <button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
+      <button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}" title="Enregistrer dans tes favoris">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
       <button class="iconbtn" id="bColl" title="Ranger dans une collection">${ic('book')}<span class="lbl">Collection</span></button>
       <button class="iconbtn" id="bNote" title="Ajouter au carnet de progression">${ic('pen')}<span class="lbl">Carnet</span></button>
-      <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button>
-      <button class="iconbtn" id="bFocus" aria-pressed="${document.body.classList.contains('focus')}" title="Mode concentration : masque tout le reste (Échap pour sortir)">${ic('target')}<span class="lbl">Concentration</span></button></div></div>
+      <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button></div></div>
     ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : st.fin ? 'fin' : ''}">${ic(st.s === 'reussi' ? 'trophy' : st.fin ? 'done' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 12/20)' : mine(ex.id) ? 'Réponse soumise' + (st.fin ? ' · fait' : '') : st.fin ? 'Fait' : 'En cours'}</div>` : ''}
 
     <section class="co co-enonce">
@@ -604,24 +603,11 @@ function renderCopy() {
   $('#bColl').onclick = () => openCollectionsPicker(ex.id);
   $('#bNote').onclick = () => openNote({exercice_id: ex.id, titre: ex.titre, type: 'difficile'});
   $('#bShareEx').onclick = () => shareEx(ex, false);
-  $('#bFocus').onclick = () => setFocus(!document.body.classList.contains('focus'));
   $('#bDone').onclick = () => toggleDone(ex);
   el.insertAdjacentHTML('beforeend', exNavHTML(ex));
   el.querySelectorAll('.exnav [data-open]').forEach(b => b.onclick = () => { openEx(b.dataset.open); if (!phone()) $('#copy').scrollIntoView({block: 'start', behavior: 'smooth'}); });
   $('#bShareCorr') && ($('#bShareCorr').onclick = () => shareEx(ex, true));
 }
-
-// Mode concentration : seul l'exercice reste à l'écran.
-function setFocus(on) {
-  document.body.classList.toggle('focus', on);
-  $('#bFocus')?.setAttribute('aria-pressed', on);
-  let x = $('#focusExit');
-  if (on && !x) { x = document.createElement('button'); x.id = 'focusExit'; x.className = 'focus-exit'; x.type = 'button'; x.innerHTML = `${ic('x')} Quitter la concentration`; x.onclick = () => setFocus(false); document.body.append(x); }
-  if (!on) x?.remove();
-  if (on) toast('Mode concentration : Échap pour revenir.', 'info', 2500);
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('focus') && !document.querySelector('dialog[open]')) setFocus(false); });
-addEventListener('hashchange', () => { if (!location.hash.startsWith('#ex-')) setFocus(false); });
 
 /* ================= GROUPES : réponses sur l'honneur, notes, discussion ================= */
 async function loadGroups() {
