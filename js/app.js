@@ -160,7 +160,7 @@ function renderMe() {
 }
 async function afterLogin2() {
   const p = api.profile;
-  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices" title="Exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#groupes" data-v="groupes" title="Groupes">${ic('users')}<span class="lbl">Groupes</span></a><a href="#suivi" data-v="suivi" title="Suivi">${ic('chart')}<span class="lbl">Suivi</span></a><a href="#carnet" data-v="carnet" title="Carnet">${ic('pen')}<span class="lbl">Carnet</span></a><a href="#communaute" data-v="communaute" title="Communauté">${ic('share')}<span class="lbl">Communauté</span></a><a href="#profil" data-v="profil" title="Profil">${ic('user')}<span class="lbl">Profil</span></a>` +
+  $('#nav').innerHTML = `<a href="#exercices" data-v="exercices" title="Exercices">${ic('book')}<span class="lbl">Exercices</span></a><a href="#fiches" data-v="fiches" title="Fiches de cours">${ic('list')}<span class="lbl">Fiches</span></a><a href="#groupes" data-v="groupes" title="Groupes">${ic('users')}<span class="lbl">Groupes</span></a><a href="#suivi" data-v="suivi" title="Suivi">${ic('chart')}<span class="lbl">Suivi</span></a><a href="#carnet" data-v="carnet" title="Carnet">${ic('pen')}<span class="lbl">Carnet</span></a><a href="#communaute" data-v="communaute" title="Communauté">${ic('share')}<span class="lbl">Communauté</span></a><a href="#profil" data-v="profil" title="Profil">${ic('user')}<span class="lbl">Profil</span></a>` +
     (api.isProf ? `<a href="#prof" data-v="prof" title="Tableau de bord">${ic('live')}<span class="lbl lbl-long">Tableau de bord</span> <span class="count-pill" id="liveN">0</span></a>` : '') +
     '';   // « À propos » et l'envoi de sujets restent accessibles par le pied de page et « Mon suivi »
   initProfil({byId, all, LV, typeset, pickPhoto, ref: () => PREF, myAvatar: () => avatar(api.user.id, api.profile.full_name).replace('class="avatar"', 'class="avatar pe-av"'), setUsername: u => { MYUSER = u; }});
@@ -286,15 +286,18 @@ function route() {
   let pref = null, pmode = '';
   let cref = null;
   if (h.startsWith('c/')) { cref = decodeURIComponent(h.slice(2)); h = 'collection'; }
+  let fref = '';
+  if (h.startsWith('f/')) { fref = decodeURIComponent(h.slice(2)); h = 'fiches'; }
   let ctab = '';
   if (h.startsWith('communaute')) { ctab = h.split('/')[1] || 'annuaire'; h = 'communaute'; }
   if (h.startsWith('u/')) { pref = decodeURIComponent(h.slice(2)); h = 'profil'; }
   else if (h === 'profil' || h.startsWith('profil/')) { pmode = h.split('/')[1] || ''; pref = MYUSER || api.user.id; h = 'profil'; }
-  if (!['exercices', 'groupes', 'suivi', 'prof', 'apropos', 'profil', 'carnet', 'collection', 'communaute'].includes(h)) h = 'exercices';
+  if (!['exercices', 'fiches', 'groupes', 'suivi', 'prof', 'apropos', 'profil', 'carnet', 'collection', 'communaute'].includes(h)) h = 'exercices';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + h));
   document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   if (h === 'exercices') { renderStrip(); renderList(); renderCopy(); }
   if (h === 'suivi') renderSuivi();
+  if (h === 'fiches') import('./fiches.js').then(m => m.renderFiches($('#v-fiches'), fref, typeset));
   if (h === 'groupes') renderGroupes();
   if (h === 'prof') renderProf(true);
   if (h === 'carnet') { renderCarnet($('#v-carnet')); scrollTo(0, 0); }

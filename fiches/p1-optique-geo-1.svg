@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 230" role="img" aria-label="Lois de Snell-Descartes : réflexion i₁′ = i₁ et réfraction n₁ sin i₁ = n₂ sin i₂ (ici n₂ > n₁)" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <rect x="20" y="115" width="340" height="100" class="fillA"/><line x1="20" y1="115" x2="360" y2="115" class="s thick"/><line x1="190" y1="15" x2="190" y2="215" class="s axis"/>
+  <text x="30" y="106" class="lb " text-anchor="start"><tspan class="it">n</tspan><tspan baseline-shift="sub" font-size="10">1</tspan></text><text x="30" y="136" class="lb " text-anchor="start"><tspan class="it">n</tspan><tspan baseline-shift="sub" font-size="10">2</tspan></text>
+  <line x1="90" y1="25" x2="190" y2="115" class="s r" marker-end="url(#ahr)"/><line x1="190" y1="115" x2="290" y2="25" class="s r" marker-end="url(#ahr)"/><line x1="190" y1="115" x2="240" y2="210" class="s r" marker-end="url(#ahr)"/>
+  <path d="M190,70 A45,45 0 0 0 158,83" class="s"/><text x="172" y="64" class="lb " text-anchor="middle"><tspan class="it">i</tspan><tspan baseline-shift="sub" font-size="10">1</tspan></text>
+  <path d="M190,70 A45,45 0 0 1 222,83" class="s"/><text x="210" y="64" class="lb " text-anchor="middle"><tspan class="it">i</tspan><tspan baseline-shift="sub" font-size="10">1</tspan>′</text>
+  <path d="M190,165 A50,50 0 0 0 213,159" class="s"/><text x="206" y="180" class="lb " text-anchor="start"><tspan class="it">i</tspan><tspan baseline-shift="sub" font-size="10">2</tspan></text>
+  <text x="70" y="40" class="lb nt" text-anchor="end">incident</text><text x="300" y="40" class="lb nt" text-anchor="start">réfléchi</text><text x="250" y="205" class="lb nt" text-anchor="start">réfracté</text></svg>
