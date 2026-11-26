@@ -59,6 +59,38 @@ On choisit un **pivot**, on partitionne en « plus petits » et « plus grands �
 
 `sorted(L)` et `L.sort()` de Python sont en $O(n\log n)$.
 
+## Autres tris au programme
+
+**Tri par sélection** : on cherche le minimum de `T[i:]` et on l'échange avec `T[i]` ; toujours $\frac{n(n-1)}{2}$ comparaisons, $O(n^2)$, en place.
+
+**Tri rapide** :
+```python
+def tri_rapide(T):
+    if len(T) <= 1:
+        return T
+    pivot = T[0]
+    petits = [x for x in T[1:] if x < pivot]
+    grands = [x for x in T[1:] if x >= pivot]
+    return tri_rapide(petits) + [pivot] + tri_rapide(grands)
+```
+Pire cas (liste déjà triée avec ce choix de pivot) : $O(n^2)$ ; en moyenne $O(n\log n)$.
+
+**Tri par comptage** (valeurs entières entre 0 et $k$) : on compte les occurrences de chaque valeur, puis on réécrit la liste ; $O(n + k)$, sans comparaison.
+
+```python
+def tri_comptage(T, k):
+    c = [0] * (k + 1)
+    for x in T:
+        c[x] += 1
+    return [v for v in range(k + 1) for _ in range(c[v])]
+```
+
+## Propriétés à connaître
+
+- Un tri est **stable** s'il conserve l'ordre relatif des éléments égaux (insertion et fusion le sont).
+- Un tri est **en place** s'il n'utilise qu'une mémoire supplémentaire constante.
+- Un tri **par comparaisons** ne peut pas faire mieux que $O(n\log n)$ dans le pire cas ; le tri par comptage échappe à cette borne parce qu'il ne compare pas.
+
 ## Exemple corrigé
 
 **Énoncé.** Combien de comparaisons fait le tri par insertion sur `[5, 4, 3, 2, 1]` ?

@@ -39,6 +39,34 @@ On écrit une relation de récurrence sur le coût $C(n)$ :
 
 La version naïve de Fibonacci recalcule de nombreuses fois les mêmes valeurs. Remède : la **mémoïsation** (voir programmation dynamique).
 
+## Énumérer
+
+**Sous-listes (parties) d'une liste** : on prend ou non le premier élément ; $2^n$ parties.
+```python
+def parties(L):
+    if L == []:
+        return [[]]
+    reste = parties(L[1:])
+    return reste + [[L[0]] + p for p in reste]
+```
+
+**Permutations** : on choisit le premier élément puis on permute le reste ; $n!$ permutations.
+```python
+def permutations(L):
+    if len(L) <= 1:
+        return [L]
+    return [[L[i]] + p for i in range(len(L))
+            for p in permutations(L[:i] + L[i+1:])]
+```
+
+## Dessins récursifs
+
+Les figures fractales (flocon de von Koch, triangle de Sierpiński) se dessinent naturellement par récursivité : chaque segment est remplacé par plusieurs segments plus petits, jusqu'à une profondeur fixée.
+
+## Récursif ou itératif ?
+
+Toute fonction récursive simple peut s'écrire avec une boucle. La version récursive est souvent plus proche de la définition mathématique ; la version itérative évite le débordement de pile.
+
 ## Exemple corrigé
 
 **Énoncé.** Écrire l'exponentiation rapide $x^n$ et donner sa complexité.

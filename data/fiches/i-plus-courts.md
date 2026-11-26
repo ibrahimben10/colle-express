@@ -37,6 +37,25 @@ def dijkstra(G, s):
 
 Pour retrouver le chemin : remonter les prédécesseurs depuis l'arrivée.
 
+## Retrouver le chemin
+
+On mémorise pour chaque sommet son **prédécesseur** au moment de la mise à jour, puis on remonte depuis l'arrivée :
+```python
+def chemin(pred, s, t):
+    c = [t]
+    while c[-1] != s:
+        c.append(pred[c[-1]])
+    return c[::-1]
+```
+
+## Algorithme A*
+
+Variante de Dijkstra guidée par une **heuristique** $h(v)$ qui estime la distance restante jusqu'à l'arrivée (par exemple la distance à vol d'oiseau sur une carte). On traite en priorité le sommet qui minimise $d(v) + h(v)$. Si $h$ ne surestime jamais la vraie distance, le chemin trouvé est optimal, et beaucoup moins de sommets sont explorés.
+
+## File de priorité naïve
+
+Le programme accepte une version sans tas : on cherche à chaque étape le minimum parmi les sommets non traités par un parcours. Complexité $O(n^2)$, suffisante pour des graphes denses.
+
 ## Exemple corrigé
 
 **Énoncé.** Sur le graphe de la figure, dans quel ordre Dijkstra traite-t-il les sommets depuis A ?

@@ -31,6 +31,21 @@ Les clés doivent être **non mutables** (entiers, chaînes, n-uplets) : une lis
 - Représenter un graphe par listes d'adjacence.
 - Remplacer une recherche linéaire dans une liste.
 
+## Opérations et coûts
+
+| Opération | Syntaxe | Coût moyen |
+|---|---|---|
+| accès, modification | `d[k]`, `d[k] = v` | $O(1)$ |
+| test | `k in d` | $O(1)$ |
+| suppression | `del d[k]` | $O(1)$ |
+| nombre de clés | `len(d)` | $O(1)$ |
+| parcours | `for k in d`, `d.keys()`, `d.values()`, `d.items()` | $O(n)$ |
+| copie | `d.copy()` | $O(n)$ |
+
+## Ensembles
+
+Un `set` est un dictionnaire sans valeurs : `vus = set()`, `vus.add(x)`, `x in vus` en $O(1)$ en moyenne. Très utile pour marquer les sommets visités dans un graphe.
+
 ## Exemple corrigé
 
 **Énoncé.** Compter le nombre d'occurrences de chaque mot d'une liste.

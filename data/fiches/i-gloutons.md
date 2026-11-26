@@ -30,6 +30,16 @@ Rendre une somme avec le moins de pièces possible en prenant à chaque fois la 
 - Avec le système européen (1, 2, 5, 10, 20, 50…), la méthode gloutonne est optimale.
 - Avec les pièces (1, 3, 4) et la somme 6 : glouton $4 + 1 + 1$ (3 pièces), alors que $3 + 3$ (2 pièces) est meilleur.
 
+## Allocation de salles
+
+Problème : placer des cours (intervalles) dans le moins de salles possible. Glouton : traiter les cours par date de **début** croissante et mettre chacun dans une salle déjà libérée s'il y en a une, sinon ouvrir une nouvelle salle. C'est optimal : le nombre de salles est le nombre maximal de cours simultanés.
+
+## Démarche pour un algorithme glouton
+
+1. Choisir un critère d'ordre (le « meilleur choix local »).
+2. Écrire l'algorithme : tri ($O(n\log n)$) puis un parcours ($O(n)$).
+3. Prouver l'optimalité (argument d'échange) **ou** trouver un contre-exemple.
+
 ## Exemple corrigé
 
 **Énoncé.** Sac à dos fractionnaire : on peut prendre une fraction de chaque objet. Objets (poids, valeur) : (10, 60), (20, 100), (30, 120), capacité 50.

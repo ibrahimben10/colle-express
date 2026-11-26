@@ -47,6 +47,38 @@ HAVING AVG(note) > 12;
 
 Sous-requêtes : `WHERE note > (SELECT AVG(note) FROM Eleve)`.
 
+## Modélisation entité-association
+
+- Association **1–1** ou **1–\*** : une clé étrangère dans la table « côté plusieurs » (chaque élève a une classe : `id_classe` dans `Eleve`).
+- Association **\*–\*** (un élève suit plusieurs options, une option a plusieurs élèves) : une **table d'association** dont la clé primaire est le couple des deux clés étrangères.
+
+## Autres opérations au programme
+
+```sql
+-- opérations ensemblistes (même nombre de colonnes)
+SELECT nom FROM Eleve WHERE note > 15
+UNION
+SELECT nom FROM Eleve WHERE id_classe = 2;
+-- INTERSECT, EXCEPT : intersection, différence
+
+-- pagination
+SELECT nom FROM Eleve ORDER BY note DESC LIMIT 10 OFFSET 10;
+
+-- auto-jointure : élèves de la même classe qu'Ali
+SELECT e2.nom
+FROM Eleve AS e1 JOIN Eleve AS e2 ON e1.id_classe = e2.id_classe
+WHERE e1.nom = 'Ali' AND e2.nom <> 'Ali';
+
+-- sous-requête dans FROM
+SELECT AVG(nb) FROM (SELECT COUNT(*) AS nb FROM Eleve GROUP BY id_classe);
+```
+
+## Ordre d'évaluation d'une requête
+
+`FROM` / `JOIN` → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY` → `LIMIT` / `OFFSET`. C'est pourquoi un alias défini dans `SELECT` ne peut pas toujours être utilisé dans `WHERE`.
+
+Hors programme : création de tables, index, valeur `NULL`, transactions.
+
 ## Exemple corrigé
 
 **Énoncé.** Donner le nom de chaque classe et le nombre de ses élèves ayant au moins 10.

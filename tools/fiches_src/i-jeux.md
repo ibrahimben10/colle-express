@@ -33,6 +33,31 @@ On explore l'arbre des coups jusqu'à une profondeur donnée. Les feuilles sont 
 
 Coût : $O(b^p)$ pour un facteur de branchement $b$ et une profondeur $p$.
 
+## Stratégie
+
+Une **stratégie** dit, pour chaque position d'un joueur, quel coup jouer. Une stratégie **sans mémoire** ne dépend que de la position actuelle. Dans un jeu d'accessibilité, si une position est dans l'attracteur, la stratégie « aller vers un successeur de l'attracteur ajouté plus tôt » est gagnante et sans mémoire.
+
+## Calcul de l'attracteur
+
+```python
+def attracteur(G, joueur1, gagnantes):
+    """G : successeurs ; joueur1 : ensemble des positions du joueur 1."""
+    A = set(gagnantes)
+    change = True
+    while change:
+        change = False
+        for s in G:
+            if s not in A:
+                if (s in joueur1 and any(t in A for t in G[s])) or \
+                   (s not in joueur1 and G[s] and all(t in A for t in G[s])):
+                    A.add(s); change = True
+    return A
+```
+
+## Heuristique
+
+Pour un jeu réel (échecs, puissance 4), on ne peut pas explorer tout l'arbre. L'**heuristique** donne une note à une position non terminale (avantage matériel, alignements…). L'élagage alpha-bêta, qui accélère minimax, est hors programme.
+
 ## Exemple corrigé
 
 **Énoncé.** Jeu de Nim simplifié : 5 allumettes, chacun retire 1 ou 2 allumettes, celui qui prend la dernière gagne. Le premier joueur a-t-il une stratégie gagnante ?

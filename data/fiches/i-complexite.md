@@ -33,6 +33,25 @@ On compte les opérations élémentaires dans le **pire cas** (parfois en moyenn
 
 Ordre de grandeur : un ordinateur fait environ $10^8$ à $10^9$ opérations simples par seconde (beaucoup moins en Python).
 
+## Complexité en espace
+
+On compte aussi la mémoire utilisée en plus de l'entrée : $O(1)$ pour une boucle avec quelques variables, $O(n)$ pour une copie de liste ou une récursion de profondeur $n$ (pile d'appels), $O(n^2)$ pour une matrice $n \times n$.
+
+## Coût des opérations Python courantes
+
+| Opération | Coût |
+|---|---|
+| `L[i]`, `L[i] = x`, `len(L)`, `L.append(x)`, `L.pop()` | $O(1)$ |
+| `x in L`, `L.pop(0)`, `L.insert(0, x)`, `L.copy()`, `L[a:b]` | $O(n)$ (ou longueur de la tranche) |
+| `L + M` | $O(n + m)$ |
+| `sorted(L)`, `L.sort()` | $O(n\log n)$ |
+| `d[k]`, `d[k] = v`, `k in d` (dictionnaire) | $O(1)$ en moyenne |
+
+## Correction partielle et totale
+
+- **Correction partielle** : si l'algorithme termine, le résultat est correct (invariant).
+- **Correction totale** : correction partielle et terminaison (variant).
+
 ## Exemple corrigé
 
 **Énoncé.** Complexité de :

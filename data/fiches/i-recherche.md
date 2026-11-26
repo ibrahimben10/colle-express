@@ -42,6 +42,25 @@ Pour $n = 10^6$ : au plus 20 comparaisons au lieu d'un million.
 
 La même idée donne la **méthode de dichotomie** pour résoudre $f(x) = 0$ avec $f$ continue changeant de signe sur $[a, b]$ : après $k$ étapes, l'intervalle a pour largeur $(b - a)/2^k$.
 
+## Autres algorithmes du programme
+
+- **Maximum et deuxième maximum** en un seul parcours : on garde `m1 >= m2` et on les met à jour à chaque élément ; $O(n)$.
+- **Recherche d'un mot dans un texte** (algorithme naïf) : pour chaque position $i$ du texte, on compare le motif caractère par caractère ; $O(nm)$ pour un texte de longueur $n$ et un motif de longueur $m$.
+
+```python
+def cherche(motif, texte):
+    n, m = len(texte), len(motif)
+    for i in range(n - m + 1):
+        j = 0
+        while j < m and texte[i + j] == motif[j]:
+            j += 1
+        if j == m:
+            return i
+    return -1
+```
+- **Deux valeurs les plus proches** dans un tableau : deux boucles imbriquées ($O(n^2)$), ou bien trier puis comparer les voisins ($O(n\log n)$).
+- **Version récursive** de la dichotomie : même complexité $O(\log n)$, mais on évite de recopier les tranches (passer `g` et `d` en paramètres).
+
 ## Exemple corrigé
 
 **Énoncé.** Combien d'itérations de dichotomie faut-il pour encadrer $\sqrt2$ à $10^{-6}$ près, en partant de $[1, 2]$ ?

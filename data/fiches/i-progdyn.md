@@ -48,6 +48,43 @@ def sac_a_dos(objets, C):
 ```
 Complexité $O(nC)$.
 
+## Plus longue sous-séquence commune (LCS)
+
+$L[i][j]$ = longueur de la plus longue sous-séquence commune à $u[:i]$ et $v[:j]$ :
+$$L[i][j] = \begin{cases}L[i-1][j-1] + 1 & \text{si } u_{i-1} = v_{j-1}\\ \max(L[i-1][j],\ L[i][j-1]) & \text{sinon}\end{cases}$$
+avec $L[0][j] = L[i][0] = 0$. Coût $O(nm)$ en temps et en mémoire.
+
+## Distance d'édition (Levenshtein)
+
+Nombre minimal d'insertions, suppressions et substitutions pour passer de $u$ à $v$ :
+$$D[i][j] = \min\big(D[i-1][j] + 1,\ D[i][j-1] + 1,\ D[i-1][j-1] + [u_{i-1} \ne v_{j-1}]\big),$$
+avec $D[i][0] = i$ et $D[0][j] = j$. Exemple : « chien » → « niche » : 4 opérations.
+
+## Algorithme de Floyd-Warshall
+
+Plus courts chemins entre **tous** les couples de sommets (poids quelconques, sans cycle de poids négatif) :
+```python
+def floyd_warshall(M):
+    """M : matrice des poids (inf si pas d'arête, 0 sur la diagonale)."""
+    n = len(M)
+    D = [ligne[:] for ligne in M]
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                D[i][j] = min(D[i][j], D[i][k] + D[k][j])
+    return D
+```
+$D_k[i][j]$ ne s'autorise que les sommets intermédiaires $0, \dots, k$ ; coût $O(n^3)$.
+
+## Autres exemples du programme
+
+- **Partition équilibrée** : partager une liste d'entiers en deux parties de sommes les plus proches possible (tableau des sommes atteignables).
+- **Ordonnancement de tâches pondérées** : choisir des tâches compatibles de poids total maximal ; $P[i] = \max(P[i-1],\ w_i + P[p(i)])$, $p(i)$ étant la dernière tâche compatible avec $i$.
+
+## Reconstruire une solution
+
+Le tableau donne la **valeur** optimale. Pour la **solution** (les objets choisis, la sous-séquence…), on remonte le tableau depuis la dernière case en regardant quel terme a réalisé le maximum ; ou bien on mémorise ce choix dans un second tableau.
+
 ## Exemple corrigé
 
 **Énoncé.** Rendu de monnaie avec les pièces (1, 3, 4) : nombre minimal de pièces pour 6.

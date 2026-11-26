@@ -181,4 +181,87 @@ export const FIGS = {
   const E = [[0, 1], [0, 2], [1, 3], [2, 4], [3, 5], [4, 2], [2, 0]];
   return E.map(([a, b]) => arete(S[a][0], S[a][1], S[b][0], S[b][1], 18, 'soft', true)).join('') + S.map(([x, y, t, at]) => t === 'r' ? R(x - 16, y - 16, 32, 32, at ? 'fillA b' : 'fillW') : C(x, y, 17, t === 'G' ? 'fillA b thick' : at ? 'fillA b' : 'fillW') + (t === 'G' ? T(x, y + 5, 'G') : '')).join('') + T(220, 194, 'en bleu : attracteur du joueur 1', 'nt');
 })(), 'Attracteur')],
+
+// ---------- fichiers ----------
+'i-fichiers-1': ['Lecture d’un fichier de données : open puis readlines donne la liste des lignes ; on retire le saut de ligne (strip), on découpe avec split(";") et on convertit les champs', svg(460, 200, `
+  ${R(20, 30, 130, 120, 'fillW')}${T(85, 22, 'mesures.csv', 'nt')}${['t;x', '0;1.2', '1;1.9', '2;3.1'].map((l, i) => T(32, 56 + i * 26, l, '', 'start')).join('')}
+  ${A(156, 90, 196, 90, 'b')}${T(176, 172, 'readlines', 'b')}${L(176, 96, 176, 160, 'dash soft')}
+  ${['"t;x\\n"', '"0;1.2\\n"', '"1;1.9\\n"', '"2;3.1\\n"'].map((l, i) => R(200, 30 + i * 30, 90, 26, 'fillY') + T(245, 48 + i * 30, l)).join('')}
+  ${A(296, 105, 336, 105, 'b')}${T(316, 172, 'split', 'b')}${L(316, 111, 316, 160, 'dash soft')}
+  ${[['0', '1.2'], ['1', '1.9'], ['2', '3.1']].map((r, i) => cases(340, 60 + i * 30, r, 50, 26, ['fillA', 'fillA'])).join('')}${T(390, 48, 'données', 'nt')}
+  ${T(230, 196, 'la 1ʳᵉ ligne (en-tête) est ignorée ; float() convertit les champs', 'nt')}`, 'Lecture d’un fichier')],
+
+// ---------- images ----------
+'i-images-1': ['Une image est une matrice de pixels : img[i][j] est le pixel de la ligne i et de la colonne j ; en niveaux de gris c’est un entier de 0 (noir) à 255 (blanc), en couleur un triplet (R, V, B)', svg(440, 220, (() => {
+  const g = [[0, 60, 120, 180], [60, 120, 180, 240], [120, 180, 240, 255]];
+  let s = g.map((r, i) => r.map((v, j) => `<rect x="${60 + j * 50}" y="${40 + i * 50}" width="50" height="50" style="fill:rgb(${v},${v},${v})" class="s"/>` + (v < 130 ? T(85 + j * 50, 70 + i * 50, String(v)).replace('<text', '<text style="fill:#fff"') : T(85 + j * 50, 70 + i * 50, String(v)))).join('')).join('');
+  s += [0, 1, 2, 3].map(j => T(85 + j * 50, 32, String(j), 'nt')).join('') + [0, 1, 2].map(i => T(50, 70 + i * 50, String(i), 'nt', 'end')).join('') + T(160, 16, 'colonne ' + I('j'), 'nt') + T(24, 120, I('i'), 'nt');
+  s += R(310, 90, 50, 50, 'fillW') + `<rect x="310" y="90" width="50" height="50" style="fill:rgb(230,120,40)" class="s"/>` + T(335, 160, '(230, 120, 40)', 'nt') + T(335, 80, 'pixel couleur', 'nt');
+  return s + T(160, 210, 'img[1][2] = 180', 'b');
+})(), 'Image et pixels')],
+
+'i-images-2': ['Convolution par un noyau 3 × 3 : la nouvelle valeur d’un pixel est la somme des pixels voisins pondérés par les coefficients du noyau (ici un flou, moyenne des 9 voisins) ; un noyau de différences détecte les contours', svg(460, 210, `
+  ${[0, 1, 2, 3, 4].map(i => [0, 1, 2, 3, 4].map(j => R(20 + j * 30, 30 + i * 30, 30, 30, i >= 1 && i <= 3 && j >= 1 && j <= 3 ? 'fillA' : 'fillW')).join('')).join('')}${R(80, 90, 30, 30, 'fillB b thick')}
+  ${T(170, 116, '∗', '')}
+  ${[0, 1, 2].map(i => [0, 1, 2].map(j => R(190 + j * 34, 56 + i * 34, 34, 34, 'fillY') + T(207 + j * 34, 78 + i * 34, '1')).join('')).join('')}${T(241, 46, '1/9 ×', 'nt')}
+  ${T(310, 110, '→', '')}${[0, 1, 2, 3, 4].map(i => [0, 1, 2, 3, 4].map(j => R(330 + j * 24, 50 + i * 24, 24, 24, i === 2 && j === 2 ? 'fillB b' : 'fillW')).join('')).join('')}
+  ${T(95, 196, 'voisinage du pixel', 'nt')}${T(240, 196, 'noyau (flou)', 'nt')}${T(390, 196, 'nouvelle image', 'nt')}`, 'Convolution')],
+
+// ---------- zéros ----------
+'i-zeros-1': ['Méthode de dichotomie pour f(x) = 0 : f(a) et f(b) de signes opposés ; on garde la moitié de [a, b] où le signe change ; la largeur est divisée par 2 à chaque étape', svg(420, 230, `
+  ${axes(30, 130, 380, 0, 110, 90, I('x'), '')}
+  ${courbe(u => 0.0035 * (u - 190) ** 2 * Math.sign(u - 190) * 0.9 + 0.35 * (u - 190), 10, 370, 30, 130, 1, -1, 300, 'b')}
+  ${[[40, 360, 0], [40, 200, 1], [120, 200, 2], [160, 200, 3]].map(([a, b, k]) => L(30 + a, 160 + k * 18, 30 + b, 160 + k * 18, k === 3 ? 'r thick' : '') + L(30 + a, 155 + k * 18, 30 + a, 165 + k * 18) + L(30 + b, 155 + k * 18, 30 + b, 165 + k * 18)).join('')}
+  ${dot(220, 130, 'r')}${T(226, 124, 'α', 'r', 'start')}${T(70, 154, I('a'), '', 'middle')}${T(390, 154, I('b'), '', 'middle')}`, 'Dichotomie')],
+
+'i-zeros-2': ['Méthode de Newton : on remplace la courbe par sa tangente en xₙ ; l’intersection avec l’axe donne xₙ₊₁ = xₙ − f(xₙ)/f′(xₙ). Convergence très rapide près de la racine si f′(α) ≠ 0', svg(420, 230, (() => {
+  const f = x => 0.012 * x * x - 1.2, fp = x => 0.024 * x, X = x => r2(30 + x * 10), Y = y => r2(190 - y * 18);   // racine α = 10
+  let s = axes(30, 190, 380, 0, 175, 0, I('x'), '') + courbe(u => (0.012 * (u / 10) ** 2 - 1.2) * 18, 0, 290, 30, 190, 1, -1, 300, 'b');
+  let x = 26; const pts = [];
+  for (let k = 0; k < 3; k++) { const xn = x - f(x) / fp(x); s += L(X(x), 190, X(x), Y(f(x)), 'dash soft') + dot(X(x), Y(f(x))) + L(X(x), Y(f(x)), X(xn), 190, 'r'); pts.push([x, k]); x = xn; }
+  return s + pts.map(([x, k]) => T(X(x), 206, sb(I('x'), String(k)), '')).join('') + dot(X(10), 190, 'r') + T(X(10) - 4, 182, 'α', 'r', 'end');
+})(), 'Newton')],
+
+// ---------- intégration ----------
+'i-integration-1': ['Méthode des rectangles à gauche : l’intégrale est approchée par la somme des aires h × f(xₖ), avec h = (b − a)/n ; erreur en O(h) (en O(1/n))', svg(420, 220, `
+  ${axes(30, 190, 380, 0, 175, 0, I('x'), '')}
+  ${[0, 1, 2, 3, 4, 5].map(k => { const u = 30 + k * 50, v = 40 + 90 * Math.sin((u + 20) / 110); return R(30 + u, r2(190 - v), 50, r2(v), 'fillA b'); }).join('')}
+  ${courbe(u => 40 + 90 * Math.sin((u + 20) / 110), 20, 340, 30, 190, 1, -1, 200, 'r')}
+  ${T(60, 206, I('a'))}${T(360, 206, I('b'))}${D(110, 200, 160, 200, '', 0, 0)}${T(135, 214, I('h'))}`, 'Rectangles')],
+
+'i-integration-2': ['Méthode des trapèzes : on relie les points (xₖ, f(xₖ)) par des segments ; l’intégrale est approchée par la somme des aires des trapèzes, h (f(xₖ) + f(xₖ₊₁))/2 ; erreur en O(h²)', svg(420, 220, `
+  ${axes(30, 190, 380, 0, 175, 0, I('x'), '')}
+  ${[0, 1, 2, 3, 4, 5].map(k => { const u = 30 + k * 50, f = w => 40 + 90 * Math.sin((w + 20) / 110), v1 = f(u), v2 = f(u + 50); return P(`M${30 + u},190 L${30 + u},${r2(190 - v1)} L${80 + u},${r2(190 - v2)} L${80 + u},190 Z`, 'fillA b'); }).join('')}
+  ${courbe(u => 40 + 90 * Math.sin((u + 20) / 110), 20, 340, 30, 190, 1, -1, 200, 'r')}
+  ${T(60, 206, I('a'))}${T(360, 206, I('b'))}`, 'Trapèzes')],
+
+// ---------- EDO ----------
+'i-edo-1': ['Méthode d’Euler explicite pour y′ = F(t, y) : on avance pas à pas le long de la tangente, yₖ₊₁ = yₖ + h F(tₖ, yₖ) ; la solution approchée (points rouges) s’écarte peu à peu de la solution exacte (bleue) ; l’erreur diminue avec h', svg(420, 230, (() => {
+  const X = t => r2(40 + t * 140), Y = y => r2(200 - y * 14);
+  let s = axes(40, 200, 360, 0, 185, 0, I('t'), I('y')) + courbe(u => Math.exp(u / 140) * 14, 0, 350, 40, 200, 1, -1, 300, 'b');
+  let t = 0, y = 1; const h = 0.5;
+  for (let k = 0; k < 5; k++) { const y2 = y + h * y; s += L(X(t), Y(y), X(t + h), Y(y2), 'r') + dot(X(t), Y(y), 'r'); t += h; y = y2; }
+  return s + dot(X(t), Y(y), 'r') + T(372, 40, 'exacte', 'b', 'end') + T(400, 116, 'Euler', 'r', 'end') + D(X(0), 214, X(0.5), 214, '', 0, 0) + T(X(0.25), 228, I('h'));
+})(), 'Euler')],
+
+// ---------- systèmes ----------
+'i-systemes-1': ['Pivot de Gauss : par opérations sur les lignes Lᵢ ← Lᵢ − (aᵢⱼ/aⱼⱼ) Lⱼ, on annule les coefficients sous la diagonale (système triangulaire), puis on remonte pour trouver les inconnues ; coût O(n³)', svg(460, 170, (() => {
+  const M1 = [['2', '1', '−1', '8'], ['−3', '−1', '2', '−11'], ['−2', '1', '2', '−3']], M2 = [['2', '1', '−1', '8'], ['0', '1/2', '1/2', '1'], ['0', '0', '−1', '1']];
+  const mat = (x, M) => M.map((r, i) => r.map((v, j) => T(x + j * 38, 50 + i * 30, v, j === 3 ? 'b' : (i > j && x > 200 ? 'r' : ''))).join('')).join('') + L(x - 16, 30, x - 16, 120) + L(x + 140, 30, x + 140, 120) + L(x + 98, 32, x + 98, 118, 'soft');
+  return mat(40, M1) + T(225, 80, '→', '') + mat(280, M2) + T(110, 156, 'système de départ', 'nt') + T(350, 156, 'triangulaire : z = −1, y = 3, x = 2', 'nt');
+})(), 'Pivot de Gauss')],
+
+// ---------- numpy ----------
+'i-numpy-1': ['Tableau NumPy à deux dimensions : A[i, j] désigne un coefficient, A[1, :] une ligne, A[:, 2] une colonne ; A.shape vaut (3, 4) ; les opérations (A + 1, 2 * A, np.sin(A)) s’appliquent à tous les coefficients', svg(440, 200, `
+  ${[0, 1, 2].map(i => cases(110, 40 + i * 36, [0, 1, 2, 3].map(j => 4 * i + j), 48, 36, [0, 1, 2, 3].map(j => i === 1 ? 'fillA' : j === 2 ? 'fillY' : 'fillW'))).join('')}
+  ${[0, 1, 2, 3].map(j => T(134 + j * 48, 32, String(j), 'nt')).join('')}${[0, 1, 2].map(i => T(100, 63 + i * 36, String(i), 'nt', 'end')).join('')}
+  ${T(330, 80, 'A[1, :] = [4 5 6 7]', 'b', 'start')}${T(330, 110, 'A[:, 2] = [2 6 10]', 'nt', 'start')}${T(206, 170, 'A = np.arange(12).reshape(3, 4)', '')}`, 'NumPy')],
+
+// ---------- aléatoire ----------
+'i-aleatoire-1': ['Méthode de Monte-Carlo : on tire N points au hasard dans le carré [0, 1]² ; la proportion de points dans le quart de disque tend vers π/4 ; l’erreur décroît en 1/√N', svg(300, 270, (() => {
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let s = R(40, 20, 220, 220, 'fillW') + P('M40,240 L40,20 A220,220 0 0 1 260,240 Z', 'fillA');
+  for (let k = 0; k < 160; k++) { const x = rnd(), y = rnd(), dans = x * x + y * y <= 1; s += dans ? C(r2(40 + 220 * x), r2(240 - 220 * y), 2.6, 'fillB b') : R(r2(40 + 220 * x - 2.4), r2(240 - 220 * y - 2.4), 4.8, 4.8, 'fillR r'); }
+  return s + T(40, 256, '0') + T(260, 256, '1') + T(30, 24, '1', '', 'end') + T(150, 268, '4 × (points bleus)/N ≈ π', 'nt');
+})(), 'Monte-Carlo')],
 };

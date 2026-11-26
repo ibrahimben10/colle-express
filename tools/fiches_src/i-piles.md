@@ -33,6 +33,18 @@ x = f.popleft()  # défiler, en temps constant
 
 Usages : parcours en largeur, simulation de files d'attente.
 
+## Implémentation avec une liste Python
+
+| Opération | Pile (fin de liste) | File naïve (liste) | File (`deque`) |
+|---|---|---|---|
+| ajouter | `append` : $O(1)$ | `append` : $O(1)$ | `append` : $O(1)$ |
+| retirer | `pop()` : $O(1)$ | `pop(0)` : $O(n)$ | `popleft()` : $O(1)$ |
+| tester le vide | `p == []` | `f == []` | `len(f) == 0` |
+
+## Une file avec deux piles
+
+On peut aussi réaliser une file avec deux piles : on empile dans `entree` ; pour défiler, si `sortie` est vide, on y transvase tout `entree` (ce qui inverse l'ordre), puis on dépile `sortie`. Chaque élément est déplacé une seule fois : coût constant **en moyenne** par opération.
+
 ## Exemple corrigé
 
 **Énoncé.** Vérifier qu'une chaîne formée de `(` et `)` est bien parenthésée.

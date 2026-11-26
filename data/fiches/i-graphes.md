@@ -53,6 +53,32 @@ def profondeur(G, s, vus=None):
 
 Applications : connexité, composantes connexes, détection de cycle, labyrinthes.
 
+## Détecter un cycle
+
+- **Graphe non orienté** : pendant un parcours en profondeur, rencontrer un voisin déjà visité qui n'est pas le sommet dont on vient signale un cycle.
+- **Graphe orienté** : on marque les sommets « en cours de visite » ; retomber sur un sommet en cours de visite signale un cycle.
+
+## Parcours avec une pile
+
+Le parcours en profondeur peut s'écrire sans récursivité, en remplaçant la file du parcours en largeur par une **pile**. C'est le seul changement entre les deux parcours.
+
+```python
+def profondeur_iter(G, s):
+    vus, p = set(), [s]
+    while p:
+        u = p.pop()
+        if u not in vus:
+            vus.add(u)
+            for v in G[u]:
+                if v not in vus:
+                    p.append(v)
+    return vus
+```
+
+## Graphe pondéré en Python
+
+Listes d'adjacence avec poids : `G = {"A": [("B", 4), ("C", 1)], ...}` ; matrice d'adjacence avec `inf` (ou `None`) pour l'absence d'arête.
+
 ## Exemple corrigé
 
 **Énoncé.** Comment tester si un graphe non orienté est connexe ?

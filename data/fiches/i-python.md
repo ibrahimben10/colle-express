@@ -51,6 +51,26 @@ def moyenne(L):
 - `for` : nombre d'itérations connu (parcours d'une liste, d'un `range`).
 - `while` : on répète tant qu'une condition est vraie ; il faut s'assurer que la boucle termine.
 
+## Compléments utiles
+
+- **Compréhensions de liste** : `[x**2 for x in range(10) if x % 2 == 0]` ; liste de listes : `[[0] * p for _ in range(n)]` (et non `[[0] * p] * n`).
+- **N-uplets et affectation multiple** : `a, b = b, a` échange deux variables ; une fonction peut renvoyer plusieurs valeurs `return q, r`.
+- **Chaînes** : non mutables ; `s.split(",")`, `",".join(L)`, `s.strip()`, `s[::-1]` (chaîne renversée).
+- **Booléens** : `and` et `or` sont paresseux, `0 < i < len(L) and L[i] > 0` n'évalue `L[i]` que si l'indice est valide.
+- **Portée** : une variable affectée dans une fonction est locale ; une fonction ne modifie pas une variable globale entière, mais peut modifier une liste reçue en argument.
+- **Entiers** : `//` et `%` donnent quotient et reste (avec des opérandes positifs) ; `**` est la puissance ; les entiers Python ont une taille illimitée.
+
+## Tester son code
+
+```python
+def test_indice_max():
+    assert indice_max([3]) == 0                # cas limite : un seul élément
+    assert indice_max([1, 5, 2]) == 1
+    assert indice_max([7, 7, 1]) == 0          # égalités
+    assert indice_max([-4, -2, -9]) == 1       # valeurs négatives
+```
+On partitionne les entrées (cas général, cas limites, égalités) et on écrit les sorties attendues **avant** d'exécuter.
+
 ## Exemple corrigé
 
 **Énoncé.** Écrire une fonction qui renvoie l'indice du maximum d'une liste non vide.

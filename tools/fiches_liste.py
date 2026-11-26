@@ -271,6 +271,25 @@ D = [
  ('Parcours en largeur et en profondeur','Ordres de visite depuis un même sommet',1)]),
 ('Informatique','MPSI','i-plus-courts','Plus courts chemins',[
  ('Algorithme de Dijkstra','Graphe pondéré, distances provisoires, sommets traités',1)]),
+('Informatique','MPSI','i-fichiers','Fichiers, modules et données',[
+ ('Lecture d\'un fichier','Fichier texte, liste des lignes, découpage des champs',1)]),
+('Informatique','MPSI','i-images','Images et matrices',[
+ ('Image et pixels','Matrice de niveaux de gris, pixel couleur (R, V, B)',1),
+ ('Convolution','Voisinage 3 × 3, noyau de flou, nouvelle image',1)]),
+('Informatique','MPSI','i-numpy','NumPy et tracés',[
+ ('Tableau NumPy','Indices, ligne, colonne, forme',1)]),
+('Informatique','MPSI','i-zeros','Résolution numérique d\'équations',[
+ ('Dichotomie','Intervalles successifs encadrant la racine',1),
+ ('Méthode de Newton','Tangentes successives',1)]),
+('Informatique','MPSI','i-integration','Intégration et dérivation numériques',[
+ ('Méthode des rectangles','Rectangles à gauche sous la courbe',1),
+ ('Méthode des trapèzes','Trapèzes sous la courbe',1)]),
+('Informatique','MPSI','i-edo','Équations différentielles : méthode d\'Euler',[
+ ('Méthode d\'Euler','Pas h, tangentes successives, écart à la solution exacte',1)]),
+('Informatique','MPSI','i-systemes','Systèmes linéaires : pivot de Gauss',[
+ ('Pivot de Gauss','Matrice augmentée, mise sous forme triangulaire',1)]),
+('Informatique','MPSI','i-aleatoire','Simulation aléatoire et Monte-Carlo',[
+ ('Méthode de Monte-Carlo','Points aléatoires dans le carré et le quart de disque',1)]),
 ('Informatique','MP','i-sql','Bases de données et SQL',[
  ('Schéma relationnel','Deux tables, clé primaire, clé étrangère',1),
  ('Jointure','Lignes associées par égalité de clés',1)]),

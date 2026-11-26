@@ -38,6 +38,42 @@ Coût par prédiction : $O(n\log n)$ avec un tri (ou $O(nd)$ pour les distances)
 
 > **Propriété.** L'inertie (somme des carrés des distances aux centres) diminue à chaque étape, donc l'algorithme termine ; mais le résultat dépend de l'initialisation (minimum local).
 
+## Matrice de confusion
+
+Pour évaluer un classifieur sur un jeu de test : la case $(i, j)$ compte les exemples de classe réelle $i$ classés en $j$. La diagonale contient les bonnes réponses ; le **taux de réussite** est la somme de la diagonale divisée par le nombre total d'exemples.
+
+| réel \ prédit | chat | chien |
+|---|---|---|
+| chat | 45 | 5 |
+| chien | 10 | 40 |
+
+Taux de réussite : $85/100 = 85$ %.
+
+## Les k-moyennes en Python
+
+```python
+def k_moyennes(points, centres, iterations=100):
+    for _ in range(iterations):
+        groupes = [[] for _ in centres]
+        for p in points:
+            i = min(range(len(centres)), key=lambda c: distance(p, centres[c]))
+            groupes[i].append(p)
+        nouveaux = [barycentre(g) if g else c for g, c in zip(groupes, centres)]
+        if nouveaux == centres:
+            break
+        centres = nouveaux
+    return centres, groupes
+```
+
+## Apprentissage supervisé ou non
+
+| | k plus proches voisins | k-moyennes |
+|---|---|---|
+| données | étiquetées | non étiquetées |
+| but | prédire la classe d'un nouveau point | former des groupes |
+| $k$ | nombre de voisins consultés | nombre de groupes |
+| coût | pas d'entraînement, prédiction en $O(n)$ distances | $O(nk)$ distances par itération |
+
 ## Exemple corrigé
 
 **Énoncé.** Points de $\mathbb R$ : 1, 2, 3, 10, 11, 12 ; $k = 2$ ; centres initiaux 1 et 2. Dérouler les k-moyennes.
