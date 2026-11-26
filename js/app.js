@@ -286,18 +286,20 @@ function route() {
   let pref = null, pmode = '';
   let cref = null;
   if (h.startsWith('c/')) { cref = decodeURIComponent(h.slice(2)); h = 'collection'; }
-  let fref = '';
+  let fref = '', cid = '';
+  if (h === 'colle' || h.startsWith('colle/')) { cid = decodeURIComponent(h.slice(6)); h = 'colle'; }
   if (h.startsWith('f/')) { fref = decodeURIComponent(h.slice(2)); h = 'fiches'; }
   let ctab = '';
   if (h.startsWith('communaute')) { ctab = h.split('/')[1] || 'annuaire'; h = 'communaute'; }
   if (h.startsWith('u/')) { pref = decodeURIComponent(h.slice(2)); h = 'profil'; }
   else if (h === 'profil' || h.startsWith('profil/')) { pmode = h.split('/')[1] || ''; pref = MYUSER || api.user.id; h = 'profil'; }
-  if (!['exercices', 'fiches', 'groupes', 'suivi', 'prof', 'apropos', 'profil', 'carnet', 'collection', 'communaute'].includes(h)) h = 'exercices';
+  if (!['exercices', 'fiches', 'colle', 'groupes', 'suivi', 'prof', 'apropos', 'profil', 'carnet', 'collection', 'communaute'].includes(h)) h = 'exercices';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + h));
-  document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === h ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  document.querySelectorAll('#nav a, #bnav a').forEach(a => a.dataset.v === (h === 'colle' ? 'fiches' : h) ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   if (h === 'exercices') { renderStrip(); renderList(); renderCopy(); }
   if (h === 'suivi') renderSuivi();
   if (h === 'fiches') import('./fiches.js').then(m => m.renderFiches($('#v-fiches'), fref, typeset));
+  if (h === 'colle') import('./colleur.js').then(m => m.renderColleur($('#v-colle'), cid, typeset));
   if (h === 'groupes') renderGroupes();
   if (h === 'prof') renderProf(true);
   if (h === 'carnet') { renderCarnet($('#v-carnet')); scrollTo(0, 0); }

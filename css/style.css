@@ -2292,3 +2292,37 @@ pre.code{border:1px solid var(--line-soft);border-left:1px solid var(--line-soft
 @media(max-width:600px){.fiche-corps{font-size:16px}.fcards{grid-template-columns:1fr}}
 .fcard.off{opacity:.55;cursor:default}.fcard.off:hover{transform:none;border-color:var(--line-soft)}
 .fig-svg text{stroke:none!important}
+
+/* ===================== Colleur virtuel ===================== */
+.colle-page{max-width:760px;margin:0 auto;padding:8px 0 40px}
+.fiche-actions{margin:14px 0 0}
+.colle-choix{display:grid;gap:14px;max-width:520px}
+.colle-choix .seg{max-width:260px}
+.colle-avert{display:flex;gap:8px;align-items:flex-start;margin-top:14px;color:var(--soft)}
+.colle-avert .ic{flex:0 0 auto;margin-top:2px}
+.colle-fil{display:flex;flex-direction:column;gap:12px;margin:8px 0 16px}
+.cb{padding:12px 16px;border-radius:18px;max-width:88%;line-height:1.55}
+.cb p{margin:.3em 0}
+.cb-c{background:var(--card);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:6px}
+.cb-e{background:color-mix(in srgb,var(--blue) 12%,var(--card));align-self:flex-end;border-bottom-right-radius:6px}
+.cb-t{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--soft);margin-bottom:4px}
+.cb-t .ic{width:15px;height:15px}
+.cb-s{margin-left:6px;padding:2px 8px;border-radius:999px;font-size:11.5px}
+.cb-s.ok{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green)}
+.cb-s.mid{background:color-mix(in srgb,#c27c0e 20%,transparent);color:#a0650a}
+.cb-s.ko{background:color-mix(in srgb,var(--red) 15%,transparent);color:var(--red)}
+.cb-app+.cb-q{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.cb-q{font-weight:600}
+.cb-wait{display:flex;gap:5px;padding:16px}
+.cb-wait span{width:7px;height:7px;border-radius:50%;background:var(--soft);animation:cbw 1.2s infinite ease-in-out}
+.cb-wait span:nth-child(2){animation-delay:.15s}.cb-wait span:nth-child(3){animation-delay:.3s}
+@keyframes cbw{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.cb-wait span{animation:none;opacity:.6}}
+.colle-saisie textarea{width:100%;box-sizing:border-box;min-height:96px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-size:16px;resize:vertical}
+.colle-saisie textarea:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 15%,transparent)}
+.colle-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#clMic.on{background:color-mix(in srgb,var(--red) 14%,var(--card));color:var(--red);border-color:var(--red)}
+.colle-bilan h3{font-size:15px;margin:14px 0 6px}
+.colle-note{font-size:20px;margin:4px 0 8px}.colle-note b{font-size:44px;letter-spacing:-.02em}
+.colle-page .panel{padding:18px 20px;margin-top:12px}
+@media (max-width:430px){#me{gap:4px!important}#me .btn.ghost{padding:6px 8px!important;min-width:0!important}#me .dot{display:none}#me .themebtn{width:38px!important;height:38px!important}}

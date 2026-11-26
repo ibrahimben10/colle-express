@@ -59,6 +59,7 @@ export async function renderFiches(el, sub, typeset) {
   el.innerHTML = `<article class="fiche-page">
     <a class="btn ghost" href="#fiches">${ic('back')} Toutes les fiches</a>
     <header class="fiche-head"><p class="kicker">${ic(MAT[f.mat] || 'book')} ${esc(f.mat)} · ${esc(f.niveau)} · ${esc(f.partie)}</p><h1>${esc(f.titre)}</h1>
+      <p class="fiche-actions"><a class="btn primary" href="#colle/${f.id}">${ic('msg')} Passer une colle sur ce chapitre</a></p>
       ${toc.length > 2 ? `<nav class="fiche-toc" aria-label="Sommaire">${toc.map(([id, t]) => `<a href="#f/${f.id}" data-s="${id}">${esc(t)}</a>`).join('')}</nav>` : ''}</header>
     <div class="fiche-corps">${html}</div>
     <p class="small fiche-src">Fiche rédigée à partir du programme officiel ; les schémas sont à valider avant publication définitive.</p>
@@ -81,7 +82,8 @@ function renderIndex(el, L) {
     <header class="fiche-head"><p class="kicker">${ic('book')} Fiches de cours</p><h1>L’essentiel de chaque chapitre</h1>
       <p class="small">Définitions, lois, méthodes et pièges, avec les schémas à connaître. ${L.length} fiches.</p>
       <div class="searchbox"><span>${ic('search')}</span><input id="fqF" type="search" placeholder="Chercher une fiche : Gauss, pH, Michelson…" aria-label="Chercher une fiche" autocomplete="off" spellcheck="false"></div>
-      <p class="fiche-count" id="fqN" aria-live="polite" hidden></p></header>
+      <p class="fiche-count" id="fqN" aria-live="polite" hidden></p>
+      <p class="fiche-actions"><a class="btn" href="#colle">${ic('msg')} Colleur virtuel : passer une colle de cours</a></p></header>
     ${groupes.map(G => `<section class="fgrp"><h2>${ic(MAT[G.mat] || 'book')} ${esc(G.k)}</h2>${G.parties.map(P => `<h3>${esc(P.t)}</h3><div class="fcards">${P.fs.map(f =>
       (f.pret ? `<a class="fcard" href="#f/${f.id}"` : `<div class="fcard off"`) + ` data-q="${esc(norm(f.titre + ' ' + f.partie + ' ' + f.mat + ' ' + f.niveau + ' ' + (f.k || '')))}"><b>${esc(f.titre)}</b><span>${f.pret ? `${f.n} schéma${f.n > 1 ? 's' : ''}` : 'en préparation'}</span>` + (f.pret ? '</a>' : '</div>')).join('')}</div>`).join('')}</section>`).join('')}
   </div>`;

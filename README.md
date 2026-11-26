@@ -252,6 +252,18 @@ Le mode Rigoureux affiche d'abord la rédaction de concours écrite par l'équip
 
 À défaut, il affiche une « version courte » : les étapes Résolution et Conclusion de la correction en 6 étapes. Si l'exercice n'a ni l'une ni l'autre, un message invite à lire le mode Détaillé.
 
+## Colleur virtuel (colle de cours avec une IA gratuite)
+
+Depuis une fiche de cours, le bouton « Passer une colle sur ce chapitre » (ou l'adresse `#colle`) lance une colle : le colleur pose une question à la fois, juge chaque réponse en s'appuyant sur la fiche, puis donne une note indicative et les points à revoir. L'élève répond par écrit ou au micro (reconnaissance vocale du navigateur, Chrome et Edge).
+
+Mise en service :
+1. Crée une clé gratuite sur https://console.groq.com (menu API Keys).
+2. Supabase > Edge Functions > Secrets : ajoute `GROQ_API_KEY` = ta clé. Facultatif : `GROQ_MODEL` (défaut `openai/gpt-oss-120b`), `COLLE_LIMITE_JOUR` (défaut 60 échanges par élève et par jour).
+3. Déploie la fonction `supabase/functions/colleur` (`npx supabase functions deploy colleur`).
+4. Dans `js/config.js`, passe `COLLEUR: true`.
+
+La clé reste côté serveur et n'apparaît jamais dans le site. Chaque échange est compté dans `ia_usage` (mode `colle`) ; le professeur n'est pas limité. L'offre gratuite de Groq a ses propres limites de débit : si elles sont atteintes, l'élève voit « Le colleur est très sollicité, réessaie dans une minute ».
+
 ## Identité visuelle
 
 Le site suit une direction « carnet de colle » : papier chaud, encre, vert académique `#235347`, terracotta `#D97952`, et la ligne de marge comme signature. Les polices sont auto-hébergées dans `fonts/` (licence OFL) : Fraunces pour les titres, Source Sans 3 pour le texte, JetBrains Mono pour les repères, Caveat pour les annotations. Les couleurs et les polices sont réglées par les variables en tête de `css/style.css`. Le mode sombre (graphite, ivoire, sauge, cuivre) suit automatiquement le système ou le bouton lune/soleil. Toutes les paires texte/fond passent le niveau AA du WCAG.

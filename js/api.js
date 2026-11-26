@@ -592,6 +592,18 @@ export const api = {
     return data;
   },
 
+  async colleur(body) {
+    if (DEMO) throw new Error('Le colleur virtuel est désactivé en mode démonstration.');
+    const { data, error } = await sb.functions.invoke('colleur', {body});
+    if (error) {
+      let msg = 'Le colleur n’a pas pu répondre.';
+      try { const j = await error.context.json(); if (j?.error) msg = j.error; } catch {}
+      throw new Error(msg);
+    }
+    if (data?.error) throw new Error(data.error);
+    return data;
+  },
+
   /* ---------- temps réel ---------- */
   live(state) {
     if (DEMO || !this.user) return;
