@@ -510,6 +510,7 @@ function renderCopy() {
       <div class="tools"><button class="iconbtn done" id="bDone" aria-pressed="${finOf(ex.id)}" title="Cocher l’exercice comme fait, pour ton suivi personnel">${ic('done')}<span class="lbl">${finOf(ex.id) ? 'Fait' : 'Marquer comme fait'}</span></button>
       <button class="iconbtn fav" id="bFav" aria-pressed="${isFav(ex.id)}" title="Enregistrer dans tes favoris">${ic('heart')}<span class="lbl">${isFav(ex.id) ? 'Enregistré' : 'Enregistrer'}</span></button>
       <button class="iconbtn" id="bColl" title="Ranger dans une collection">${ic('book')}<span class="lbl">Collection</span></button>
+      <button class="iconbtn" id="bFiche" title="Afficher la fiche du cours de ce chapitre">${ic('list')}<span class="lbl">Fiche du cours</span></button>
       <button class="iconbtn" id="bNote" title="Ajouter au carnet de progression">${ic('pen')}<span class="lbl">Carnet</span></button>
       <button class="iconbtn" id="bShareEx" title="Partager l’exercice">${ic('share')}<span class="lbl">Partager</span></button></div></div>
     ${st ? `<div class="status ${st.s === 'reussi' ? 'ok' : st.fin ? 'fin' : ''}">${ic(st.s === 'reussi' ? 'trophy' : st.fin ? 'done' : 'pen')} ${st.s === 'reussi' ? 'Réussi (moyenne des pairs ≥ 12/20)' : mine(ex.id) ? 'Réponse soumise' + (st.fin ? ' · fait' : '') : st.fin ? 'Fait' : 'En cours'}</div>` : ''}
@@ -607,6 +608,7 @@ function renderCopy() {
   $('#bFav').onclick = () => toggleFav(ex.id);
   $('#bColl').onclick = () => openCollectionsPicker(ex.id);
   $('#bNote').onclick = () => openNote({exercice_id: ex.id, titre: ex.titre, type: 'difficile'});
+  $('#bFiche').onclick = () => import('./fiches.js').then(m => m.ouvrirFicheCours(ex.mat, ex.chap, typeset));
   $('#bShareEx').onclick = () => shareEx(ex, false);
   $('#bDone').onclick = () => toggleDone(ex);
   el.insertAdjacentHTML('beforeend', exNavHTML(ex));

@@ -98,3 +98,79 @@ function renderIndex(el, L) {
   };
   scrollTo(0, 0);
 }
+
+// ---------- Fiche du cours depuis un exercice (oral) ----------
+// Chapitre d'exercice → fiches correspondantes (dans l'ordre de pertinence).
+const LIENS = {
+  Maths: {
+    'Algèbre & arithmétique': ['m1-arithmetique', 'm2-algebre'], 'Algèbre euclidienne': ['m2-euclidiens', 'm1-prehilbertiens'],
+    'Algèbre linéaire': ['m2-algebre-lin', 'm1-ev', 'm1-dimension', 'm1-matrices'], 'Analyse asymptotique': ['m1-asymptotique'],
+    'Anneaux': ['m2-algebre', 'm1-structures'], 'Approximation': ['m2-suites-fonctions', 'm2-topologie'], 'Arithmétique': ['m1-arithmetique', 'm2-algebre'],
+    'Calcul différentiel': ['m2-differentiel'], 'Déterminants': ['m1-determinants'], 'Exponentielle de matrices': ['m2-reduction', 'm2-edl'],
+    "Fonctions d'une variable": ['m1-derivabilite', 'm1-continuite', 'm1-fonctions'], 'Groupes': ['m2-algebre', 'm1-structures'],
+    'Groupes & représentations': ['m2-algebre'], 'Groupes de matrices': ['m2-euclidiens', 'm2-algebre'], 'Géométrie euclidienne': ['m1-prehilbertiens', 'm2-euclidiens'],
+    'Intégrales à paramètre': ['m2-parametre', 'm2-integration'], 'Intégration': ['m2-integration', 'm1-integration'], 'Polynômes': ['m1-polynomes'],
+    'Probabilités': ['m2-probas', 'm1-probas', 'm1-denombrement'], 'Réduction': ['m2-reduction', 'm2-algebre-lin'], 'Suites': ['m1-suites'],
+    'Suites de fonctions': ['m2-suites-fonctions'], 'Séries': ['m2-series', 'm1-series'], 'Séries de Fourier': ['m2-suites-fonctions'],
+    'Séries de Fourier & EDP': ['m2-suites-fonctions'], 'Séries de fonctions': ['m2-suites-fonctions'], 'Séries entières': ['m2-series-entieres'],
+    'Topologie & convexité': ['m2-topologie'], 'Topologie matricielle': ['m2-topologie'], 'Équations différentielles': ['m2-edl', 'm1-edl'],
+  },
+  Physique: {
+    'Diffusion thermique': ['mp-diffusion'], 'Mécanique des fluides': [], 'Induction': ['p5-induction', 'p5-circuit-fixe', 'p5-circuit-mobile'], 'Magnétostatique': ['mp-magnetostatique', 'mp-dipole-m', 'p5-champ-b'],
+    'Mécanique': ['p2-dynamique', 'p2-energie', 'p3-moment', 'p3-central', 'mp-non-galileen', 'mp-frottement'],
+    'Mécanique quantique': ['mp-quantique', 'mp-potentiel', 'mp-libre'], 'Ondes mécaniques': ['p1-propagation', 'p1-superposition'],
+    'Ondes électromagnétiques': ['mp-ondes-vide', 'mp-plasma', 'mp-conducteur'], 'Optique géométrique': ['p1-optique-geo'],
+    'Optique ondulatoire': ['mp-interferences', 'mp-young', 'mp-michelson', 'mp-n-ondes', 'mp-ondes-lumineuses'], 'Physique statistique': ['mp-statistique'],
+    'Rayonnement': ['mp-rayonnement'], 'Thermodynamique': ['p4-premier', 'p4-second', 'p4-machines', 'mp-systemes-ouverts'],
+    'Électrocinétique': ['p1-arqs', 'p1-premier-ordre', 'p1-second-ordre', 'p1-sinusoidal', 'p1-filtrage'],
+    'Électrostatique': ['mp-electrostatique', 'mp-exemples-e', 'mp-dipole-e'], 'Équations de Maxwell': ['mp-maxwell', 'mp-energie-em'],
+  },
+  Chimie: {
+    'Acide-base': ['c-acide-base'], 'Atomistique': ['c-classification'], 'Cinétique': ['c-cinetique'], 'Cristallographie': ['c-cristal'],
+    'Oxydoréduction': ['c-redox', 'c-e-ph'], 'Solubilité': ['c-solubilite'], 'Solutions aqueuses': ['c-acide-base', 'c-solubilite'],
+    'Structure des molécules': ['c-lewis', 'c-intermoleculaire'], 'Thermochimie': ['c-matiere'], 'Électrochimie': ['c-redox', 'c-e-ph'],
+  },
+  Informatique: {
+    'Apprentissage': ['i-ia'], 'Bases de données (SQL)': ['i-sql'], 'Complexité et preuves': ['i-complexite'], 'Graphes': ['i-graphes', 'i-plus-courts'],
+    'Nombres flottants': ['i-nombres'], 'Piles, files et récursivité': ['i-piles', 'i-recursivite'], 'Programmation dynamique': ['i-progdyn', 'i-dictionnaires'],
+    'Python : listes et fichiers': ['i-python', 'i-fichiers'], 'Théorie des jeux': ['i-jeux'], 'Tris': ['i-tris'],
+  },
+};
+
+// Fiches proposées pour un exercice : table ci-dessus, sinon recherche par mots du chapitre dans l'index.
+export async function fichesPour(mat, chap) {
+  const L = (await index().catch(() => [])).filter(f => f.pret);
+  const ids = LIENS[mat]?.[chap];
+  if (ids) return ids.map(id => L.find(f => f.id === id)).filter(Boolean);
+  const mots = norm(chap).split(/[^a-z0-9]+/).filter(m => m.length > 3);
+  return L.filter(f => (f.mat === mat || (mat === 'Maths' && f.mat === 'Mathématiques')) && mots.some(m => norm(f.titre + ' ' + f.partie + ' ' + (f.k || '')).includes(m))).slice(0, 4);
+}
+
+// Panneau latéral qui affiche la fiche du cours sans quitter l'exercice.
+export async function ouvrirFicheCours(mat, chap, typeset) {
+  document.getElementById('ficheDlg')?.remove();
+  const d = document.createElement('dialog');
+  d.id = 'ficheDlg'; d.className = 'fdlg'; d.setAttribute('aria-label', 'Fiche du cours');
+  d.innerHTML = `<div class="fdlg-h"><b>${ic('list')} Fiche du cours</b><button class="iconbtn" type="button" data-close aria-label="Fermer">${ic('x')}</button></div><div class="fdlg-c"><p class="small">Chargement…</p></div>`;
+  document.body.appendChild(d);
+  d.querySelector('[data-close]').onclick = () => d.close();
+  d.addEventListener('close', () => d.remove());
+  d.addEventListener('click', e => { if (e.target === d) d.close(); });
+  d.showModal();
+  const c = d.querySelector('.fdlg-c');
+  const F = await fichesPour(mat, chap);
+  if (!F.length) { c.innerHTML = `<p>Pas encore de fiche pour le chapitre « ${esc(chap)} ».</p><a class="btn" href="#fiches">${ic('list')} Toutes les fiches</a>`; c.querySelector('a').onclick = () => d.close(); return; }
+  const montre = async f => {
+    const zone = c.querySelector('.fdlg-f');
+    zone.innerHTML = '<p class="small">Chargement…</p>';
+    const [md, FG] = await Promise.all([fetch(`data/fiches/${f.id}.md`).then(r => r.ok ? r.text() : ''), figs(f.id)]);
+    if (!md) { zone.innerHTML = '<p>Fiche introuvable.</p>'; return; }
+    zone.innerHTML = `<h2 class="fdlg-t">${esc(f.titre)}</h2><p class="small">${esc(f.mat)} · ${esc(f.niveau)} · ${esc(f.partie)}</p><div class="fiche-corps">${corps(md, FG).html}</div>
+      <p><a class="btn ghost" href="#f/${f.id}">${ic('book')} Ouvrir la fiche en pleine page</a></p>`;
+    zone.querySelector('a[href^="#f/"]').onclick = () => d.close();
+    zone.scrollTop = 0; typeset?.(zone);
+  };
+  c.innerHTML = (F.length > 1 ? `<div class="fdlg-tabs" role="tablist">${F.map((f, i) => `<button type="button" role="tab" aria-selected="${i === 0}" data-i="${i}">${esc(f.titre)}</button>`).join('')}</div>` : '') + '<div class="fdlg-f"></div>';
+  c.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { c.querySelectorAll('[data-i]').forEach(x => x.setAttribute('aria-selected', x === b)); montre(F[+b.dataset.i]); });
+  montre(F[0]);
+}
