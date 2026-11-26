@@ -39,6 +39,7 @@ function corps(md, F) {
     const t = p.trim();
     let m;
     if ((m = t.match(/^##\s+(.+)$/))) { const id = 's' + toc.length; toc.push([id, m[1]]); return `<h2 class="fh2" id="${id}">${esc(m[1])}</h2>`; }
+    if ((m = t.match(/^###\s+(.+)$/))) return `<h3 class="fh3">${esc(m[1])}</h3>`;
     if ((m = t.match(/^\[\[fig:([\w-]+)\]\]$/))) return figure(F, m[1]);
     if (/^>\s?/.test(t)) return callout(t.replace(/^>\s?/gm, ''));
     return rich(t);

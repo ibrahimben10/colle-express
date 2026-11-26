@@ -2342,3 +2342,5 @@ pre.code{border:1px solid var(--line-soft);border-left:1px solid var(--line-soft
 .fdlg-tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer}
 .fdlg-tabs button[aria-selected=true]{background:var(--blue);border-color:var(--blue);color:#fff}
 .fdlg-t{margin:4px 0 2px;font-size:var(--t-lg)}
+
+.fiche-corps .fh3{font-size:1.02rem;margin:1.1rem 0 .35rem;font-weight:650}
