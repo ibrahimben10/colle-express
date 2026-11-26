@@ -33,6 +33,15 @@ Dans le diagramme $(T, S)$, une isotherme est horizontale, une adiabatique réve
 2. Calculer $S_e$ avec la température de la **source**, pas celle du système.
 3. En déduire $S_c = \Delta S - S_e \geq 0$ : son signe vérifie la cohérence.
 
+## Exemple corrigé
+
+**Énoncé.** Un bloc de cuivre ($C = 400$ J·K⁻¹) à 350 K est plongé dans un lac à 290 K. Calculer l'entropie créée.
+
+**Solution.**
+1. État final : $T_f = 290$ K. Variation d'entropie du cuivre (phase condensée) : $\Delta S = C\ln\dfrac{T_f}{T_i} \approx -75{,}2$ J·K⁻¹.
+2. Entropie échangée avec le lac (thermostat) : $S_e = \dfrac{Q}{T_0} = \dfrac{C(T_f - T_i)}{T_0} \approx -82{,}8$ J·K⁻¹.
+3. $S_c = \Delta S - S_e \approx +7{,}6$ J·K⁻¹ $> 0$ : transformation irréversible, comme prévu.
+
 ## Pièges classiques
 
 - Dans $S_e$, c'est la température de la frontière (du thermostat) qui intervient.

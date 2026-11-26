@@ -42,6 +42,16 @@ Chute libre sans frottement avec $\vec v_0$ inclinée de $\alpha$ : trajectoire 
 3. PFD projeté sur des axes bien choisis.
 4. Résolution avec les conditions initiales.
 
+## Exemple corrigé
+
+**Énoncé.** Un palet de masse $m$ glisse sans frottement sur un plan incliné d'un angle $\alpha = 30°$. Calculer son accélération et la réaction du support.
+
+**Solution.**
+1. Système : le palet ; référentiel terrestre supposé galiléen ; forces : poids $m\vec g$ et réaction normale $\vec N$.
+2. Base liée au plan : $\vec u_x$ le long de la pente (vers le bas), $\vec u_y$ normal au plan.
+3. PFD projeté : sur $\vec u_x$, $ma = mg\sin\alpha$ ; sur $\vec u_y$, $0 = N - mg\cos\alpha$.
+4. $a = g\sin\alpha \approx 4{,}9$ m·s⁻², indépendante de la masse ; $N = mg\cos\alpha$.
+
 ## Pièges classiques
 
 - La réaction normale ne vaut $mg$ que sur un support horizontal sans autre force verticale.

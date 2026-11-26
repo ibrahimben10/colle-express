@@ -35,6 +35,15 @@ Par superposition des deux plans de charges $+\sigma$ et $-\sigma$ :
 
 Énergie stockée : $\tfrac12CU^2 = \tfrac{\varepsilon_0E^2}{2}\cdot Se$, soit une densité volumique d'énergie $\dfrac{\varepsilon_0E^2}{2}$.
 
+## Exemple corrigé
+
+**Énoncé.** Condensateur plan : armatures de 10 cm × 10 cm, distantes de 1 mm, dans l'air, sous 100 V. Calculer $C$, $E$, $Q$ et l'énergie stockée.
+
+**Solution.**
+1. $C = \dfrac{\varepsilon_0S}{e} = \dfrac{8{,}85\cdot10^{-12}\times10^{-2}}{10^{-3}} \approx 89$ pF.
+2. $E = U/e = 10^5$ V·m⁻¹ (inférieur au champ disruptif de l'air, $3\cdot10^6$ V·m⁻¹).
+3. $Q = CU \approx 8{,}9$ nC ; énergie $\tfrac12CU^2 \approx 0{,}44$ µJ.
+
 ## Pièges classiques
 
 - Le fil et le plan infinis sont des modèles : loin d'un fil fini, on retrouve un champ en $1/r^2$.

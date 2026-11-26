@@ -32,6 +32,15 @@ Ici, c'est l'intensité qui est continue.
 
 Pendant la charge complète, le générateur fournit $CE^2$ : la moitié est stockée dans le condensateur ($\tfrac12 CE^2$), l'autre moitié est dissipée par effet Joule, **quelle que soit** $R$.
 
+## Exemple corrigé
+
+**Énoncé.** Un condensateur $C = 10$ µF, initialement déchargé, est chargé à travers $R = 1$ kΩ par un échelon de tension $E = 5$ V. Donner $u_C(t)$ et le temps au bout duquel $u_C = 4{,}75$ V.
+
+**Solution.**
+1. Loi des mailles : $E = Ri + u_C$ avec $i = C\dfrac{\mathrm du_C}{\mathrm dt}$, d'où $\tau\dfrac{\mathrm du_C}{\mathrm dt} + u_C = E$, $\tau = RC = 10$ ms.
+2. Solution : $u_C = E + K e^{-t/\tau}$ ; la continuité de $u_C$ donne $u_C(0) = 0$, donc $K = -E$ : $u_C(t) = E(1 - e^{-t/\tau})$.
+3. $u_C = 0{,}95E$ pour $e^{-t/\tau} = 0{,}05$, soit $t = \tau\ln20 \approx 3\tau = 30$ ms : c'est le « temps de réponse à 5 % ».
+
 ## Pièges classiques
 
 - L'intensité dans un circuit RC **saute** à la fermeture de l'interrupteur : seule $u_C$ est continue.

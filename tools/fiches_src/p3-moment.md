@@ -35,6 +35,15 @@ $$J_\Delta\ddot\theta = -mga\sin\theta,\qquad \omega_0 = \sqrt{\frac{mga}{J_\Del
 
 $E_c = \tfrac12J_\Delta\omega^2$ ; puissance d'une force ou d'un couple : $\mathcal P = \mathcal M_\Delta\,\omega$.
 
+## Exemple corrigé
+
+**Énoncé.** Une tige homogène de masse $m$ et de longueur $\ell$ tourne autour d'un axe horizontal fixe passant par une extrémité ($J = m\ell^2/3$). Écrire l'équation du mouvement et la période des petites oscillations.
+
+**Solution.**
+1. Théorème du moment cinétique par rapport à l'axe : $J\ddot\theta = \mathcal M_\Delta(\text{poids})$, le moment de la liaison pivot parfaite étant nul.
+2. Le poids s'applique au centre de masse, à $\ell/2$ de l'axe : $\mathcal M_\Delta = -mg\dfrac\ell2\sin\theta$.
+3. $\ddot\theta + \dfrac{3g}{2\ell}\sin\theta = 0$ ; pour de petits angles, $T_0 = 2\pi\sqrt{\dfrac{2\ell}{3g}}$.
+
 ## Pièges classiques
 
 - Une force dont la droite d'action passe par l'axe a un moment nul, quelle que soit son intensité.

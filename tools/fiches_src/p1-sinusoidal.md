@@ -34,6 +34,15 @@ Il n'y a résonance que si $Q > 1/\sqrt2$, en $x_r = \sqrt{1 - \frac1{2Q^2}} < 1
 
 Puissance moyenne reçue par un dipôle : $P = U_{\text{eff}}I_{\text{eff}}\cos\varphi$, avec $U_{\text{eff}} = U_m/\sqrt2$. Seules les résistances consomment de la puissance en moyenne.
 
+## Exemple corrigé
+
+**Énoncé.** Un dipôle RC série ($R = 1$ kΩ, $C = 1$ µF) est alimenté par $e(t) = 10\cos(1000t)$ (en V). Calculer l'amplitude du courant et son déphasage par rapport à $e$.
+
+**Solution.**
+1. Impédance complexe : $\underline Z = R + \dfrac{1}{jC\omega} = 1000 - 1000j$ (en Ω).
+2. $|\underline Z| = 1000\sqrt2 \approx 1{,}41$ kΩ, d'où $I_m = E_m/|\underline Z| \approx 7{,}1$ mA.
+3. $\arg\underline I = -\arg\underline Z = +\pi/4$ : le courant est **en avance** de $\pi/4$ sur la tension (comportement capacitif).
+
 ## Pièges classiques
 
 - On ne prend la partie réelle qu'à la fin ; on n'additionne pas des amplitudes réelles de signaux déphasés.

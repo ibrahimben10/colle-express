@@ -15,11 +15,16 @@ idx = []
 for mat, niv, fid, titre, L in ns['D']:
     partie = next(p for r, p in PARTIE if re.match(r, fid))
     pret = os.path.exists(os.path.join(src, fid + '.md'))
+    mots = ''
     if pret:
         md = open(os.path.join(src, fid + '.md'), encoding='utf-8').read()
         for k in re.findall(r'\[\[fig:([\w-]+)\]\]', md):
             assert k.startswith(fid + '-'), (fid, k)
         shutil.copy(os.path.join(src, fid + '.md'), os.path.join(out, fid + '.md'))
-    idx.append({'id': fid, 'titre': titre, 'mat': mat, 'niveau': niv, 'partie': partie, 'n': len(L), 'pret': pret})
+        # mots-clés pour la recherche : titres de sections, termes en gras, noms des schémas (sans LaTeX)
+        k = re.findall(r'^##+ (.+)$', md, re.M) + re.findall(r'\*\*([^*]+)\*\*', md) + [sch for sch, _, _ in L]
+        k = [re.sub(r'\$[^$]*\$|[—.:]', ' ', x) for x in k if x not in ("L'essentiel", 'Méthode', 'Pièges classiques', 'Ordres de grandeur')]
+        mots = ' '.join(dict.fromkeys(' '.join(k).split()))
+    idx.append({'id': fid, 'titre': titre, 'mat': mat, 'niveau': niv, 'partie': partie, 'n': len(L), 'pret': pret, 'k': mots})
 json.dump(idx, open(os.path.join(out, 'index.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 print(len(idx), 'fiches dont', sum(x['pret'] for x in idx), 'rédigées')

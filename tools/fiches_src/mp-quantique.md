@@ -33,6 +33,15 @@ On ne peut pas localiser une particule en position et en impulsion à la fois. C
 
 Constante de Planck réduite $\hbar = 1{,}05\cdot10^{-34}$ J·s. Électron de 1 eV : $\lambda \approx 1$ nm.
 
+## Exemple corrigé
+
+**Énoncé.** Un électron est confiné dans un atome de taille $\Delta x \approx 0{,}1$ nm. Estimer son énergie cinétique minimale.
+
+**Solution.**
+1. Heisenberg : $\Delta p \gtrsim \dfrac{\hbar}{2\Delta x} \approx 5\cdot10^{-25}$ kg·m·s⁻¹.
+2. On prend $p \approx \Delta p$ : $E_c \approx \dfrac{\Delta p^2}{2m} \approx 1{,}5\cdot10^{-19}$ J, soit environ 1 eV.
+3. C'est le bon ordre de grandeur des énergies atomiques (quelques eV) : le confinement suffit à expliquer l'échelle des énergies de liaison.
+
 ## Pièges classiques
 
 - $\psi$ n'est pas mesurable ; seul $|\psi|^2$ a un sens physique.

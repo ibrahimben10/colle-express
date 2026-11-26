@@ -29,6 +29,15 @@ Une source réelle émet des trains d'onde de durée moyenne $\tau_c$ ; leurs ph
 | lampe spectrale | 1 mm à 1 cm |
 | laser He-Ne | 10 cm à plusieurs mètres |
 
+## Exemple corrigé
+
+**Énoncé.** Une lame de verre d'indice $n = 1{,}5$ et d'épaisseur $e = 10$ µm est placée sur un rayon. Quel chemin optique supplémentaire introduit-elle ?
+
+**Solution.**
+1. Sans lame, le rayon parcourt $e$ dans l'air ($n \approx 1$) : chemin optique $e$.
+2. Avec la lame : $ne$.
+3. Supplément : $(n - 1)e = 5$ µm, soit environ 9 longueurs d'onde pour $\lambda_0 = 560$ nm : un décalage de 9 franges dans un interféromètre.
+
 ## Pièges classiques
 
 - La réflexion sur un milieu plus réfringent ajoute un déphasage de $\pi$ (soit $\lambda/2$ sur le chemin optique).

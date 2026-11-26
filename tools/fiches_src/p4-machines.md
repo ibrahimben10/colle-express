@@ -38,6 +38,15 @@ Le cycle de Carnot (deux isothermes, deux adiabatiques réversibles) atteint l'e
 
 Le cycle de Beau de Rochas modélise le moteur à essence : rendement $\eta = 1 - a^{1 - \gamma}$, où $a = V_{\max}/V_{\min}$ est le taux de compression.
 
+## Exemple corrigé
+
+**Énoncé.** Un moteur ditherme fonctionne entre une source chaude à 600 K et une source froide à 300 K. Il fournit 1 kJ de travail par cycle et reçoit 3 kJ de la source chaude. Calculer son rendement et le comparer au rendement de Carnot.
+
+**Solution.**
+1. Rendement : $\eta = \dfrac{-W}{Q_c} = \dfrac13 \approx 33$ %.
+2. Rendement de Carnot : $\eta_C = 1 - \dfrac{T_f}{T_c} = 50$ %.
+3. $\eta < \eta_C$ : la machine est possible mais irréversible. Chaleur rejetée : $Q_f = -(Q_c + W) = -2$ kJ.
+
 ## Pièges classiques
 
 - Les températures sont en kelvins dans les formules de Carnot.

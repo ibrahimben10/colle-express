@@ -31,6 +31,15 @@ On calcule la sortie à partir des échantillons, par une relation de récurrenc
 |---|---|---|
 | passe-bas du 1er ordre | $\tau\dfrac{\mathrm ds}{\mathrm dt} + s = e$ | $s_{k+1} = s_k + \dfrac{T_e}{\tau}(e_k - s_k)$ |
 
+## Exemple corrigé
+
+**Énoncé.** On échantillonne à $f_e = 1$ kHz une sinusoïde de fréquence 800 Hz. Quelle fréquence observe-t-on sur le signal reconstruit ?
+
+**Solution.**
+1. Critère de Shannon : il faudrait $f_e > 1600$ Hz ; il n'est pas respecté.
+2. Le spectre échantillonné contient les raies $|800 - kf_e|$ : la plus basse est $|800 - 1000| = 200$ Hz.
+3. On observe une sinusoïde à 200 Hz : c'est le repliement. Il fallait un filtre anti-repliement coupant au-dessus de 500 Hz.
+
 ## Pièges classiques
 
 - Le stroboscope et l'effet « roue qui tourne à l'envers » sont des cas de repliement.

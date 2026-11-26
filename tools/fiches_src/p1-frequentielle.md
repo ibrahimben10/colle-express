@@ -28,6 +28,15 @@ Le diagramme de Bode trace $G_{\text{dB}}$ et $\varphi$ en fonction de $\log\ome
 2. Étudier les comportements limites $\omega \to 0$ et $\omega \to \infty$ : ils donnent les asymptotes.
 3. Pour un signal d'entrée donné, multiplier chaque raie par $|\underline H(n\omega)|$ et la déphaser de $\arg\underline H(n\omega)$.
 
+## Exemple corrigé
+
+**Énoncé.** Pour le filtre RC (sortie aux bornes de C), avec $R = 10$ kΩ et $C = 10$ nF, donner la fonction de transfert, la pulsation de coupure et le gain en dB à $f = 16$ kHz.
+
+**Solution.**
+1. Pont diviseur : $\underline H = \dfrac{1}{1 + jRC\omega}$, passe-bas du 1er ordre.
+2. $\omega_c = 1/(RC) = 10^4$ rad·s⁻¹, soit $f_c \approx 1{,}6$ kHz.
+3. À $f = 10f_c$ : $|\underline H| \approx 1/10$, $G_{dB} \approx -20$ dB (une décade au-dessus de $f_c$, l'asymptote descend de 20 dB).
+
 ## Pièges classiques
 
 - $20\log$ pour une amplitude, $10\log$ pour une puissance.

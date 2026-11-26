@@ -26,6 +26,15 @@ Un milieu est dispersif si $n$ dépend de $\lambda$ ; la loi de Cauchy en donne 
 
 Sur un écran à la distance $D$, la tache centrale a une largeur $\ell \approx 2\lambda D/a$ : plus la fente est étroite, plus la tache est large.
 
+## Exemple corrigé
+
+**Énoncé.** Une lumière de longueur d'onde $\lambda_0 = 600$ nm dans le vide passe dans un verre d'indice $n = 1{,}5$. Que deviennent sa fréquence, sa vitesse et sa longueur d'onde ?
+
+**Solution.**
+1. La fréquence est fixée par la source et ne change pas : $\nu = c/\lambda_0 = 5{,}0\cdot10^{14}$ Hz.
+2. Vitesse dans le verre : $v = c/n = 2{,}0\cdot10^8$ m·s⁻¹.
+3. Longueur d'onde dans le verre : $\lambda = v/\nu = \lambda_0/n = 400$ nm. La couleur perçue est liée à la fréquence, pas à $\lambda$ dans le milieu.
+
 ## Pièges classiques
 
 - $\theta \approx \lambda/a$ est un **demi**-angle ; la largeur angulaire totale de la tache centrale vaut $2\lambda/a$.

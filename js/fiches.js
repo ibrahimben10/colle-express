@@ -59,6 +59,8 @@ export async function renderFiches(el, sub, typeset) {
   scrollTo(0, 0);
 }
 
+const norm = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 function renderIndex(el, L) {
   const groupes = [];
   for (const f of L) {
@@ -68,11 +70,19 @@ function renderIndex(el, L) {
   el.innerHTML = `<div class="fiches-idx">
     <header class="fiche-head"><p class="kicker">${ic('book')} Fiches de cours</p><h1>L’essentiel de chaque chapitre</h1>
       <p class="small">Définitions, lois, méthodes et pièges, avec les schémas à connaître. ${L.length} fiches.</p>
-      <div class="searchbox"><span>${ic('search')}</span><input id="fqF" type="search" placeholder="Chercher une fiche…" aria-label="Chercher une fiche"></div></header>
+      <div class="searchbox"><span>${ic('search')}</span><input id="fqF" type="search" placeholder="Chercher une fiche : Gauss, pH, Michelson…" aria-label="Chercher une fiche" autocomplete="off" spellcheck="false"></div>
+      <p class="fiche-count" id="fqN" aria-live="polite" hidden></p></header>
     ${groupes.map(G => `<section class="fgrp"><h2>${ic(MAT[G.mat] || 'book')} ${esc(G.k)}</h2>${G.parties.map(P => `<h3>${esc(P.t)}</h3><div class="fcards">${P.fs.map(f =>
-      (f.pret ? `<a class="fcard" href="#f/${f.id}"` : `<div class="fcard off"`) + ` data-q="${esc((f.titre + ' ' + f.partie).toLowerCase())}"><b>${esc(f.titre)}</b><span>${f.pret ? `${f.n} schéma${f.n > 1 ? 's' : ''}` : 'en préparation'}</span>` + (f.pret ? '</a>' : '</div>')).join('')}</div>`).join('')}</section>`).join('')}
+      (f.pret ? `<a class="fcard" href="#f/${f.id}"` : `<div class="fcard off"`) + ` data-q="${esc(norm(f.titre + ' ' + f.partie + ' ' + f.mat + ' ' + f.niveau + ' ' + (f.k || '')))}"><b>${esc(f.titre)}</b><span>${f.pret ? `${f.n} schéma${f.n > 1 ? 's' : ''}` : 'en préparation'}</span>` + (f.pret ? '</a>' : '</div>')).join('')}</div>`).join('')}</section>`).join('')}
   </div>`;
   const q = el.querySelector('#fqF');
-  q.oninput = () => { const v = q.value.trim().toLowerCase(); el.querySelectorAll('.fcard').forEach(c => c.hidden = v && !c.dataset.q.includes(v)); };
+  const nb = el.querySelector('#fqN');
+  q.oninput = () => {
+    const mots = norm(q.value).split(/\s+/).filter(Boolean); let n = 0;
+    el.querySelectorAll('.fcard').forEach(c => { const ok = mots.every(m => c.dataset.q.includes(m)); c.hidden = !ok; if (ok) n++; });
+    el.querySelectorAll('.fcards').forEach(b => { const vide = ![...b.children].some(c => !c.hidden); b.hidden = vide; b.previousElementSibling.hidden = vide; });
+    el.querySelectorAll('.fgrp').forEach(g => g.hidden = ![...g.querySelectorAll('.fcard')].some(c => !c.hidden));
+    nb.hidden = !mots.length; nb.textContent = n ? `${n} fiche${n > 1 ? 's' : ''} trouvée${n > 1 ? 's' : ''}` : 'Aucune fiche ne correspond. Essayez un autre mot.';
+  };
   scrollTo(0, 0);
 }

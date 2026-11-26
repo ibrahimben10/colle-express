@@ -40,6 +40,16 @@ Forme locale : $\mathrm{div}\,\vec E = \dfrac{\rho}{\varepsilon_0}$ ; avec le po
 - $\vec E$ est dirigé vers les potentiels décroissants.
 - Énergie d'une charge $q$ dans le potentiel $V$ : $E_p = qV$.
 
+## Exemple corrigé
+
+**Énoncé.** Une sphère creuse de rayon $R$ porte une charge $Q$ uniformément répartie en surface. Calculer le champ partout.
+
+**Solution.**
+1. Symétrie sphérique : tous les plans contenant O et M sont plans de symétrie, donc $\vec E = E(r)\,\vec u_r$.
+2. Surface de Gauss : sphère de rayon $r$ ; flux $4\pi r^2E(r)$.
+3. $r < R$ : $Q_{\text{int}} = 0$, donc $\vec E = \vec 0$ à l'intérieur.
+4. $r > R$ : $E = \dfrac{Q}{4\pi\varepsilon_0r^2}$. Le champ est discontinu en $r = R$, de $\sigma/\varepsilon_0$.
+
 ## Pièges classiques
 
 - Le principe de Curie concerne les **causes** (la distribution), pas le champ lui-même.

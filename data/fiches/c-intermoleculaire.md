@@ -34,6 +34,16 @@ En solution, un ion s'entoure de molécules de solvant orientées : c'est la **s
 
 > **Propriété.** « Qui se ressemble s'assemble » : une espèce se dissout bien dans un solvant qui établit avec elle des interactions comparables.
 
+## Exemple corrigé
+
+**Énoncé.** Classer par température d'ébullition croissante : CH₄, H₂O, H₂S, et justifier.
+
+**Solution.**
+1. CH₄ : apolaire, seulement des interactions de London faibles ; $T_{\text{éb}} = -162$ °C.
+2. H₂S : polaire et plus gros (plus polarisable) ; $T_{\text{éb}} = -60$ °C.
+3. H₂O : liaisons hydrogène ; $T_{\text{éb}} = 100$ °C, anormalement élevée pour une si petite molécule.
+4. Ordre : CH₄ < H₂S < H₂O.
+
 ## Pièges classiques
 
 - La liaison hydrogène n'est pas une liaison covalente.

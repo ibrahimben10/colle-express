@@ -28,6 +28,15 @@ Si une espèce disparaît avant que $Q$ atteigne $K$, la transformation est **to
 2. Exprimer $Q$ en fonction de $\xi$.
 3. Résoudre $Q(\xi_{\text{éq}}) = K$, ou faire une hypothèse (réaction quasi totale si $K$ est très grand) puis la vérifier.
 
+## Exemple corrigé
+
+**Énoncé.** On mélange 0,10 mol d'acide éthanoïque et 0,10 mol d'éthanol ; l'estérification a pour constante $K = 4$. Calculer l'avancement à l'équilibre.
+
+**Solution.**
+1. Tableau d'avancement : acide $0{,}10 - \xi$, alcool $0{,}10 - \xi$, ester $\xi$, eau $\xi$ (tous dans le même volume, qui se simplifie).
+2. $K = \dfrac{\xi^2}{(0{,}10 - \xi)^2} = 4$, donc $\dfrac{\xi}{0{,}10 - \xi} = 2$ et $\xi = 0{,}067$ mol.
+3. Rendement : 67 % ; la réaction n'est pas totale. Ajouter un réactif en excès ou éliminer l'eau déplace l'équilibre.
+
 ## Pièges classiques
 
 - $K$ ne dépend que de la température, pas des quantités initiales.

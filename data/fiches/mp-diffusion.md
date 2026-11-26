@@ -40,6 +40,15 @@ Comme en électricité, les résistances en série s'ajoutent, et les conductanc
 | verre, béton | 1 |
 | air immobile, laine de verre | 0,03 |
 
+## Exemple corrigé
+
+**Énoncé.** Un mur de béton ($\lambda = 1$ W·m⁻¹·K⁻¹) de 20 cm et de 10 m² sépare une pièce à 20 °C de l'extérieur à 0 °C. Calculer les pertes, puis l'effet d'une couche de 5 cm de laine de verre ($\lambda = 0{,}04$).
+
+**Solution.**
+1. $R_{\text{béton}} = \dfrac{e}{\lambda S} = \dfrac{0{,}2}{1\times10} = 0{,}02$ K·W⁻¹, d'où $\Phi = \Delta T/R = 1000$ W.
+2. $R_{\text{laine}} = \dfrac{0{,}05}{0{,}04\times10} = 0{,}125$ K·W⁻¹, en série : $R = 0{,}145$ K·W⁻¹.
+3. $\Phi \approx 138$ W : les pertes sont divisées par plus de 7.
+
 ## Pièges classiques
 
 - L'analogie électrique ne vaut qu'en régime stationnaire.

@@ -41,6 +41,15 @@ Résistances en série : $R = R_1 + R_2$ ; en parallèle : $\dfrac1R = \dfrac1{R
 
 Diviseur de tension : $U_2 = \dfrac{R_2}{R_1 + R_2}U$. Diviseur de courant : $I_2 = \dfrac{R_1}{R_1 + R_2}I$ (c'est l'**autre** résistance au numérateur).
 
+## Exemple corrigé
+
+**Énoncé.** Un générateur de f.é.m. $E = 12$ V alimente deux résistances $R_1 = 2$ kΩ et $R_2 = 4$ kΩ montées en série. Calculer l'intensité et la tension aux bornes de $R_2$.
+
+**Solution.**
+1. Loi des mailles : $E = R_1I + R_2I$, donc $I = \dfrac{E}{R_1 + R_2} = 2$ mA.
+2. Pont diviseur de tension : $U_2 = E\,\dfrac{R_2}{R_1 + R_2} = 8$ V.
+3. Vérification : $U_1 = 4$ V et $U_1 + U_2 = E$. Puissance fournie : $EI = 24$ mW, entièrement dissipée par effet Joule.
+
 ## Pièges classiques
 
 - Le diviseur de tension suppose que les deux résistances sont parcourues par le **même** courant (pas de dérivation entre elles).

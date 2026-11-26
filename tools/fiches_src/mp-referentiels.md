@@ -38,6 +38,16 @@ On étudie le mouvement d'un point M dans deux référentiels : R (dit absolu) e
 2. Identifier le point coïncident.
 3. Écrire $\vec v_r$ dans la base de R′, puis appliquer les lois de composition.
 
+## Exemple corrigé
+
+**Énoncé.** Un manège tourne à $\omega = 1$ rad·s⁻¹. Un enfant marche sur un rayon, vers l'extérieur, à $v_r = 1$ m·s⁻¹ par rapport au manège. À $r = 2$ m, donner sa vitesse et son accélération dans le référentiel terrestre.
+
+**Solution.**
+1. Vitesse d'entraînement (point coïncident, cercle de rayon $r$) : $\vec v_e = r\omega\,\vec u_\theta$, de norme 2 m·s⁻¹.
+2. $\vec v_a = v_r\,\vec u_r + r\omega\,\vec u_\theta$, de norme $\sqrt5 \approx 2{,}2$ m·s⁻¹.
+3. $\vec a_r = \vec 0$ (marche uniforme), $\vec a_e = -r\omega^2\,\vec u_r$ (2 m·s⁻² vers l'axe), $\vec a_c = 2\vec\omega\wedge\vec v_r = 2\omega v_r\,\vec u_\theta$ (2 m·s⁻²).
+4. $\vec a_a = -2\,\vec u_r + 2\,\vec u_\theta$ (en m·s⁻²).
+
 ## Pièges classiques
 
 - $\vec v_e$ n'est pas la vitesse de O′ en rotation : c'est celle du point coïncident.

@@ -33,6 +33,15 @@ Une force perpendiculaire au déplacement (réaction normale sans frottement, fo
 
 Pour un mouvement à un degré de liberté : équilibre si $\dfrac{\mathrm dE_p}{\mathrm dx} = 0$ ; stable si c'est un minimum ($E_p'' > 0$), instable si c'est un maximum.
 
+## Exemple corrigé
+
+**Énoncé.** Une bille est lâchée sans vitesse d'une hauteur $h = 1{,}25$ m. Avec quelle vitesse touche-t-elle le sol (frottements négligés) ?
+
+**Solution.**
+1. Seul le poids travaille ; il est conservatif : l'énergie mécanique se conserve.
+2. $E_m = \tfrac12mv^2 + mgz$ : $0 + mgh = \tfrac12mv^2 + 0$.
+3. $v = \sqrt{2gh} = \sqrt{2\times9{,}8\times1{,}25} \approx 5$ m·s⁻¹, sans avoir besoin de résoudre le mouvement.
+
 ## Pièges classiques
 
 - Le TEC fait intervenir **toutes** les forces, le théorème de l'énergie mécanique seulement les non conservatives.

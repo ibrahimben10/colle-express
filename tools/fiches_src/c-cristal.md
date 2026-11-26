@@ -44,6 +44,15 @@ Les anions forment le réseau, les cations occupent des sites. Condition de stab
 
 Métallique (liaison métallique), ionique, covalent (diamant), moléculaire (glace, liaisons faibles) : leurs propriétés (dureté, température de fusion, conductivité) découlent du type de liaison.
 
+## Exemple corrigé
+
+**Énoncé.** Le cuivre cristallise en CFC, avec $a = 361$ pm ($M = 63{,}5$ g·mol⁻¹). Calculer le rayon atomique et la masse volumique.
+
+**Solution.**
+1. Contact sur la diagonale d'une face : $a\sqrt2 = 4r$, d'où $r = 128$ pm.
+2. Population : $8\times\tfrac18 + 6\times\tfrac12 = 4$ atomes par maille.
+3. $\rho = \dfrac{4M}{\mathcal N_Aa^3} = \dfrac{4\times63{,}5\cdot10^{-3}}{6{,}02\cdot10^{23}\times(361\cdot10^{-12})^3} \approx 8{,}97\cdot10^3$ kg·m⁻³, en accord avec la valeur tabulée (8,96).
+
 ## Pièges classiques
 
 - Un atome au sommet compte pour 1/8, sur une face pour 1/2, sur une arête pour 1/4.

@@ -41,6 +41,16 @@ Nappe de courant $\vec j_s$ : $\|\vec B\| = \dfrac{\mu_0j_s}{2}$, parallèle au 
 2. Choisir un contour d'Ampère où $\vec B$ est tangent (de norme constante) ou orthogonal.
 3. Calculer la circulation et le courant enlacé.
 
+## Exemple corrigé
+
+**Énoncé.** Un conducteur cylindrique de rayon $a$ est parcouru par un courant $I$ réparti uniformément. Calculer $B(r)$.
+
+**Solution.**
+1. Symétries : tout plan contenant l'axe est plan de symétrie des courants, donc $\vec B = B(r)\,\vec u_\theta$.
+2. Contour d'Ampère : cercle de rayon $r$ d'axe le fil ; circulation $2\pi rB$.
+3. $r > a$ : courant enlacé $I$, $B = \dfrac{\mu_0I}{2\pi r}$.
+4. $r < a$ : courant enlacé $I\dfrac{r^2}{a^2}$, $B = \dfrac{\mu_0Ir}{2\pi a^2}$, nul sur l'axe et maximal à la surface.
+
 ## Pièges classiques
 
 - Ne pas confondre les règles de symétrie de $\vec E$ et de $\vec B$.

@@ -36,6 +36,15 @@ $$\vec E_2 - \vec E_1 = \frac{\sigma}{\varepsilon_0}\vec n_{12},\qquad \vec B_2 
 - **Statique** : on retrouve l'électrostatique et la magnétostatique, découplées.
 - **ARQS magnétique** : on néglige le courant de déplacement ; valable si les dimensions sont petites devant la longueur d'onde.
 
+## Exemple corrigé
+
+**Énoncé.** Montrer qu'en régime variable, Maxwell-Ampère sans le terme $\varepsilon_0\partial\vec E/\partial t$ contredirait la conservation de la charge.
+
+**Solution.**
+1. Sans ce terme : $\overrightarrow{\mathrm{rot}}\,\vec B = \mu_0\vec j$. La divergence d'un rotationnel est nulle, donc $\mathrm{div}\,\vec j = 0$.
+2. Or la conservation de la charge impose $\mathrm{div}\,\vec j = -\partial\rho/\partial t$, non nul pendant la charge d'un condensateur.
+3. Avec le terme complet : $0 = \mu_0\,\mathrm{div}\,\vec j + \mu_0\varepsilon_0\,\partial(\mathrm{div}\,\vec E)/\partial t = \mu_0\left(\mathrm{div}\,\vec j + \partial\rho/\partial t\right)$, grâce à Maxwell-Gauss : tout est cohérent.
+
 ## Pièges classiques
 
 - Les champs sont couplés dès qu'ils varient dans le temps.

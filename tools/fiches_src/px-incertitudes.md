@@ -32,6 +32,16 @@ Pour les cas plus compliqués, on utilise une **simulation de Monte-Carlo** (tir
 
 Pour valider un modèle affine : tracer les points avec leurs barres d'incertitude, vérifier que la droite passe par (presque) toutes les barres et que les **résidus** sont répartis sans tendance.
 
+## Exemple corrigé
+
+**Énoncé.** On mesure la période d'un pendule 6 fois : 2,01 ; 2,03 ; 1,99 ; 2,02 ; 2,00 ; 2,03 s. Donner le résultat avec son incertitude-type.
+
+**Solution.**
+1. Moyenne : $\bar T = 2{,}013$ s.
+2. Écart-type expérimental : $\sigma \approx 0{,}016$ s.
+3. Incertitude-type sur la moyenne (type A) : $u(\bar T) = \sigma/\sqrt6 \approx 0{,}0065$ s.
+4. Résultat : $T = 2{,}013 \pm 0{,}007$ s (incertitude arrondie à 1 ou 2 chiffres significatifs, valeur arrondie au même rang).
+
 ## Pièges classiques
 
 - Ne pas donner plus de deux chiffres significatifs à l'incertitude, et arrondir la valeur au même rang.

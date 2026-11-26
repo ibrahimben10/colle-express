@@ -24,6 +24,15 @@ Chaque point $M$ décrit un cercle centré sur l'axe $\Delta$, de rayon $r$ éga
 - Pour un solide en rotation, raisonner sur un seul paramètre angulaire $\theta(t)$.
 - Une roue qui roule sans glisser n'est ni en translation ni en rotation autour d'un axe fixe : son point de contact a une vitesse nulle.
 
+## Exemple corrigé
+
+**Énoncé.** Un disque tourne autour de son axe fixe à 1200 tours par minute. Quelle est la vitesse d'un point situé à 10 cm de l'axe ?
+
+**Solution.**
+1. Vitesse angulaire : $\omega = 1200\times\dfrac{2\pi}{60} \approx 126$ rad·s⁻¹.
+2. Chaque point décrit un cercle centré sur l'axe : $v = r\omega = 0{,}10\times126 \approx 12{,}6$ m·s⁻¹.
+3. Tous les points ont la même $\omega$, mais leur vitesse est proportionnelle à la distance à l'axe.
+
 ## Pièges classiques
 
 - Translation circulaire et rotation : dans les deux cas les points décrivent des cercles, mais en translation les cercles ont des centres différents et les vitesses sont toutes égales.

@@ -31,6 +31,15 @@ Puissance totale moyenne : $\mathcal P = \dfrac{\mu_0p_0^2\omega^4}{12\pi c}$, p
 - Lumière diffusée polarisée à 90° du soleil.
 - Antennes : une antenne émet surtout perpendiculairement à son axe.
 
+## Exemple corrigé
+
+**Énoncé.** Pourquoi le ciel est-il bleu, et le soleil couchant rouge ?
+
+**Solution.**
+1. Les molécules de l'air, excitées par la lumière solaire, se comportent comme des dipôles oscillants à la fréquence de l'onde.
+2. Puissance diffusée proportionnelle à $\omega^4$ : le bleu (400 nm) est diffusé $(700/400)^4 \approx 9$ fois plus que le rouge (700 nm).
+3. Le ciel diffuse surtout du bleu. Au coucher, la lumière traverse une grande épaisseur d'air : elle a perdu son bleu, il reste le rouge.
+
 ## Pièges classiques
 
 - Le champ rayonné est évalué au temps retardé $t - r/c$.

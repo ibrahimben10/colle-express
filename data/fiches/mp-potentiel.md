@@ -34,6 +34,15 @@ Applications : radioactivité α, microscope à effet tunnel, diode tunnel.
 
 Nombre fini d'états liés ($E < V_0$). Les fonctions d'onde débordent du puits ; les niveaux sont un peu plus bas que pour un puits infini de même largeur.
 
+## Exemple corrigé
+
+**Énoncé.** Un électron est enfermé dans un puits infini de largeur $L = 1$ nm. Calculer $E_1$ et la longueur d'onde du photon émis lors de la transition $2 \to 1$.
+
+**Solution.**
+1. $E_1 = \dfrac{\pi^2\hbar^2}{2mL^2} \approx 6{,}0\cdot10^{-20}$ J $\approx 0{,}38$ eV.
+2. $E_2 - E_1 = 3E_1 \approx 1{,}1$ eV.
+3. $\lambda = \dfrac{hc}{E_2 - E_1} \approx 1{,}1$ µm, dans l'infrarouge proche : c'est le principe des boîtes quantiques, dont la couleur dépend de la taille.
+
 ## Pièges classiques
 
 - Une particule quantique peut être là où elle serait classiquement interdite.

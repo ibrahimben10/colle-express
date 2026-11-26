@@ -25,6 +25,15 @@ Deux ondes de même fréquence et **cohérentes** (issues d'une même source, av
 - **Cohérence temporelle** : une source non monochromatique superpose des figures de pas différents ; le contraste s'annule quand $\delta$ dépasse $\ell_c$.
 - **Cohérence spatiale** : une source étendue superpose des figures décalées.
 
+## Exemple corrigé
+
+**Énoncé.** Deux ondes cohérentes d'intensités $I_1 = 4I_0$ et $I_2 = I_0$ interfèrent. Calculer $I_{\max}$, $I_{\min}$ et le contraste.
+
+**Solution.**
+1. $I_{\max} = I_1 + I_2 + 2\sqrt{I_1I_2} = 9I_0$ ; $I_{\min} = 5I_0 - 4I_0 = I_0$.
+2. Contraste : $C = \dfrac{9 - 1}{9 + 1} = 0{,}8$.
+3. Le contraste vaut 1 seulement si les deux ondes ont la même intensité.
+
 ## Pièges classiques
 
 - Deux sources distinctes (deux lampes) n'interfèrent pas.

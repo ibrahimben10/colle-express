@@ -31,6 +31,15 @@ M₁ et M₂′ font un petit angle $\alpha$. Sous incidence quasi normale, les 
 - Doublet du sodium : brouillages périodiques, d'où $\Delta\lambda$.
 - Mesure d'indice d'un gaz, contrôle de l'état de surface (coin d'air).
 
+## Exemple corrigé
+
+**Énoncé.** En lame d'air, éclairé par une lampe à 546 nm, on translate un miroir et on compte 100 anneaux qui disparaissent au centre. De combien a-t-on translaté le miroir ?
+
+**Solution.**
+1. Au centre ($i = 0$), $\delta = 2e$ ; un anneau défile chaque fois que $\delta$ varie de $\lambda$.
+2. $\Delta e = N\dfrac\lambda2 = 100\times273$ nm $\approx 27{,}3$ µm.
+3. Les anneaux rentrent vers le centre : $e$ a diminué (on se rapproche du contact optique).
+
 ## Pièges classiques
 
 - En lame d'air, l'ordre d'interférence est maximal au centre ($i = 0$) et décroît vers les bords.

@@ -30,6 +30,15 @@ Le gabarit traduit un cahier des charges : gain minimal dans la bande passante, 
 
 $S_{\text{eff}}^2 = a_0^2 + \sum_n \dfrac{A_n^2}{2}$ (formule de Parseval).
 
+## Exemple corrigé
+
+**Énoncé.** Un créneau de fréquence 1 kHz, de valeur moyenne nulle et d'amplitude $E$, a pour harmoniques $\dfrac{4E}{n\pi}$ aux rangs $n$ impairs. On veut extraire le fondamental avec un passe-bande très sélectif centré sur 1 kHz. Quelle amplitude obtient-on ?
+
+**Solution.**
+1. Le filtre laisse passer la seule composante à 1 kHz (rang 1) et coupe les rangs 3, 5…
+2. Amplitude du fondamental : $\dfrac{4E}{\pi} \approx 1{,}27E$, plus grande que l'amplitude du créneau.
+3. On obtient une sinusoïde à 1 kHz : un créneau filtré est une manière simple de fabriquer une sinusoïde.
+
 ## Pièges classiques
 
 - Un filtre non linéaire (diode, saturation) crée de nouvelles fréquences ; un filtre linéaire, jamais.

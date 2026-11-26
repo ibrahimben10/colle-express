@@ -33,6 +33,15 @@ Un hydroxyde **amphotère** comme Zn(OH)₂ se dissout en milieu acide (ions Zn�
 2. Exprimer les concentrations en fonction de $s$ (avec les équilibres annexes s'il y en a).
 3. Vérifier la présence effective du solide.
 
+## Exemple corrigé
+
+**Énoncé.** Calculer la solubilité de AgCl ($\mathrm pK_s = 9{,}75$) dans l'eau pure, puis dans une solution de NaCl à 0,10 mol·L⁻¹.
+
+**Solution.**
+1. Eau pure : $[\mathrm{Ag^+}] = [\mathrm{Cl^-}] = s$, donc $s = \sqrt{K_s} \approx 1{,}3\cdot10^{-5}$ mol·L⁻¹.
+2. Dans NaCl : $[\mathrm{Cl^-}] = 0{,}10 + s \approx 0{,}10$ et $s = K_s/0{,}10 \approx 1{,}8\cdot10^{-9}$ mol·L⁻¹.
+3. La solubilité est divisée par environ 7000 : c'est l'effet d'ion commun.
+
 ## Pièges classiques
 
 - $K_s$ ne s'applique que si le solide est présent.

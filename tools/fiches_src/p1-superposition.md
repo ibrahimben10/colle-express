@@ -32,6 +32,15 @@ les dépendances en $x$ et en $t$ sont **séparées**. Les nœuds (amplitude nul
 
 $\cos\omega_1 t + \cos\omega_2 t = 2\cos\!\left(\dfrac{\omega_1 - \omega_2}{2}t\right)\cos\!\left(\dfrac{\omega_1 + \omega_2}{2}t\right)$ : une oscillation rapide modulée par une enveloppe lente, de période $T_b = 1/|f_1 - f_2|$.
 
+## Exemple corrigé
+
+**Énoncé.** Deux haut-parleurs en phase, distants de quelques mètres, émettent un son de fréquence $f = 680$ Hz ($c = 340$ m·s⁻¹). Un micro est à $d_1 = 3{,}00$ m de l'un et $d_2 = 3{,}75$ m de l'autre. Les ondes y interfèrent-elles de façon constructive ?
+
+**Solution.**
+1. $\lambda = c/f = 0{,}50$ m.
+2. Différence de marche $\delta = d_2 - d_1 = 0{,}75$ m, soit $\delta/\lambda = 1{,}5$.
+3. $\delta$ est un multiple **impair** de $\lambda/2$ : déphasage $\Delta\varphi = 2\pi\delta/\lambda = 3\pi$, interférence **destructive** (amplitude minimale, nulle si les deux amplitudes sont égales).
+
 ## Pièges classiques
 
 - Il faut des sources **cohérentes** (même fréquence, déphasage constant) pour observer des interférences stables.

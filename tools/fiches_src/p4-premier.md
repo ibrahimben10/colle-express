@@ -33,6 +33,15 @@ Le calorimètre réalise une transformation monobare et adiabatique : $\Delta H 
 2. Identifier la transformation (adiabatique, monobare, isochore…).
 3. Écrire $\Delta U$ ou $\Delta H$ par un chemin fictif commode (fonction d'état).
 
+## Exemple corrigé
+
+**Énoncé.** Une mole de gaz parfait diatomique est comprimée de façon isotherme et réversible à 300 K, de 10 L à 5 L. Calculer $W$, $Q$ et $\Delta U$.
+
+**Solution.**
+1. Gaz parfait isotherme : $\Delta U = 0$ (l'énergie interne ne dépend que de $T$).
+2. Réversible : $W = -\int P\,\mathrm dV = -nRT\ln\dfrac{V_f}{V_i} = nRT\ln2 \approx 1{,}73$ kJ (le gaz reçoit du travail).
+3. Premier principe : $Q = -W \approx -1{,}73$ kJ ; le gaz cède cette chaleur au thermostat.
+
 ## Pièges classiques
 
 - $\Delta H = Q$ n'est valable qu'en monobare avec équilibre mécanique initial et final.

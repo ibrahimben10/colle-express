@@ -33,6 +33,15 @@ Le **poids** $m\vec g$ est la somme de l'attraction gravitationnelle et de la fo
 
 Effets de Coriolis : déviation vers l'est d'un corps en chute libre, sens de rotation des vents autour des dépressions, pendule de Foucault.
 
+## Exemple corrigé
+
+**Énoncé.** Dans un train qui accélère à $a = 2$ m·s⁻², un pendule est à l'équilibre relatif. Quel angle fait-il avec la verticale ?
+
+**Solution.**
+1. Référentiel du train, en translation rectiligne accélérée : on ajoute la force d'inertie d'entraînement $-m\vec a$ (pas de Coriolis).
+2. Équilibre : $m\vec g - m\vec a + \vec T = \vec 0$ ; le fil est aligné avec $\vec g - \vec a$.
+3. $\tan\alpha = a/g \approx 0{,}20$, soit $\alpha \approx 11{,}5°$, le pendule penchant vers l'arrière du train.
+
 ## Pièges classiques
 
 - Pas de forces d'inertie dans un référentiel galiléen.

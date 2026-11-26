@@ -31,6 +31,15 @@ Si $\vec v_0$ a une composante selon $\vec B$, elle est conservée : la trajecto
 
 Spectromètre de masse (séparer des ions de $m/q$ différents par leur rayon), cyclotron, déflexion d'un faisceau d'électrons.
 
+## Exemple corrigé
+
+**Énoncé.** Un électron, d'énergie cinétique initiale négligeable, est accéléré sous une tension $U = 1$ kV, puis entre dans un champ magnétique uniforme $B = 1$ mT perpendiculaire à sa vitesse. Calculer sa vitesse et le rayon de sa trajectoire.
+
+**Solution.**
+1. Théorème de l'énergie cinétique : $\tfrac12mv^2 = eU$, donc $v = \sqrt{2eU/m} \approx 1{,}9\cdot10^7$ m·s⁻¹ (non relativiste).
+2. Dans $\vec B$, la force de Lorentz ne travaille pas : mouvement circulaire uniforme de rayon $R = \dfrac{mv}{eB}$.
+3. $R = \dfrac{9{,}1\cdot10^{-31}\times1{,}9\cdot10^7}{1{,}6\cdot10^{-19}\times10^{-3}} \approx 11$ cm.
+
 ## Pièges classiques
 
 - Le sens de la force pour un électron ($q = -e$) est opposé à $\vec E$.

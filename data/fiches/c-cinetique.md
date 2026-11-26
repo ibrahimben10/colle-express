@@ -35,6 +35,15 @@ Si la réaction admet un ordre : $v = k[A]^\alpha[B]^\beta$, d'ordre global $\al
 
 L'énergie d'activation $E_a$ est la barrière à franchir. Un catalyseur abaisse cette barrière sans modifier l'état final.
 
+## Exemple corrigé
+
+**Énoncé.** La décomposition de N₂O₅ est d'ordre 1, avec $k = 5\cdot10^{-4}$ s⁻¹ à 45 °C. Calculer le temps de demi-réaction et la fraction restante après 1 heure.
+
+**Solution.**
+1. Ordre 1 : $t_{1/2} = \dfrac{\ln2}{k} \approx 1{,}4\cdot10^3$ s, soit 23 min.
+2. $[\mathrm A] = [\mathrm A]_0e^{-kt}$ ; après 3600 s : $e^{-1{,}8} \approx 0{,}17$.
+3. Il reste 17 % du réactif, quelle que soit sa concentration initiale.
+
 ## Pièges classiques
 
 - Ordre et coefficients stœchiométriques ne coïncident que pour un acte élémentaire.

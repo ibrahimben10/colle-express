@@ -32,6 +32,15 @@ Dans un conducteur parfait ($\gamma\to\infty$), $\vec E = \vec 0$ et $\vec B = \
 
 Le vecteur de Poynting moyen est nul : une onde stationnaire ne transporte pas d'énergie. Entre deux plans conducteurs distants de $L$, seules les ondes avec $L = n\lambda/2$ subsistent (modes propres d'une cavité).
 
+## Exemple corrigé
+
+**Énoncé.** Pourquoi les câbles haute tension en courant alternatif (50 Hz) sont-ils formés de plusieurs brins plutôt que d'un seul gros conducteur ? (aluminium, $\gamma = 3{,}5\cdot10^7$ S·m⁻¹)
+
+**Solution.**
+1. $\delta = \sqrt{\dfrac{2}{\mu_0\gamma\omega}} = \sqrt{\dfrac{2}{4\pi\cdot10^{-7}\times3{,}5\cdot10^7\times2\pi\cdot50}} \approx 12$ mm.
+2. Le courant circule surtout dans une couche d'environ $\delta$ sous la surface : le cœur d'un conducteur de rayon bien supérieur à 12 mm serait mal utilisé.
+3. Des brins de rayon inférieur à $\delta$ utilisent toute leur section : moins de pertes pour la même masse de métal.
+
 ## Pièges classiques
 
 - Ne pas oublier les courants surfaciques induits sur le métal, qui expliquent la discontinuité de $\vec B$.

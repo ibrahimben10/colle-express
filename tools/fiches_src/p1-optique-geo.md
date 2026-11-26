@@ -47,6 +47,15 @@ Une lunette **afocale** ($F_1' = F_2$) donne d'un objet à l'infini une image à
 
 L'œil se modélise par une lentille de vergence variable (cristallin), un diaphragme (iris) et un écran fixe (rétine) : l'**accommodation** permet de voir net du punctum remotum (l'infini pour un œil normal) au punctum proximum (environ 25 cm).
 
+## Exemple corrigé
+
+**Énoncé.** Un objet de 2 cm est placé à 30 cm devant une lentille convergente de distance focale $f' = 10$ cm. Où est l'image et quelle est sa taille ?
+
+**Solution.**
+1. Relation de conjugaison de Descartes, avec $\overline{OA} = -30$ cm : $\dfrac{1}{\overline{OA'}} - \dfrac{1}{\overline{OA}} = \dfrac{1}{f'}$, donc $\dfrac{1}{\overline{OA'}} = \dfrac{1}{10} - \dfrac{1}{30} = \dfrac{1}{15}$ et $\overline{OA'} = 15$ cm.
+2. Grandissement : $\gamma = \overline{OA'}/\overline{OA} = -0{,}5$.
+3. L'image est réelle (après la lentille), renversée, de taille 1 cm. Vérifier sur la construction : le rayon passant par O n'est pas dévié.
+
 ## Pièges classiques
 
 - Les distances sont **algébriques** : orienter l'axe dans le sens de la lumière.

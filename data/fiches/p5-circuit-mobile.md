@@ -27,6 +27,16 @@ Un cadre de $N$ spires de surface $S$ tourne à $\omega$ dans un champ uniforme 
 
 Freinage par courants de Foucault, alternateurs de centrales, dynamo, haut-parleur utilisé en microphone.
 
+## Exemple corrigé
+
+**Énoncé.** Sur des rails de Laplace horizontaux (écartement $L$, champ vertical $B$, résistance totale $R$), une barre de masse $m$ est lancée à la vitesse $v_0$. Déterminer $v(t)$.
+
+**Solution.**
+1. Électrique : $|e| = BLv$, d'où $i = \dfrac{BLv}{R}$.
+2. Mécanique : la force de Laplace freine la barre, $m\dfrac{\mathrm dv}{\mathrm dt} = -iLB = -\dfrac{B^2L^2}{R}v$.
+3. $v(t) = v_0e^{-t/\tau}$ avec $\tau = \dfrac{mR}{B^2L^2}$.
+4. Bilan : l'énergie cinétique initiale $\tfrac12mv_0^2$ est entièrement dissipée par effet Joule dans $R$.
+
 ## Pièges classiques
 
 - Oublier le terme de f.é.m. dans la loi des mailles, ou la force de Laplace dans le PFD : le couplage disparaît.

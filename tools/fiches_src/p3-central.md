@@ -37,6 +37,15 @@ Orbite circulaire de rayon $r$ : $v = \sqrt{GM/r}$, $E_m = -\dfrac{GMm}{2r}$. Po
 
 Satellite géostationnaire : orbite circulaire équatoriale, période d'un jour sidéral (86 164 s), rayon d'environ 42 000 km soit une altitude de 36 000 km. Vitesse de libération depuis la surface : $v_\ell = \sqrt{2GM/R}$ (11,2 km/s pour la Terre).
 
+## Exemple corrigé
+
+**Énoncé.** Un satellite décrit une orbite circulaire autour de la Terre, à l'altitude $h = 36\,000$ km. Calculer sa période ($R_T = 6400$ km, $GM_T = 4{,}0\cdot10^{14}$ m³·s⁻²).
+
+**Solution.**
+1. Mouvement circulaire uniforme : PFD radial $m\dfrac{v^2}{r} = \dfrac{GM_Tm}{r^2}$, donc $v = \sqrt{GM_T/r}$.
+2. $T = \dfrac{2\pi r}{v} = 2\pi\sqrt{\dfrac{r^3}{GM_T}}$ (3ᵉ loi de Kepler).
+3. Avec $r = 4{,}24\cdot10^7$ m : $T \approx 8{,}6\cdot10^4$ s $\approx 24$ h. C'est l'orbite géostationnaire.
+
 ## Pièges classiques
 
 - La loi des aires ne dit pas que la vitesse est constante : elle est maximale au périgée.

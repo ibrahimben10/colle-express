@@ -26,6 +26,15 @@ La position $\vec m$ colinéaire à $\vec B$ et de même sens est un équilibre 
 - Haut-parleur : bobine dans l'entrefer d'un aimant, la force de Laplace fait vibrer la membrane.
 - Moteur à courant continu : couple exercé sur des spires.
 
+## Exemple corrigé
+
+**Énoncé.** Une barre de longueur $L = 10$ cm, parcourue par $I = 5$ A, est placée perpendiculairement à un champ uniforme $B = 0{,}2$ T. Calculer la force de Laplace.
+
+**Solution.**
+1. $\vec F = I\vec L\wedge\vec B$ ; $\vec L \perp \vec B$, donc $F = ILB = 5\times0{,}1\times0{,}2 = 0{,}1$ N.
+2. Direction : perpendiculaire à la barre et au champ ; le sens se lit avec la règle de la main droite (ou le produit vectoriel dans une base).
+3. Si la barre se déplace de 2 cm dans le sens de $\vec F$, la force fournit $W = 0{,}1\times0{,}02 = 2$ mJ.
+
 ## Pièges classiques
 
 - Le sens de $\mathrm d\vec\ell$ est celui du courant choisi, pas celui de la barre.

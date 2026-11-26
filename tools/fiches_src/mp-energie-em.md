@@ -27,6 +27,15 @@ Dans un conducteur ohmique ($\vec j = \gamma\vec E$), $\vec j\cdot\vec E = \dfra
 
 Éclairement solaire au sol : $\langle\Pi\rangle \approx 1$ kW·m⁻². Laser de TP (1 mW sur 1 mm²) : 1 kW·m⁻².
 
+## Exemple corrigé
+
+**Énoncé.** Un fil cylindrique de rayon $a$, longueur $\ell$, conductivité $\gamma$, est parcouru par un courant $I$. Vérifier que le flux du vecteur de Poynting entrant égale la puissance Joule.
+
+**Solution.**
+1. À la surface : $E = \dfrac{j}{\gamma} = \dfrac{I}{\gamma\pi a^2}$ (axial) et $B = \dfrac{\mu_0I}{2\pi a}$ (orthoradial).
+2. $\Pi = \dfrac{EB}{\mu_0} = \dfrac{I^2}{2\gamma\pi^2a^3}$, dirigé vers l'axe.
+3. Flux entrant par la surface latérale : $\Pi\times2\pi a\ell = \dfrac{\ell}{\gamma\pi a^2}I^2 = RI^2$. C'est bien la puissance Joule.
+
 ## Pièges classiques
 
 - $\vec\Pi$ se calcule avec les champs **réels** : passer aux notations réelles avant de faire un produit.

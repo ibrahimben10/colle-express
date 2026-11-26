@@ -39,6 +39,16 @@ La puissance des actions de contact est négative ou nulle : $\mathcal P = \vec 
 | pneu sur route sèche | 0,8 |
 | bois sur bois | 0,3 à 0,5 |
 
+## Exemple corrigé
+
+**Énoncé.** On pose un bloc sur un plan dont on augmente lentement l'inclinaison. Il commence à glisser pour $\alpha_0 = 25°$. En déduire $f$, puis l'accélération pour $\alpha = 35°$.
+
+**Solution.**
+1. Juste avant le glissement, la réaction est sur le bord du cône : $\tan\alpha_0 = f$, donc $f \approx 0{,}47$.
+2. Pour $\alpha = 35°$, hypothèse glissement vers le bas : $N = mg\cos\alpha$ et $T = fN$, opposée au mouvement.
+3. PFD le long de la pente : $a = g(\sin\alpha - f\cos\alpha) \approx 9{,}8\,(0{,}574 - 0{,}38) \approx 1{,}9$ m·s⁻².
+4. Vérification : $a > 0$, cohérent avec un glissement vers le bas (on suppose ici $f$ dynamique égal à $f$ statique).
+
 ## Pièges classiques
 
 - La composante $N$ n'est pas toujours égale au poids : la déterminer avec le PFD.

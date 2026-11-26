@@ -36,6 +36,15 @@ En puissance : $D_m(\Delta h + \Delta e_c + g\Delta z) = \mathcal P_u + \mathcal
 
 Dans le diagramme $(\log P, h)$, les transformations isobares et isenthalpiques sont des segments : on lit directement $w_u$ et $q$ en différences d'abscisses. Efficacité d'un réfrigérateur : $e = \dfrac{q_{\text{évap}}}{w_u}$.
 
+## Exemple corrigé
+
+**Énoncé.** Une turbine adiabatique est traversée par $D_m = 2$ kg·s⁻¹ de vapeur ; l'enthalpie massique passe de 3200 à 2600 kJ·kg⁻¹. Calculer la puissance fournie ($\Delta e_c$ et $\Delta e_p$ négligés).
+
+**Solution.**
+1. Premier principe industriel : $\Delta h = w_u + q$ avec $q = 0$ (adiabatique).
+2. $w_u = \Delta h = -600$ kJ·kg⁻¹ : le fluide cède du travail.
+3. Puissance fournie à l'arbre : $\mathcal P = D_m|w_u| = 1{,}2$ MW.
+
 ## Pièges classiques
 
 - C'est l'**enthalpie**, et non l'énergie interne, qui intervient : le travail des forces de pression d'entrée et de sortie est inclus dans $h$.

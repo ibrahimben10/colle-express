@@ -31,6 +31,15 @@ Les ions H⁺ ou HO⁻ éventuels figurent dans le logarithme : le potentiel dé
 
 La réaction entre l'oxydant le plus fort et le réducteur le plus fort est quasi totale dès que les potentiels standard sont écartés de quelques dixièmes de volt.
 
+## Exemple corrigé
+
+**Énoncé.** Pile Daniell avec $[\mathrm{Cu^{2+}}] = [\mathrm{Zn^{2+}}] = 0{,}10$ mol·L⁻¹ ($E^\circ(\mathrm{Cu^{2+}/Cu}) = 0{,}34$ V, $E^\circ(\mathrm{Zn^{2+}/Zn}) = -0{,}76$ V). Calculer sa f.é.m. et la constante de la réaction de fonctionnement.
+
+**Solution.**
+1. Nernst : $E_{\mathrm{Cu}} = 0{,}34 + 0{,}03\log0{,}10 = 0{,}31$ V et $E_{\mathrm{Zn}} = -0{,}79$ V.
+2. Le pôle + est le cuivre : $e = E_+ - E_- = 1{,}10$ V.
+3. Réaction : $\mathrm{Cu^{2+}} + \mathrm{Zn} \to \mathrm{Cu} + \mathrm{Zn^{2+}}$, $n = 2$ : $K = 10^{2\times1{,}10/0{,}06} \approx 10^{37}$, réaction totale.
+
 ## Pièges classiques
 
 - Équilibrer d'abord les demi-équations (atomes, puis O avec H₂O, H avec H⁺, charges avec e⁻).

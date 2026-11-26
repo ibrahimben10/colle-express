@@ -32,6 +32,14 @@ C'est l'origine des spectres de raies.
 $$\Delta x\,\Delta p_x \gtrsim \hbar,\qquad \hbar = \frac{h}{2\pi}.$$
 On ne peut pas connaître simultanément, avec une précision arbitraire, la position et la quantité de mouvement.
 
+## Exemple corrigé
+
+**Énoncé.** Calculer l'énergie (en eV) d'un photon de longueur d'onde 500 nm, et la longueur d'onde de de Broglie d'un électron de vitesse $10^6$ m·s⁻¹.
+
+**Solution.**
+1. $E = \dfrac{hc}{\lambda} = \dfrac{6{,}63\cdot10^{-34}\times3{,}0\cdot10^8}{500\cdot10^{-9}} = 4{,}0\cdot10^{-19}$ J, soit $E \approx 2{,}5$ eV (diviser par $1{,}6\cdot10^{-19}$).
+2. $\lambda_{dB} = \dfrac{h}{mv} = \dfrac{6{,}63\cdot10^{-34}}{9{,}1\cdot10^{-31}\times10^6} \approx 0{,}73$ nm : de l'ordre des distances interatomiques, d'où la diffraction des électrons par les cristaux.
+
 ## Pièges classiques
 
 - Le comportement quantique se manifeste quand $\lambda = h/p$ est comparable aux dimensions du système : pour une balle de tennis, $\lambda$ est ridiculement petite.

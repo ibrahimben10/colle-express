@@ -27,6 +27,15 @@ Le potentiel décroît en $1/r^2$ et le champ en $1/r^3$ : plus vite que pour un
 
 Molécules polaires (eau : $p \approx 6\cdot10^{-30}$ C·m), solvatation des ions, forces de Van der Waals, électrisation d'un morceau de papier par un objet frotté.
 
+## Exemple corrigé
+
+**Énoncé.** Une molécule d'eau ($p = 6{,}2\cdot10^{-30}$ C·m) est placée dans un champ uniforme $E = 10^6$ V·m⁻¹. Calculer le couple maximal et comparer l'énergie d'orientation à $k_BT$ à 300 K.
+
+**Solution.**
+1. Couple maximal (pour $\vec p \perp \vec E$) : $\Gamma = pE = 6{,}2\cdot10^{-24}$ N·m.
+2. Écart d'énergie entre les orientations extrêmes : $2pE \approx 1{,}2\cdot10^{-23}$ J.
+3. $k_BT \approx 4{,}1\cdot10^{-21}$ J, plus de 300 fois plus grand : l'agitation thermique empêche l'alignement complet, seule une faible orientation moyenne subsiste.
+
 ## Pièges classiques
 
 - $\vec p$ va de la charge **négative** vers la charge **positive**.

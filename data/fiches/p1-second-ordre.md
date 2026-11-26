@@ -33,6 +33,15 @@ Deux conditions sont nécessaires : continuité de $u_C$ et de $i = C\,\mathrm d
 
 $E = \tfrac12 Cu_C^2 + \tfrac12 Li^2$ décroît : $\dfrac{\mathrm dE}{\mathrm dt} = -Ri^2$ en régime libre.
 
+## Exemple corrigé
+
+**Énoncé.** Un circuit RLC série ($R = 100$ Ω, $L = 0{,}1$ H, $C = 1$ µF) est soumis à un échelon de tension. Quel est le régime transitoire ?
+
+**Solution.**
+1. Forme canonique : $\ddot u_C + \dfrac{\omega_0}{Q}\dot u_C + \omega_0^2u_C = \omega_0^2E$, avec $\omega_0 = \dfrac{1}{\sqrt{LC}} \approx 3{,}2\cdot10^3$ rad·s⁻¹ et $Q = \dfrac1R\sqrt{\dfrac LC} \approx 3{,}2$.
+2. $Q > 1/2$ : régime **pseudo-périodique**.
+3. Pseudo-pulsation $\omega = \omega_0\sqrt{1 - \dfrac{1}{4Q^2}} \approx 0{,}99\,\omega_0$ ; on observe environ $Q \approx 3$ oscillations visibles avant l'amortissement.
+
 ## Pièges classiques
 
 - La pseudo-période $2\pi/\Omega$ est **plus grande** que la période propre $2\pi/\omega_0$.

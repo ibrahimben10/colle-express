@@ -28,6 +28,15 @@ $$\omega_0 = \sqrt{\frac{E_p''(x_0)}{m}}.$$
 
 $E_p = mg\ell(1 - \cos\theta)$, $E_p'' (0)= mg\ell$, moment d'inertie $m\ell^2$ : $\omega_0 = \sqrt{g/\ell}$. Pour de grandes amplitudes, la période augmente : l'isochronisme est perdu.
 
+## Exemple corrigé
+
+**Énoncé.** Une particule a l'énergie potentielle $E_p(x) = \dfrac{a}{x^2} - \dfrac{b}{x}$ ($a, b > 0$, $x > 0$). Trouver la position d'équilibre et sa stabilité.
+
+**Solution.**
+1. Équilibre : $\dfrac{\mathrm dE_p}{\mathrm dx} = -\dfrac{2a}{x^3} + \dfrac{b}{x^2} = 0$, d'où $x_e = \dfrac{2a}{b}$.
+2. $\dfrac{\mathrm d^2E_p}{\mathrm dx^2} = \dfrac{6a}{x^4} - \dfrac{2b}{x^3}$ ; en $x_e$ elle vaut $\dfrac{b^4}{8a^3} > 0$ : minimum, équilibre **stable**.
+3. Si $E_m < 0$, le mouvement est borné entre deux points où $E_p = E_m$ (état lié) ; si $E_m \ge 0$, la particule peut partir à l'infini.
+
 ## Pièges classiques
 
 - Le « $m$ » de la formule de $\omega_0$ est à remplacer par le coefficient du terme cinétique ($m\ell^2$ si la variable est un angle).

@@ -28,6 +28,15 @@ La boussole s'oriente selon le champ local (équilibre stable pour $\vec m$ dans
 | aimant usuel | 1 A·m² |
 | Terre | $8\cdot10^{22}$ A·m² |
 
+## Exemple corrigé
+
+**Énoncé.** Une boussole (moment $m = 0{,}1$ A·m²) est soumise à la composante horizontale du champ terrestre, $B_h = 2\cdot10^{-5}$ T. Calculer le couple qui la ramène lorsqu'elle est écartée de 90°, et la période des petites oscillations (moment d'inertie $J = 10^{-7}$ kg·m²).
+
+**Solution.**
+1. $\Gamma = mB_h\sin\theta$, maximal à 90° : $2\cdot10^{-6}$ N·m.
+2. Petits angles : $J\ddot\theta = -mB_h\theta$, d'où $\omega_0 = \sqrt{\dfrac{mB_h}{J}} \approx 4{,}5$ rad·s⁻¹.
+3. $T_0 = 2\pi/\omega_0 \approx 1{,}4$ s. Mesurer cette période permet de mesurer $B_h$.
+
 ## Pièges classiques
 
 - Le sens de $\vec n$ est lié au sens du courant par la règle de la main droite.

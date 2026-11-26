@@ -28,6 +28,15 @@ L'ordre 0 ($\theta = \theta_i$) est le même pour toutes les longueurs d'onde ; 
 
 Réseau usuel : 500 traits par mm, soit $a = 2$ µm ; une dizaine de milliers de traits éclairés.
 
+## Exemple corrigé
+
+**Énoncé.** Un réseau de 600 traits/mm est éclairé sous incidence normale par une lumière de 500 nm. Dans quelles directions observe-t-on les maxima ?
+
+**Solution.**
+1. Pas $a = 1/600$ mm $\approx 1{,}67$ µm.
+2. Formule des réseaux, $\theta_i = 0$ : $\sin\theta_p = p\lambda/a = 0{,}30\,p$.
+3. $p = 0$ : $0°$ ; $p = \pm1$ : $\pm17{,}5°$ ; $p = \pm2$ : $\pm36{,}9°$ ; $p = \pm3$ : $\pm64°$. Pour $p = 4$, $\sin\theta > 1$ : 7 maxima en tout.
+
 ## Pièges classiques
 
 - $\theta_p$ dépend de $\lambda$ : le rouge est plus dévié que le bleu (contrairement au prisme).

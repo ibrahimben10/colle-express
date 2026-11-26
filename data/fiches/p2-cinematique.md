@@ -40,6 +40,15 @@ Pour $r = R$ constant : $\vec v = R\dot\theta\,\vec u_\theta$ et $\vec a = -R\do
 - Choisir la base selon la symétrie : cartésienne pour un mouvement rectiligne ou parabolique, polaire pour une rotation ou une force centrale.
 - Dériver les vecteurs de base mobiles : c'est l'erreur la plus fréquente.
 
+## Exemple corrigé
+
+**Énoncé.** Un point M décrit un cercle de rayon $R = 2$ m avec $\theta(t) = 3t^2$ (en rad, $t$ en s). Donner sa vitesse et son accélération à $t = 1$ s.
+
+**Solution.**
+1. En coordonnées polaires ($r = R$ constant) : $\vec v = R\dot\theta\,\vec u_\theta$ et $\vec a = -R\dot\theta^2\,\vec u_r + R\ddot\theta\,\vec u_\theta$.
+2. $\dot\theta = 6t = 6$ rad·s⁻¹ et $\ddot\theta = 6$ rad·s⁻² à $t = 1$ s.
+3. $v = 12$ m·s⁻¹ ; $a_r = -72$ m·s⁻² (centripète), $a_\theta = 12$ m·s⁻² (tangentielle). Le mouvement est circulaire **accéléré**.
+
 ## Pièges classiques
 
 - « Uniforme » signifie norme de la vitesse constante, pas accélération nulle.

@@ -41,6 +41,15 @@ Une spire de surface $S$ parcourue par $I$ a un moment magnétique $\vec m = IS\
 | aimant usuel | 0,1 T |
 | IRM | 1 à 3 T |
 
+## Exemple corrigé
+
+**Énoncé.** Un solénoïde de 50 cm de long comporte 1000 spires et est parcouru par 2 A. Calculer le champ à l'intérieur et le comparer au champ terrestre.
+
+**Solution.**
+1. $n = 1000/0{,}50 = 2000$ spires par mètre.
+2. $B = \mu_0nI = 4\pi\cdot10^{-7}\times2000\times2 \approx 5{,}0$ mT.
+3. C'est environ 250 fois la composante horizontale du champ terrestre ($2\cdot10^{-5}$ T) : on peut négliger ce dernier.
+
 ## Pièges classiques
 
 - Les lignes de champ d'un aimant sont **fermées** : à l'intérieur de l'aimant, elles vont du sud au nord.

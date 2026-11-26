@@ -34,6 +34,15 @@ Les **électrons de valence** sont ceux de la couche de $n$ le plus grand, plus 
 
 > **Propriété.** L'électronégativité augmente de gauche à droite et de bas en haut ; le rayon atomique évolue en sens inverse. Le fluor est l'élément le plus électronégatif.
 
+## Exemple corrigé
+
+**Énoncé.** Donner la configuration électronique du soufre ($Z = 16$), son nombre d'électrons de valence et sa position dans le tableau.
+
+**Solution.**
+1. Remplissage : $1s^2\,2s^2\,2p^6\,3s^2\,3p^4$.
+2. Électrons de valence : $3s^2\,3p^4$, soit 6.
+3. Période 3 (couche $n = 3$), bloc p, colonne 16 (famille de l'oxygène). Il gagne facilement 2 électrons : ion S²⁻.
+
 ## Pièges classiques
 
 - La sous-couche $4s$ se remplit avant la $3d$ mais se vide avant elle lors de l'ionisation.

@@ -37,6 +37,16 @@ Une liaison entre atomes d'électronégativités différentes est polarisée. Le
 
 Unité : le debye, 1 D $= 3{,}33\cdot10^{-30}$ C·m ; eau : 1,85 D.
 
+## Exemple corrigé
+
+**Énoncé.** Établir le schéma de Lewis de NH₃ et prévoir sa géométrie.
+
+**Solution.**
+1. Électrons de valence : $5 + 3\times1 = 8$, soit 4 doublets.
+2. Trois liaisons N–H et un doublet non liant sur N : octet respecté, charges formelles nulles.
+3. N est de type AX₃E : directions tétraédriques, molécule **pyramidale**, angle HNH $\approx 107°$ (un peu moins que 109,5° à cause du doublet non liant).
+4. N plus électronégatif que H et molécule non plane : NH₃ est polaire.
+
 ## Pièges classiques
 
 - On compte les doublets non liants de l'atome central dans $n + m$, mais pas pour nommer la géométrie.

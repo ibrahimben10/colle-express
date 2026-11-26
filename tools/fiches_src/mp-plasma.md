@@ -28,6 +28,15 @@ Dans le plasma, $v_\varphi > c$ mais $v_g < c$, et $v_\varphi v_g = c^2$.
 
 Ionosphère : $n \approx 10^{11}$ à $10^{12}$ m⁻³, soit $f_p = \omega_p/2\pi$ de quelques MHz.
 
+## Exemple corrigé
+
+**Énoncé.** L'ionosphère contient $n = 10^{12}$ électrons par m³. Une onde radio de 5 MHz s'y propage-t-elle ? Et une onde FM à 100 MHz ?
+
+**Solution.**
+1. $\omega_p = \sqrt{\dfrac{ne^2}{m\varepsilon_0}} \approx 5{,}6\cdot10^7$ rad·s⁻¹, soit $f_p \approx 9$ MHz.
+2. À 5 MHz, $f < f_p$ : onde évanescente, réflexion. Ces ondes « rebondissent » sur l'ionosphère et portent loin.
+3. À 100 MHz, $f \gg f_p$ : l'onde traverse l'ionosphère (d'où l'usage de fréquences élevées pour les satellites).
+
 ## Pièges classiques
 
 - $v_\varphi > c$ ne contredit pas la relativité : aucune information ne se propage à la vitesse de phase.

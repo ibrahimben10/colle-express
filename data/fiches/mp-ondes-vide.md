@@ -31,6 +31,15 @@ Un polariseur ne transmet que la composante selon sa direction : **loi de Malus*
 
 Pour une OPPM, $\mathrm{div} \to -j\vec k\cdot$, $\overrightarrow{\mathrm{rot}} \to -j\vec k\wedge$, $\partial/\partial t \to j\omega$ (convention $e^{j(\omega t - \vec k\cdot\vec r)}$).
 
+## Exemple corrigé
+
+**Énoncé.** Un laser de 1 mW éclaire uniformément une tache de 1 mm². Calculer l'amplitude du champ électrique de l'onde.
+
+**Solution.**
+1. Éclairement : $\langle\Pi\rangle = \dfrac{10^{-3}}{10^{-6}} = 10^3$ W·m⁻².
+2. Pour une OPPM : $\langle\Pi\rangle = \tfrac12\varepsilon_0cE_0^2$.
+3. $E_0 = \sqrt{\dfrac{2\langle\Pi\rangle}{\varepsilon_0c}} \approx 870$ V·m⁻¹, et $B_0 = E_0/c \approx 2{,}9$ µT.
+
 ## Pièges classiques
 
 - La relation $\vec B = \vec k\wedge\vec E/\omega$ n'est valable que pour une onde plane progressive (pas pour une onde stationnaire).

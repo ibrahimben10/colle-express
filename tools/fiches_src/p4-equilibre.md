@@ -28,6 +28,15 @@ Sous une pression donnée, le changement d'état a lieu à **température fixée
 
 > **Propriété — Théorème des moments.** Sur le palier, le titre massique en vapeur vaut $x_V = \dfrac{LM}{LV} = \dfrac{v - v_L}{v_V - v_L}$.
 
+## Exemple corrigé
+
+**Énoncé.** Quelle quantité d'air (gaz parfait) contient une pièce de 50 m³ à 20 °C et 1 bar ? Quelle est sa masse ($M = 29$ g·mol⁻¹) ?
+
+**Solution.**
+1. $PV = nRT$ avec $P = 10^5$ Pa, $V = 50$ m³, $T = 293$ K : $n = \dfrac{PV}{RT} \approx 2{,}05\cdot10^3$ mol.
+2. $m = nM \approx 59$ kg.
+3. Penser aux unités SI : pression en pascals, volume en m³, température en kelvins.
+
 ## Pièges classiques
 
 - La température dans $PV = nRT$ est en **kelvins**, le volume en m³.

@@ -40,6 +40,16 @@ Dans le plan $(x, \dot x)$, la trajectoire est une ellipse de demi-axes $X_m$ et
 - Mettre l'équation sous la forme canonique $\ddot x + \omega_0^2 x = 0$ et **identifier** $\omega_0$.
 - Utiliser les conditions initiales en dernier.
 
+## Exemple corrigé
+
+**Énoncé.** Une masse $m = 200$ g accrochée à un ressort de raideur $k = 20$ N·m⁻¹ est écartée de $X_0 = 3$ cm de sa position d'équilibre puis lâchée sans vitesse. Donner $x(t)$, la période et la vitesse maximale.
+
+**Solution.**
+1. PFD projeté sur l'axe : $m\ddot x = -kx$, soit $\ddot x + \omega_0^2x = 0$ avec $\omega_0 = \sqrt{k/m} = 10$ rad·s⁻¹.
+2. Solution générale $x = A\cos\omega_0t + B\sin\omega_0t$ ; les conditions initiales $x(0) = X_0$, $\dot x(0) = 0$ donnent $A = X_0$, $B = 0$ : $x(t) = X_0\cos(\omega_0t)$.
+3. Période $T_0 = 2\pi/\omega_0 \approx 0{,}63$ s.
+4. $v_{\max} = \omega_0X_0 = 0{,}30$ m·s⁻¹. Vérification énergétique : $\tfrac12kX_0^2 = \tfrac12mv_{\max}^2$.
+
 ## Pièges classiques
 
 > **Attention — Origine de l'axe.** $x$ doit être mesuré depuis la **position d'équilibre** pour obtenir la forme canonique ; sinon un terme constant apparaît.
