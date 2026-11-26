@@ -1132,7 +1132,27 @@ insert into public.exercices_meta (id, mat, chap, niveau) values
   ('n-dist-convergence','Maths','Distributions',2),
   ('n-cdp-regression','Maths','Calcul différentiel & probabilités',2),
   ('n-cdp-laplace','Maths','Calcul différentiel & probabilités',3),
-  ('n-cdp-entropie','Maths','Calcul différentiel & probabilités',3)
+  ('n-cdp-entropie','Maths','Calcul différentiel & probabilités',3),
+  ('n-cc-bertrand','Maths','Séries',1),
+  ('n-cc-telescope','Maths','Séries',1),
+  ('n-cc-se-somme','Maths','Séries entières',1),
+  ('n-cc-se-ln','Maths','Séries entières',1),
+  ('n-cc-wallis','Maths','Intégration',1),
+  ('n-cc-cvd','Maths','Intégration',1),
+  ('n-cc-param','Maths','Intégrales à paramètre',1),
+  ('n-cc-ed1','Maths','Équations différentielles',1),
+  ('n-cc-ed2','Maths','Équations différentielles',1),
+  ('n-cc-red3','Maths','Réduction',1),
+  ('n-cc-matJ','Maths','Réduction',1),
+  ('n-cc-red2','Maths','Réduction',1),
+  ('n-cc-gram','Maths','Algèbre euclidienne',1),
+  ('n-cc-proj','Maths','Algèbre euclidienne',1),
+  ('n-cc-de6','Maths','Probabilités',1),
+  ('n-cc-poisson','Maths','Probabilités',1),
+  ('n-cc-binom','Maths','Probabilités',1),
+  ('n-cc-poly','Maths','Polynômes',1),
+  ('n-cc-sdf','Maths','Séries de fonctions',1),
+  ('n-cc-norme','Maths','Topologie & convexité',1)
 on conflict (id) do update set mat = excluded.mat, chap = excluded.chap, niveau = excluded.niveau;
 alter table public.exercices_meta enable row level security;
 drop policy if exists "méta: lecture" on public.exercices_meta;
