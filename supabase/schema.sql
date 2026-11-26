@@ -1120,7 +1120,19 @@ insert into public.exercices_meta (id, mat, chap, niveau) values
   ('n-mp-sinc','Maths','Équations différentielles',2),
   ('n-mp-chiab','Maths','Topologie matricielle',2),
   ('n-mp-densite','Maths','Topologie matricielle',3),
-  ('n-mp-marche','Maths','Probabilités',3)
+  ('n-mp-marche','Maths','Probabilités',3),
+  ('n-mp-polya','Maths','Probabilités',3),
+  ('n-mp-glnp','Maths','Probabilités',3),
+  ('n-mp-commutateur','Maths','Réduction',3),
+  ('n-mp-nilptr','Maths','Réduction',3),
+  ('n-mp-glconnexe','Maths','Topologie & convexité',3),
+  ('n-mp-sgR','Maths','Topologie & convexité',2),
+  ('n-dist-heaviside','Maths','Distributions',2),
+  ('n-dist-equations','Maths','Distributions',3),
+  ('n-dist-convergence','Maths','Distributions',2),
+  ('n-cdp-regression','Maths','Calcul différentiel & probabilités',2),
+  ('n-cdp-laplace','Maths','Calcul différentiel & probabilités',3),
+  ('n-cdp-entropie','Maths','Calcul différentiel & probabilités',3)
 on conflict (id) do update set mat = excluded.mat, chap = excluded.chap, niveau = excluded.niveau;
 alter table public.exercices_meta enable row level security;
 drop policy if exists "méta: lecture" on public.exercices_meta;

@@ -3,7 +3,7 @@
 import json, sys, importlib
 sys.path.insert(0, 'tools')
 B = {}
-for m in ['bilan_m1', 'bilan_m2', 'bilan_p1', 'bilan_n', 'bilan_s', 'bilan_i', 'bilan_pc', 'bilan_mp']:
+for m in ['bilan_m1', 'bilan_m2', 'bilan_p1', 'bilan_n', 'bilan_s', 'bilan_i', 'bilan_pc', 'bilan_mp', 'bilan_mp2', 'bilan_mp3']:
     B.update(importlib.import_module(m).B)
 E = json.load(open('data/exercices.json')); C = json.load(open('data/corriges.json'))
 ids = {e['id'] for e in E}

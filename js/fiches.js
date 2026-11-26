@@ -106,7 +106,7 @@ function renderIndex(el, L) {
 // Chapitre d'exercice → fiches correspondantes (dans l'ordre de pertinence).
 const LIENS = {
   Maths: {
-    'Algèbre & arithmétique': ['m1-arithmetique', 'm2-algebre'], 'Algèbre euclidienne': ['m2-euclidiens', 'm1-prehilbertiens'],
+    'Algèbre & arithmétique': ['m1-arithmetique', 'm2-algebre'], 'Distributions': ['m2-integration', 'm2-parametre'], 'Calcul différentiel & probabilités': ['m2-differentiel', 'm2-probas'], 'Algèbre euclidienne': ['m2-euclidiens', 'm1-prehilbertiens'],
     'Algèbre linéaire': ['m2-algebre-lin', 'm1-ev', 'm1-dimension', 'm1-matrices'], 'Analyse asymptotique': ['m1-asymptotique'],
     'Anneaux': ['m2-algebre', 'm1-structures'], 'Approximation': ['m2-suites-fonctions', 'm2-topologie'], 'Arithmétique': ['m1-arithmetique', 'm2-algebre'],
     'Calcul différentiel': ['m2-differentiel'], 'Déterminants': ['m1-determinants'], 'Exponentielle de matrices': ['m2-reduction', 'm2-edl'],

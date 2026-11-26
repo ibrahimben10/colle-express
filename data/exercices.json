@@ -3494,5 +3494,137 @@
   "enonce": "Soit $(X_k)_{k\\ge1}$ une suite de variables aléatoires indépendantes telles que $P(X_k=1)=P(X_k=-1)=\\frac12$, et $S_0=0$, $S_n=X_1+\\dots+X_n$. On note $T=\\min\\{n\\ge1,\\ S_n=0\\}$ (avec $T=+\\infty$ si l'ensemble est vide), $u_n=P(S_{2n}=0)$ et $f_n=P(T=2n)$ pour $n\\ge1$ ; $u_0=1$.\n\n1. Calculer $u_n$ et en donner un équivalent.\n2. Montrer que $u_n=\\sum_{k=1}^nf_k\\,u_{n-k}$ pour $n\\ge1$.\n3. On pose $U(x)=\\sum_{n\\ge0}u_nx^n$ et $F(x)=\\sum_{n\\ge1}f_nx^n$. Montrer que $U(x)=\\frac1{\\sqrt{1-x}}$ et $F(x)=1-\\sqrt{1-x}$ pour $x\\in[0,1[$.\n4. En déduire que la marche revient presque sûrement en $0$, mais que $E(T)=+\\infty$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
   "duree": 35,
   "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-polya",
+  "mat": "Maths",
+  "chap": "Probabilités",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "L’urne de Pólya devient uniforme",
+  "enonce": "Une urne contient initialement une boule rouge et une boule bleue. À chaque étape, on tire une boule au hasard, on la remet, et on ajoute une boule **de la même couleur**. On note $R_n$ le nombre de boules rouges après $n$ tirages (il y a alors $n+2$ boules).\n\n1. Montrer que $R_n$ suit la loi uniforme sur $\\{1,\\dots,n+1\\}$.\n2. Montrer que, pour tout $n$, la probabilité que le $(n+1)$-ième tirage donne une boule rouge vaut $\\frac12$.\n3. On pose $Y_n=\\frac{R_n}{n+2}$ (proportion de rouges). Montrer que $P(Y_n\\le x)\\to x$ pour tout $x\\in[0,1]$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-glnp",
+  "mat": "Maths",
+  "chap": "Probabilités",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "Une matrice au hasard est-elle inversible ?",
+  "enonce": "Soit $p$ un nombre premier et $n\\ge1$. On choisit une matrice $M$ uniformément au hasard dans $\\mathcal M_n(\\mathbb Z/p\\mathbb Z)$ (les $n^2$ coefficients sont indépendants et uniformes).\n\n1. Montrer que $P(M\\in GL_n(\\mathbb Z/p\\mathbb Z))=\\prod_{j=1}^n\\big(1-p^{-j}\\big)$.\n2. Montrer que cette probabilité admet une limite $L_p>0$ quand $n\\to+\\infty$.\n3. Montrer que $L_2\\ge\\frac14$ et que $L_p\\ge1-\\frac1{p-1}$ pour $p\\ge3$. Que vaut $\\lim_{p\\to+\\infty}L_p$ ?\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 30,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-commutateur",
+  "mat": "Maths",
+  "chap": "Réduction",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "Toute matrice de trace nulle est un commutateur",
+  "enonce": "Soit $\\mathbb K=\\mathbb R$ ou $\\mathbb C$ et $n\\ge1$.\n\n1. Montrer qu'il n'existe pas de matrices $X,Y\\in\\mathcal M_n(\\mathbb K)$ telles que $XY-YX=I_n$.\n2. Soit $u\\in\\mathcal L(\\mathbb K^n)$ qui n'est pas une homothétie. Montrer qu'il existe $x$ tel que $(x,u(x))$ soit libre.\n3. Montrer que toute matrice $A$ de trace nulle est semblable à une matrice de diagonale nulle.\n4. Soit $D=\\mathrm{diag}(1,2,\\dots,n)$. Montrer que toute matrice $C$ de diagonale nulle s'écrit $C=DB-BD$.\n5. En déduire : $\\operatorname{tr}A=0\\iff$ il existe $X,Y$ telles que $A=XY-YX$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 35,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-nilptr",
+  "mat": "Maths",
+  "chap": "Réduction",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "Nilpotence lue sur les traces",
+  "enonce": "Soit $A\\in\\mathcal M_n(\\mathbb C)$.\n\n1. Montrer que $A$ est nilpotente si et seulement si $\\operatorname{tr}(A^k)=0$ pour tout $k\\in\\{1,\\dots,n\\}$.\n2. Soient $A,B\\in\\mathcal M_n(\\mathbb C)$ telles que $AB-BA=A$. Montrer que $A^kB-BA^k=kA^k$ pour tout $k\\ge1$.\n3. En déduire que $A$ est nilpotente.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-glconnexe",
+  "mat": "Maths",
+  "chap": "Topologie & convexité",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "GL_n(ℂ) est connexe par arcs, GL_n(ℝ) non",
+  "enonce": "1. Montrer que $GL_n(\\mathbb R)$ n'est pas connexe par arcs ($n\\ge1$).\n2. Soient $A,B\\in GL_n(\\mathbb C)$. Montrer que $P(z)=\\det\\big((1-z)A+zB\\big)$ est un polynôme en $z$ non nul, et en déduire qu'il existe un chemin continu $\\gamma:[0,1]\\to\\mathbb C$ de $0$ à $1$ qui évite ses racines.\n3. En déduire que $GL_n(\\mathbb C)$ est connexe par arcs.\n4. Montrer que toute application continue $f:GL_n(\\mathbb C)\\to\\mathbb Z$ est constante. Est-ce vrai pour $GL_n(\\mathbb R)$ ?\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 30,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-sgR",
+  "mat": "Maths",
+  "chap": "Topologie & convexité",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Sous-groupes de ℝ et densité de {cos n}",
+  "enonce": "Soit $G$ un sous-groupe de $(\\mathbb R,+)$ non réduit à $\\{0\\}$, et $a=\\inf\\big(G\\cap\\,]0,+\\infty[\\big)$.\n\n1. Montrer que si $a>0$, alors $a\\in G$ et $G=a\\mathbb Z$.\n2. Montrer que si $a=0$, alors $G$ est dense dans $\\mathbb R$.\n3. En déduire que $\\mathbb Z+\\sqrt2\\,\\mathbb Z$ est dense dans $\\mathbb R$.\n4. Montrer que $\\{\\cos n,\\ n\\in\\mathbb N\\}$ est dense dans $[-1,1]$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-dist-heaviside",
+  "mat": "Maths",
+  "chap": "Distributions",
+  "niveau": 2,
+  "concours": "Ouverture",
+  "titre": "Dérivées de Heaviside, de |x| et masse de Dirac",
+  "enonce": "**Cadre.** On note $\\mathcal D$ l'ensemble des fonctions $\\varphi:\\mathbb R\\to\\mathbb R$ de classe $\\mathcal C^\\infty$ et nulles en dehors d'un segment (fonctions test). Une **distribution** est une forme linéaire $T:\\mathcal D\\to\\mathbb R$ telle que, pour tout $a>0$, il existe $C\\ge0$ et $k\\in\\mathbb N$ avec $|T(\\varphi)|\\le C\\max_{j\\le k}\\|\\varphi^{(j)}\\|_\\infty$ pour toute $\\varphi\\in\\mathcal D$ nulle hors de $[-a,a]$. Exemples : pour $f$ continue par morceaux, $T_f(\\varphi)=\\int_{\\mathbb R}f\\varphi$ ; la masse de Dirac $\\delta(\\varphi)=\\varphi(0)$. La **dérivée** de $T$ est la distribution $T'(\\varphi)=-T(\\varphi')$ (pour $f$ de classe $\\mathcal C^1$, une intégration par parties donne $(T_f)'=T_{f'}$).\n\nOn note $H=\\mathbb 1_{[0,+\\infty[}$ (fonction de Heaviside).\n\n1. Soit $g(x)=e^{-1/x}$ pour $x>0$ et $g(x)=0$ pour $x\\le0$. On admet que $g$ est de classe $\\mathcal C^\\infty$. Vérifier que $\\varphi_0(x)=g(1-x^2)$ appartient à $\\mathcal D$ et que $\\varphi_0(0)\\ne0$.\n2. Montrer que $(T_H)'=\\delta$.\n3. Calculer $(T_{|x|})'$ et $(T_{|x|})''$.\n4. Montrer qu'il n'existe pas de fonction $f$ continue telle que $\\delta=T_f$.\n\n*Pour aller plus loin : notion hors programme, entièrement définie dans l'énoncé.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-dist-equations",
+  "mat": "Maths",
+  "chap": "Distributions",
+  "niveau": 3,
+  "concours": "Ouverture",
+  "titre": "Équations T′ = 0, T′ = δ et xT = 0",
+  "enonce": "**Cadre.** On note $\\mathcal D$ l'ensemble des fonctions $\\varphi:\\mathbb R\\to\\mathbb R$ de classe $\\mathcal C^\\infty$ et nulles en dehors d'un segment (fonctions test). Une **distribution** est une forme linéaire $T:\\mathcal D\\to\\mathbb R$ telle que, pour tout $a>0$, il existe $C\\ge0$ et $k\\in\\mathbb N$ avec $|T(\\varphi)|\\le C\\max_{j\\le k}\\|\\varphi^{(j)}\\|_\\infty$ pour toute $\\varphi\\in\\mathcal D$ nulle hors de $[-a,a]$. Exemples : pour $f$ continue par morceaux, $T_f(\\varphi)=\\int_{\\mathbb R}f\\varphi$ ; la masse de Dirac $\\delta(\\varphi)=\\varphi(0)$. La **dérivée** de $T$ est la distribution $T'(\\varphi)=-T(\\varphi')$ (pour $f$ de classe $\\mathcal C^1$, une intégration par parties donne $(T_f)'=T_{f'}$).\n\nPour une distribution $T$, on note $xT$ la distribution $\\varphi\\mapsto T(x\\varphi)$, où $x\\varphi$ désigne la fonction $x\\mapsto x\\varphi(x)$. On fixe $\\theta\\in\\mathcal D$ telle que $\\int_{\\mathbb R}\\theta=1$, et $\\chi\\in\\mathcal D$ égale à $1$ sur $[-1,1]$ (on admet leur existence).\n\n1. Soit $\\varphi\\in\\mathcal D$ et $\\rho=\\varphi-\\big(\\int_{\\mathbb R}\\varphi\\big)\\theta$. Montrer que $\\psi(x)=\\int_{-\\infty}^x\\rho(t)\\,\\mathrm dt$ définit un élément de $\\mathcal D$ tel que $\\psi'=\\rho$.\n2. En déduire que si $T'=0$, alors il existe une constante $c$ telle que $T=T_c$.\n3. Déterminer toutes les distributions $T$ telles que $T'=\\delta$.\n4. Soit $\\varphi\\in\\mathcal D$ et $\\sigma=\\varphi-\\varphi(0)\\chi$. Montrer que $\\sigma(x)=x\\,\\eta(x)$ avec $\\eta\\in\\mathcal D$ (on pourra écrire $\\sigma(x)=x\\int_0^1\\sigma'(tx)\\,\\mathrm dt$).\n5. En déduire les distributions $T$ telles que $xT=0$.\n\n*Pour aller plus loin : notion hors programme, entièrement définie dans l'énoncé.*",
+  "duree": 35,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-dist-convergence",
+  "mat": "Maths",
+  "chap": "Distributions",
+  "niveau": 2,
+  "concours": "Ouverture",
+  "titre": "Suites de fonctions qui convergent vers δ",
+  "enonce": "**Cadre.** On note $\\mathcal D$ l'ensemble des fonctions $\\varphi:\\mathbb R\\to\\mathbb R$ de classe $\\mathcal C^\\infty$ et nulles en dehors d'un segment (fonctions test). Une **distribution** est une forme linéaire $T:\\mathcal D\\to\\mathbb R$ telle que, pour tout $a>0$, il existe $C\\ge0$ et $k\\in\\mathbb N$ avec $|T(\\varphi)|\\le C\\max_{j\\le k}\\|\\varphi^{(j)}\\|_\\infty$ pour toute $\\varphi\\in\\mathcal D$ nulle hors de $[-a,a]$. Exemples : pour $f$ continue par morceaux, $T_f(\\varphi)=\\int_{\\mathbb R}f\\varphi$ ; la masse de Dirac $\\delta(\\varphi)=\\varphi(0)$. La **dérivée** de $T$ est la distribution $T'(\\varphi)=-T(\\varphi')$ (pour $f$ de classe $\\mathcal C^1$, une intégration par parties donne $(T_f)'=T_{f'}$).\n\nOn dit qu'une suite de distributions $(T_n)$ converge vers $T$ si $T_n(\\varphi)\\to T(\\varphi)$ pour toute $\\varphi\\in\\mathcal D$.\n\n1. Soit $\\rho\\in\\mathcal D$, positive, nulle hors de $[-1,1]$, d'intégrale $1$, et $\\rho_n(x)=n\\rho(nx)$. Montrer que $T_{\\rho_n}\\to\\delta$.\n2. Montrer que $T_{f_n}\\to\\delta$ pour $f_n(x)=\\dfrac{n}{\\pi(1+n^2x^2)}$.\n3. Montrer que $T_{\\cos(n\\,\\cdot)}\\to0$, bien que $\\cos(nx)$ ne tende vers $0$ pour aucun réel $x$.\n4. Montrer que $(T_{\\rho_n})'\\to\\delta'$, où $\\delta'(\\varphi)=-\\varphi'(0)$.\n\n*Pour aller plus loin : notion hors programme, entièrement définie dans l'énoncé.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-cdp-regression",
+  "mat": "Maths",
+  "chap": "Calcul différentiel & probabilités",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Meilleure approximation affine d’une variable aléatoire",
+  "enonce": "Soient $X$ et $Y$ deux variables aléatoires réelles discrètes admettant un moment d'ordre $2$, avec $V(X)>0$. Pour $(a,b)\\in\\mathbb R^2$, on pose $f(a,b)=E\\big((Y-aX-b)^2\\big)$.\n\n1. Montrer que $f$ est une fonction polynomiale de degré au plus $2$ en $(a,b)$, et calculer son gradient.\n2. Montrer que $f$ admet un unique point critique $(a^*,b^*)$, avec $a^*=\\dfrac{\\operatorname{Cov}(X,Y)}{V(X)}$ et $b^*=E(Y)-a^*E(X)$.\n3. Montrer que $(a^*,b^*)$ est un minimum global de $f$, et que ce minimum vaut $V(Y)\\big(1-r^2\\big)$ où $r=\\dfrac{\\operatorname{Cov}(X,Y)}{\\sqrt{V(X)V(Y)}}$ (si $V(Y)>0$).\n4. En déduire que $|r|\\le1$, avec égalité si et seulement si $Y$ est presque sûrement une fonction affine de $X$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-cdp-laplace",
+  "mat": "Maths",
+  "chap": "Calcul différentiel & probabilités",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "Transformée de Laplace d’un couple et convexité",
+  "enonce": "Soient $X$ et $Y$ deux variables aléatoires réelles prenant un nombre **fini** de valeurs. Pour $(x,y)\\in\\mathbb R^2$, on pose $L(x,y)=E\\big(e^{xX+yY}\\big)$ et $g=\\ln L$.\n\n1. Montrer que $L$ est de classe $\\mathcal C^\\infty$ et strictement positive, et calculer $\\nabla L(0,0)$ et la hessienne de $L$ en $(0,0)$.\n2. Montrer que la hessienne de $g$ en $(0,0)$ est la matrice de covariance $\\Sigma=\\begin{pmatrix}V(X)&\\operatorname{Cov}(X,Y)\\\\\\operatorname{Cov}(X,Y)&V(Y)\\end{pmatrix}$, et que $\\Sigma$ est symétrique positive.\n3. Pour $(x,y)$ fixé et $(u,v)\\in\\mathbb R^2$, on pose $h(t)=g(x+tu,y+tv)$. Montrer que $h''(t)\\ge0$ (on pourra introduire une probabilité « pondérée » par $e^{xX+yY}$).\n4. En déduire que $g$ est convexe sur $\\mathbb R^2$, puis que $L\\big(\\tfrac{m+m'}2\\big)^2\\le L(m)L(m')$ pour tous $m,m'\\in\\mathbb R^2$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 30,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-cdp-entropie",
+  "mat": "Maths",
+  "chap": "Calcul différentiel & probabilités",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "Entropie maximale",
+  "enonce": "Pour une loi $p=(p_1,\\dots,p_n)$ sur $\\{1,\\dots,n\\}$ (avec $p_i\\ge0$, $\\sum p_i=1$), on définit l'**entropie** $H(p)=-\\sum_{i=1}^np_i\\ln p_i$ (avec la convention $0\\ln0=0$).\n\n1. Sur l'ouvert $U=\\,]0,+\\infty[^n$, on considère $H$ et la contrainte $C(p)=\\sum p_i=1$. Montrer qu'en un extremum de $H$ sur $U\\cap\\{C=1\\}$, le gradient de $H$ est colinéaire à celui de $C$, et en déduire le seul candidat.\n2. Montrer que $\\ln x\\le x-1$ pour $x>0$, puis que $H(p)\\le\\ln n$ pour toute loi $p$, avec égalité si et seulement si $p$ est uniforme.\n3. Soit $\\beta\\in\\mathbb R$, $Z=\\sum_{i=1}^ne^{-\\beta i}$ et $q_i=\\frac{e^{-\\beta i}}Z$. Montrer que pour toute loi $p$ de même espérance que $q$ (c'est-à-dire $\\sum ip_i=\\sum iq_i$), on a $H(p)\\le H(q)$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 30,
+  "ajout": "2026-11-26"
  }
 ]
