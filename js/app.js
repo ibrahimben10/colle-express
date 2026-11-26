@@ -1271,6 +1271,8 @@ async function importPhoto(file) {
   document.querySelectorAll('[data-nbfig]').forEach(e => { e.textContent = Object.keys(FIG).length; });
   try { await api.init(); }
   catch { showAuth('in', {alert: navigator.onLine ? 'Connexion au serveur impossible pour le moment. Réessayez dans un instant.' : 'Vous êtes hors connexion : reconnectez-vous à Internet pour accéder à votre compte.'}); return; }
+  // Lien déjà utilisé alors qu'on est connecté (on reclique sur l'e-mail de confirmation) : rien à faire, on entre.
+  if (api.linkError === 'email_link' && api.user) { start(); return toast('Votre adresse est déjà confirmée : vous êtes connecté.'); }
   if (api.linkError === 'email_link') return showAuth('in', {alert: MSG.email_link});
   if (api.linkError) return showAuth('forgot', {alert: MSG[api.linkError]});
   if (api.recovery && api.user) return showAuth('new');

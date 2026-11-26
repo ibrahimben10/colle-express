@@ -13,7 +13,7 @@ export const MSG = {
   missing_name: 'Indiquez votre prénom et votre nom.',
   mismatch: 'Les deux mots de passe ne sont pas identiques.',
   invalid_credentials: 'Adresse e-mail ou mot de passe incorrect.',
-  email_not_confirmed: 'Confirmez d’abord votre adresse grâce à l’e-mail reçu à l’inscription.',
+  email_not_confirmed: 'Votre adresse n’est pas encore confirmée : ouvrez l’e-mail reçu à l’inscription (regardez aussi dans les spams) et cliquez sur son lien. Après un renvoi, seul le dernier e-mail est valable.',
   rate_limit: 'Trop de demandes en peu de temps. Patientez quelques minutes avant de réessayer.',
   server: 'Impossible de traiter votre demande pour le moment. Veuillez réessayer ultérieurement.',
   email_send: 'L’e-mail n’a pas pu être envoyé pour le moment (problème d’envoi côté serveur). Réessayez plus tard ; si cela persiste, prévenez l’administrateur du site.',
@@ -24,9 +24,9 @@ export const MSG = {
   link_invalid: 'Ce lien de réinitialisation est invalide ou a déjà été utilisé. Demandez un nouveau lien ci-dessous.',
   link_expired: 'Ce lien de réinitialisation a expiré. Demandez un nouveau lien ci-dessous.',
   email_link: 'Ce lien a expiré ou a déjà été utilisé (il ne fonctionne qu’une fois). Si vous veniez de confirmer votre adresse, connectez-vous simplement ; sinon, utilisez « Mot de passe oublié ? ».',
-  confirm_sent: 'E-mail de confirmation renvoyé. Ouvrez le lien qu’il contient (pensez aux spams), puis connectez-vous.',
+  confirm_sent: 'E-mail de confirmation renvoyé. Ouvrez le lien de ce nouvel e-mail (pensez aux spams) : les liens des e-mails précédents ne fonctionnent plus.',
   reset_sent: 'Si un compte est associé à cette adresse, vous recevrez un lien de réinitialisation.',
-  signup_confirm: 'Compte presque prêt : ouvrez l’e-mail de confirmation que nous venons de vous envoyer, puis connectez-vous.',
+  signup_confirm: 'Compte presque prêt : ouvrez l’e-mail de confirmation (regardez aussi dans les spams) et cliquez sur son lien, puis connectez-vous ici. Vous aviez déjà un compte avec cette adresse ? Aucun e-mail n’est envoyé : connectez-vous directement ou utilisez « Mot de passe oublié ? ».',
 };
 const HEAD = {
   in: ['Bon retour !', 'Connectez-vous pour retrouver vos exercices, vos groupes et votre suivi.'],
@@ -165,7 +165,7 @@ export function initAuth({ onSignedIn }) {
     try {
       const r = await api.signUp({name: name.value.trim(), email: mail.value, password: pass.value, niveau: +$('#upLvl').value});
       done();
-      if (r === 'confirm') { setAlert('ok', MSG.signup_confirm); f.reset(); meter('', '#upMeter'); }
+      if (r === 'confirm') { const m = mail.value.trim(); f.reset(); meter('', '#upMeter'); showAuth('in', {alert: MSG.signup_confirm, kind: 'ok'}); $('#inMail').value = m; }
     } catch (x) {
       done();
       const c = err(x);

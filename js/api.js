@@ -184,7 +184,9 @@ export const api = {
   },
   async signOut() {
     if (DEMO) { localStorage.removeItem('ce:demo-profile'); this.user = null; this.profile = null; emit('auth', 'out'); return; }
-    await sb.auth.signOut();
+    // « local » : ne déconnecte que cet appareil. Par défaut supabase-js révoque TOUTES les sessions du compte
+    // (téléphone, ordinateur, autre adresse du site), qui se retrouvaient déconnectées sans prévenir.
+    await sb.auth.signOut({scope: 'local'});
   },
 
   /* ---------- profils ---------- */
