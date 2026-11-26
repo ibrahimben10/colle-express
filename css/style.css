@@ -2546,3 +2546,8 @@ svg.hop{animation:none!important}
 .toast{transition:opacity .25s,transform .4s ease!important}
 .modesel .mk-n,.pf-num{display:none!important}
 .pf-fig b{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:var(--ink)!important;font-family:var(--fdisp);font-weight:400!important;letter-spacing:-.02em!important}
+/* Accessibilité (audit axe, 2026-11-26) */
+:is(h1,h2)[tabindex="-1"]:focus{outline:none}
+.bdg .small{color:var(--soft)}
+:where(p,.pf-emptyline,.small,.colle-avert,.notice) a:not(.btn):not(.iconbtn){text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.bdg{opacity:1}.bdg:not(.got) .bdg-m{opacity:.75}

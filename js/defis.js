@@ -42,7 +42,7 @@ export function defisHTML(R, {compact = false} = {}) {
   const one = d => { const ok = d.val >= d.cible, v = Math.min(d.val, d.cible);
     return `<li class="df ${ok ? 'ok' : ''}" data-df="${d.id}"><span class="df-ck" aria-hidden="true">${ok ? ic('check') : ''}</span>
       <div><b>${esc(d.titre)}</b>${d.open && !ok ? `<button class="linkbtn df-go" data-open="${esc(d.open)}">${esc(d.detail)}</button>` : `<span class="small">${esc(d.detail)}</span>`}</div>
-      <span class="df-n mono" aria-label="${v} sur ${d.cible}">${d.cible > 1 ? `${v}/${d.cible}` : ok ? 'fait' : ''}</span>${d.cible > 1 ? `<span class="df-bar"><i style="width:${(100 * v / d.cible).toFixed(0)}%"></i></span>` : ''}</li>`; };
+      <span class="df-n mono"><span aria-hidden="true">${d.cible > 1 ? `${v}/${d.cible}` : ok ? 'fait' : ''}</span><span class="sr">${v} sur ${d.cible}</span></span>${d.cible > 1 ? `<span class="df-bar"><i style="width:${(100 * v / d.cible).toFixed(0)}%"></i></span>` : ''}</li>`; };
   const fin = new Date(lundi() + 7 * 864e5 - 1);
   return `<div class="dfs${compact ? ' compact' : ''}">
     <div><h4>${ic('target')} Aujourd’hui</h4><ul>${R.jour.map(one).join('')}</ul></div>

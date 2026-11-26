@@ -312,7 +312,19 @@ function route() {
   if (pres.v !== h) presence({v: h});
 }
 let PREF = null;
+/* Accessibilité : après une navigation, titre de l'onglet et focus sur le titre de la vue (lecteurs d'écran) */
+function annonceVue() {
+  setTimeout(() => {
+    const v = document.querySelector('.view.on'); if (!v) return;
+    const t = (document.body.classList.contains('detail') && $('#copy h1, #copy h2')) || v.querySelector('h1, h2');
+    if (!t) return;
+    document.title = t.textContent.trim().replace(/\s+/g, ' ').slice(0, 70) + ' · Colle Express';
+    if (!t.hasAttribute('tabindex')) t.setAttribute('tabindex', '-1');
+    t.focus({preventScroll: true});
+  }, 350);
+}
 addEventListener('hashchange', route);
+addEventListener('hashchange', annonceVue);
 function rerender() {
   const v = document.querySelector('.view.on')?.id;
   if (v === 'v-exercices') { renderStrip(); renderList(); if (!CUR || !sess(CUR).busy) renderCopy(); }
