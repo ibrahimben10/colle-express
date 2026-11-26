@@ -347,9 +347,9 @@ export async function renderEdition(el) {
       </div>
     </fieldset>
     <fieldset class="panel pe-sec"><legend><span class="pf-num">04</span> Confidentialité</legend>
-      ${tog('public', 'Profil visible par les membres connectés', 'Désactivé : personne d’autre que toi (et l’administrateur) ne voit ton profil. Ton e-mail n’est jamais affiché.')}
+      ${tog('public', 'Profil visible par les membres connectés', 'Désactivé : personne d’autre que toi (et l’administrateur) ne voit ton profil ; seuls ton nom et ton niveau apparaissent dans le classement de la communauté. Ton e-mail n’est jamais affiché.')}
       <div class="pe-vis" id="peVis">
-        ${tog('annuaire', 'Apparaître dans l’annuaire de la communauté', 'Les membres pourront te trouver par ton nom, ta filière ou tes matières, et te suivre.')}
+        ${tog('annuaire', 'Carte complète dans la communauté', 'Ta carte (filière, matières, présentation, bouton « Suivre ») apparaît dans le classement. Désactivé : seuls ton nom et ton niveau y figurent.')}
         ${tog('vis_stats', 'Statistiques')}${tog('vis_activite', 'Carte d’activité')}${tog('vis_parcours', 'Parcours scientifique')}
         ${tog('vis_favoris', 'Exercices favoris')}${tog('vis_collections', 'Collections', 'Seules les collections que tu partages apparaissent.')}${tog('vis_carnet', 'Pages du carnet', 'Seules les notes que tu publies apparaissent.')}${tog('vis_badges', 'Badges obtenus')}${tog('vis_commentaires', 'Commentaires publics')}${tog('vis_etoiles', 'Étoiles', 'Les membres peuvent te noter de 1 à 5 ; leurs notes restent anonymes.')}
       </div>

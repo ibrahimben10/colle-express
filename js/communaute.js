@@ -5,6 +5,7 @@ import { ic } from './icons.js';
 import { esc, rich } from './format.js';
 import { toast } from './ui.js';
 import { FILIERES, DOMAINES } from './profil.js';
+import { niveau } from './xp.js';
 
 let D = {};   // byId, typeset, cartes(ids) -> map, myUser()
 export const initCommunaute = deps => { D = deps; };
@@ -20,7 +21,7 @@ export async function renderCommunaute(el, tab) {
   if (tab) TAB = tab;
   el.innerHTML = `<div class="cm">
     <header class="cm-head"><div><h1>Les membres de Colle express</h1>
-      <p class="cn-sub">Seuls les profils publics qui ont choisi d’apparaître ici sont listés, par ordre alphabétique : il n’y a aucun classement.</p></div>
+      <p class="cn-sub">Tous les membres, classés par niveau (points d’expérience gagnés en travaillant les exercices). Les profils privés n’affichent que leur nom et leur niveau.</p></div>
       <div class="seg" role="tablist" aria-label="Communauté"><button role="tab" data-tab="annuaire" aria-selected="${TAB === 'annuaire'}">${ic('users')} Annuaire</button><button role="tab" data-tab="fil" aria-selected="${TAB === 'fil'}">${ic('live')} Mes abonnements</button></div></header>
     <div id="cmBody"></div></div>`;
   el.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { location.hash = b.dataset.tab === 'fil' ? '#communaute/fil' : '#communaute'; });
@@ -50,12 +51,18 @@ async function load(body, more) {
   try { L = await api.annuaire(F, PAGE); } catch (x) { box.innerHTML = `<div class="panel empty">Annuaire indisponible pour le moment.</div>`; return; }
   LIST = more ? LIST.concat(L) : L;
   box.innerHTML = LIST.length ? `<ul class="cm-list">${LIST.map(cardHTML).join('')}</ul>${L.length === 24 ? '<button class="btn wide" id="cmMore">Afficher plus de membres</button>' : ''}`
-    : `<div class="panel empty">${Object.values(F).some(Boolean) ? 'Aucun membre ne correspond à ces filtres.' : 'Personne n’apparaît encore dans l’annuaire. Pour y figurer : Profil → Modifier → « Apparaître dans l’annuaire ».'}</div>`;
+    : `<div class="panel empty">${Object.values(F).some(Boolean) ? 'Aucun membre ne correspond à ces filtres (les filtres autres que le nom ne s’appliquent qu’aux profils publics).' : 'Aucun membre pour l’instant.'}</div>`;
   box.querySelector('#cmMore')?.addEventListener('click', () => { PAGE++; load(body, true); });
   bindFollow(box, id => { const m = LIST.find(x => x.id === id); m.suivi = !m.suivi; m.abonnes += m.suivi ? 1 : -1; return m; }, m => { box.querySelector(`[data-follow="${m.id}"]`).outerHTML = followBtn(m.id, m.suivi); });
 }
+// Rang + niveau (même barème que le profil). Les profils privés : nom et niveau seulement, sans lien.
+const rangHTML = m => {
+  return `<span class="cm-rank${m.rang <= 3 && m.xp > 0 ? ' top' + m.rang : ''}" aria-label="Rang ${m.rang}">${m.rang}</span>`; };
+const lvlHTML = m => { const n = niveau(m.xp || 0); return `<span class="cm-lvl" title="${m.xp || 0} XP">Niv. ${n.i} · ${n.nom} <span class="small">${m.xp || 0} XP</span></span>`; };
 function cardHTML(m) {
-  return `<li class="cm-card"><a class="cm-id" href="#u/${esc(m.username || m.id)}">${av(m.id, m.nom, m.photo)}<span><b>${esc(m.nom)}</b><span class="small">@${esc(m.username || '')}${m.filiere ? ' · ' + esc(m.filiere) : ''}${m.annee ? ` · ${m.annee}${m.annee === 1 ? 're' : 'e'} année` : ''}${m.etablissement ? ' · ' + esc(m.etablissement) : ''}</span></span></a>
+  if (m.prive) return `<li class="cm-card cm-prive${m.moi ? ' cm-moi' : ''}"><div class="cm-top">${rangHTML(m)}<div class="cm-id">${av(m.cle, m.nom, '')}<span><b>${esc(m.nom)}</b><span class="small">${ic('lock')} ${m.moi ? 'Toi · profil privé' : 'Profil privé'}</span></span></div>${lvlHTML(m)}</div>
+    </div></li>`;
+  return `<li class="cm-card${m.moi ? ' cm-moi' : ''}"><div class="cm-top">${rangHTML(m)}<a class="cm-id" href="#u/${esc(m.username || m.id)}">${av(m.id, m.nom, m.photo)}<span><b>${esc(m.nom)}</b><span class="small">@${esc(m.username || '')}${m.filiere ? ' · ' + esc(m.filiere) : ''}${m.annee ? ` · ${m.annee}${m.annee === 1 ? 're' : 'e'} année` : ''}${m.etablissement ? ' · ' + esc(m.etablissement) : ''}</span></span></a>${lvlHTML(m)}</div>
     ${m.bio ? `<p class="cm-bio">${esc(m.bio)}</p>` : ''}
     <div class="cm-foot">${(m.matieres || []).slice(0, 4).map(x => `<span class="cm-tag">${esc(x)}</span>`).join('')}
       <span class="small cm-n">${plural(m.abonnes, 'abonné')}${m.collections ? ` · ${plural(m.collections, 'collection')}` : ''}</span>

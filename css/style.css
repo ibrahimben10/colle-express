@@ -2589,3 +2589,16 @@ main#contenu:focus{outline:none}
 .rel-list .cm-id .small{display:block}
 .rel-priv,.rel-vide{display:flex;gap:8px;align-items:flex-start;margin:12px 2px}
 .rel-priv svg{flex:none;width:16px;height:16px;margin-top:2px}
+
+/* Communauté : classement par niveau */
+.cm-top{display:flex;align-items:center;gap:12px;min-width:0}
+.cm-top .cm-id{flex:1;min-width:0}
+.cm-rank{flex:none;min-width:34px;height:34px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-weight:800;font-variant-numeric:tabular-nums;font-size:15px;color:var(--soft);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.cm-rank.top1{background:#f4c542;color:#3a2a00}
+.cm-rank.top2{background:#cfd6e0;color:#22303f}
+.cm-rank.top3{background:#e0a46f;color:#3b1f08}
+.cm-lvl{flex:none;margin-left:auto;font-weight:700;font-size:14px;color:var(--ink);text-align:right;white-space:nowrap}
+.cm-lvl .small{display:block;font-weight:500}
+.cm-moi{border-color:color-mix(in srgb,var(--blue) 55%,var(--line));box-shadow:inset 3px 0 0 var(--blue)}
+.cm-prive .cm-id .small svg{width:13px;height:13px;vertical-align:-2px}
+@media (max-width:520px){.cm-top{flex-wrap:wrap;gap:10px}.cm-top .cm-id{flex:1 1 calc(100% - 50px)}.cm-lvl{flex:1 1 100%;margin-left:46px;text-align:left}.cm-lvl .small{display:inline;margin-left:4px}}

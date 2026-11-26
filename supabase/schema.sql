@@ -1756,3 +1756,50 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke all on function public.mes_relations(text) from public, anon;
 grant execute on function public.mes_relations(text) to authenticated;
+
+-- 25 bis. Communauté : TOUS les membres, classés par niveau (XP, même barème que js/xp.js).
+-- Profil public + « carte complète » : carte entière. Sinon (profil privé ou carte désactivée) : nom et niveau seulement,
+-- sans identifiant, sans lien ni bouton « Suivre ». Le rang est calculé sur l'ensemble des membres, avant les filtres.
+create or replace function public.annuaire(p_q text default '', p_filiere text default '', p_matiere text default '',
+  p_etab text default '', p_collections boolean default false, p_suivis boolean default false, p_page int default 0) returns jsonb
+language sql stable security definer set search_path = public as $$
+  with base as (
+    select pf.id u, pf.full_name nom, p.username, p.filiere, p.annee, p.etablissement, p.matieres, p.bio, p.vis_collections,
+           coalesce(p.public and p.annuaire, false) carte
+    from public.profiles pf left join public.profils p on p.user_id = pf.id
+    where auth.uid() is not null and coalesce(trim(pf.full_name), '') <> ''
+  ), xp as (
+    select b.*, (
+        40 * (select count(distinct r2.exercice_id) from public.reponses r2 where r2.user_id = b.u
+                and (select count(*) from public.notes n where n.reponse_id = r2.id) >= 2
+                and (select avg(n.note) from public.notes n where n.reponse_id = r2.id) >= 12)
+      + 20 * (select count(distinct r3.exercice_id) from public.reponses r3 where r3.user_id = b.u)
+      + 10 * (select count(distinct r4.exercice_id) from public.reponses r4 where r4.user_id = b.u and not r4.aide_consultee)
+      +  5 * (select count(*) from (select a.exercice_id from public.activite a where a.user_id = b.u and a.kind in ('indice','reponse')
+                                    union select r5.exercice_id from public.reponses r5 where r5.user_id = b.u) t)
+      +  3 * (select count(distinct a2.jour) from public.activite a2 where a2.user_id = b.u and a2.kind in ('indice','reponse')
+                and a2.jour > (now() at time zone 'Europe/Paris')::date - 371)
+    )::int xp from base b
+  ), rang as (
+    select x.*, rank() over (order by x.xp desc) rg from xp x
+  ), f as (
+    select r.* from rang r
+    where (coalesce(p_q, '') = '' or r.nom ilike '%' || p_q || '%' or (r.carte and (r.username ilike '%' || p_q || '%' or r.bio ilike '%' || p_q || '%')))
+      and (coalesce(p_filiere, '') = '' or (r.carte and r.filiere = p_filiere))
+      and (coalesce(p_matiere, '') = '' or (r.carte and p_matiere = any(r.matieres)))
+      and (coalesce(p_etab, '') = '' or (r.carte and r.etablissement ilike '%' || p_etab || '%'))
+      and (not p_collections or (r.carte and exists (select 1 from public.collections c where c.user_id = r.u and c.public and r.vis_collections)))
+      and (not p_suivis or (r.carte and exists (select 1 from public.abonnements a where a.suiveur_id = auth.uid() and a.suivi_id = r.u)))
+    order by r.xp desc, lower(r.nom) limit 24 offset greatest(0, least(p_page, 100)) * 24
+  )
+  select coalesce(jsonb_agg(case when f.carte then jsonb_build_object(
+      'id', f.u, 'username', f.username, 'nom', f.nom, 'photo', coalesce(s.data->>'photo', ''),
+      'filiere', f.filiere, 'annee', f.annee, 'etablissement', f.etablissement, 'matieres', to_jsonb(f.matieres), 'bio', left(f.bio, 160),
+      'collections', (select count(*) from public.collections c where c.user_id = f.u and c.public and f.vis_collections),
+      'abonnes', (select count(*) from public.abonnements a where a.suivi_id = f.u),
+      'suivi', exists (select 1 from public.abonnements a where a.suiveur_id = auth.uid() and a.suivi_id = f.u),
+      'moi', f.u = auth.uid(), 'xp', f.xp, 'rang', f.rg)
+    else jsonb_build_object('prive', true, 'cle', left(md5(f.u::text), 12), 'nom', f.nom, 'moi', f.u = auth.uid(), 'xp', f.xp, 'rang', f.rg) end
+    order by f.xp desc, lower(f.nom)), '[]')
+  from f left join public.suivi s on s.user_id = f.u and f.carte;
+$$;
