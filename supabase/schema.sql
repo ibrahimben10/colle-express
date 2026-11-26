@@ -1108,7 +1108,17 @@ insert into public.exercices_meta (id, mat, chap, niveau) values
   ('n-pc-shannon','Physique','Électrocinétique',1),
   ('n-pc-fresnel','Physique','Optique ondulatoire',2),
   ('n-pc-troisondes','Physique','Optique ondulatoire',3),
-  ('n-pc-cielbleu','Physique','Rayonnement',2)
+  ('n-pc-cielbleu','Physique','Rayonnement',2),
+  ('n-mp-racine','Maths','Réduction',2),
+  ('n-mp-commutant','Maths','Algèbre linéaire',2),
+  ('n-mp-tracerang','Maths','Algèbre euclidienne',2),
+  ('n-mp-geom','Maths','Probabilités',1),
+  ('n-mp-involutions','Maths','Séries entières',2),
+  ('n-mp-logint','Maths','Intégrales à paramètre',2),
+  ('n-mp-sinrac','Maths','Séries',1),
+  ('n-mp-deuxcarres','Maths','Polynômes',2),
+  ('n-mp-sinc','Maths','Équations différentielles',2),
+  ('n-mp-chiab','Maths','Topologie matricielle',2)
 on conflict (id) do update set mat = excluded.mat, chap = excluded.chap, niveau = excluded.niveau;
 alter table public.exercices_meta enable row level security;
 drop policy if exists "méta: lecture" on public.exercices_meta;

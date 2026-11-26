@@ -3362,5 +3362,115 @@
   "enonce": "On modélise un électron d'une molécule de l'air par un oscillateur : $m\\ddot{\\vec r}=-m\\omega_0^2\\vec r-e\\vec E$, où $\\vec E=E_0\\cos(\\omega t)\\,\\vec e_x$ est le champ de l'onde solaire. On néglige l'amortissement. La pulsation propre $\\omega_0$ correspond à une longueur d'onde dans l'ultraviolet ($\\lambda_0\\approx100\\ \\mathrm{nm}$).\n\n1. Déterminer le dipôle induit $\\vec p(t)=-e\\vec r(t)$ en régime forcé. Le simplifier pour la lumière visible.\n2. On admet qu'un dipôle oscillant $p_0\\cos\\omega t$ rayonne la puissance moyenne $\\mathcal P=\\frac{\\mu_0p_0^2\\omega^4}{12\\pi c}$. Justifier l'approximation dipolaire, puis montrer que la puissance diffusée varie en $\\frac1{\\lambda^4}$.\n3. Calculer le rapport des puissances diffusées pour le bleu ($450\\ \\mathrm{nm}$) et le rouge ($700\\ \\mathrm{nm}$). Expliquer la couleur du ciel, et celle du Soleil couchant.\n4. La lumière diffusée à $90^\\circ$ de la direction du Soleil est-elle polarisée ? Justifier.\n\n*Thème signalé par le rapport du jury Centrale-Supélec 2025 (épreuve orale de physique-chimie) : rayonnement dipolaire et modèle de l’électron élastiquement lié.*",
   "duree": 25,
   "ajout": "2026-11-25"
+ },
+ {
+  "id": "n-mp-racine",
+  "mat": "Maths",
+  "chap": "Réduction",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Si A² est diagonalisable…",
+  "enonce": "Soit $A\\in\\mathcal M_n(\\mathbb C)$ **inversible** telle que $A^2$ soit diagonalisable.\n\n1. Montrer que $A$ est diagonalisable.\n2. Le résultat subsiste-t-il sans l'hypothèse d'inversibilité ?\n3. Le résultat subsiste-t-il dans $\\mathcal M_n(\\mathbb R)$ (diagonalisabilité sur $\\mathbb R$) ?\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 20,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-commutant",
+  "mat": "Maths",
+  "chap": "Algèbre linéaire",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Commutant d’un endomorphisme à valeurs propres distinctes",
+  "enonce": "Soit $E$ un $\\mathbb K$-espace vectoriel de dimension $n\\ge1$ et $u\\in\\mathcal L(E)$ admettant $n$ valeurs propres distinctes $\\lambda_1,\\dots,\\lambda_n$. On note $\\mathcal C(u)=\\{v\\in\\mathcal L(E),\\ u\\circ v=v\\circ u\\}$.\n\n1. Montrer que $v\\in\\mathcal C(u)$ si et seulement si $v$ est diagonale dans une base de vecteurs propres de $u$.\n2. En déduire $\\dim\\mathcal C(u)$.\n3. Montrer que $\\mathcal C(u)=\\mathbb K[u]$, et même que tout $v\\in\\mathcal C(u)$ s'écrit $P(u)$ avec $\\deg P\\le n-1$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 20,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-tracerang",
+  "mat": "Maths",
+  "chap": "Algèbre euclidienne",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Trace, rang et matrice symétrique",
+  "enonce": "Soit $A\\in\\mathcal S_n(\\mathbb R)$ non nulle, de rang $r$.\n\n1. Montrer que $(\\operatorname{tr}A)^2\\le r\\,\\operatorname{tr}(A^2)$.\n2. Étudier le cas d'égalité.\n3. En déduire que si $A\\in\\mathcal S_n(\\mathbb R)$ vérifie $A^2=A$, alors $\\operatorname{rg}A=\\operatorname{tr}A$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 15,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-geom",
+  "mat": "Maths",
+  "chap": "Probabilités",
+  "niveau": 1,
+  "concours": "Mines-Ponts",
+  "titre": "Duel de lois géométriques",
+  "enonce": "Soient $X$ et $Y$ deux variables aléatoires indépendantes de même loi géométrique $\\mathcal G(p)$, $p\\in\\,]0,1[$, et $q=1-p$.\n\n1. Calculer $P(X>k)$ pour $k\\in\\mathbb N$.\n2. Déterminer la loi de $Z=\\min(X,Y)$.\n3. Calculer $P(X=Y)$, puis $P(X<Y)$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 15,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-involutions",
+  "mat": "Maths",
+  "chap": "Séries entières",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Nombre d’involutions et série génératrice",
+  "enonce": "Pour $n\\in\\mathbb N$, on note $a_n$ le nombre d'involutions de $\\{1,\\dots,n\\}$ (permutations $\\sigma$ telles que $\\sigma\\circ\\sigma=\\mathrm{id}$), avec $a_0=1$.\n\n1. Montrer que $a_{n+1}=a_n+n\\,a_{n-1}$ pour $n\\ge1$.\n2. Montrer que la série entière $S(x)=\\sum_{n\\ge0}\\frac{a_n}{n!}x^n$ a un rayon de convergence $R\\ge1$.\n3. Montrer que $S'(x)=(1+x)S(x)$ sur $]-1,1[$ et en déduire $S$.\n4. En déduire que $R=+\\infty$ et une expression de $a_n$ sous forme de somme.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-logint",
+  "mat": "Maths",
+  "chap": "Intégrales à paramètre",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Une intégrale qui donne un logarithme",
+  "enonce": "Pour $x\\in\\mathbb R$, on pose $F(x)=\\displaystyle\\int_0^{+\\infty}e^{-t}\\,\\frac{1-\\cos(xt)}{t}\\,\\mathrm dt$.\n\n1. Montrer que $F$ est définie sur $\\mathbb R$.\n2. Montrer que $F$ est de classe $\\mathcal C^1$ sur $\\mathbb R$ et calculer $F'$.\n3. En déduire $F(x)$ pour tout réel $x$, puis la valeur de $\\displaystyle\\int_0^{+\\infty}e^{-t}\\,\\frac{1-\\cos t}{t}\\,\\mathrm dt$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 20,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-sinrac",
+  "mat": "Maths",
+  "chap": "Séries",
+  "niveau": 1,
+  "concours": "Mines-Ponts",
+  "titre": "Nature de séries en sin(π√…)",
+  "enonce": "Déterminer la nature des séries de termes généraux\n$$u_n=\\sin\\big(\\pi\\sqrt{n^2+1}\\big)\\qquad\\text{et}\\qquad v_n=\\sin\\big(\\pi\\sqrt{n^2+n}\\big)\\qquad(n\\ge1).$$\nLa première est-elle absolument convergente ?\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 15,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-deuxcarres",
+  "mat": "Maths",
+  "chap": "Polynômes",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Polynôme positif et somme de deux carrés",
+  "enonce": "Soit $P\\in\\mathbb R[X]$ tel que $P(x)\\ge0$ pour tout réel $x$.\n\n1. Montrer que les racines réelles de $P$ sont de multiplicité paire, et que si $P\\ne0$ son coefficient dominant est positif.\n2. Montrer qu'il existe $A,B\\in\\mathbb R[X]$ tels que $P=A^2+B^2$.\n3. Écrire explicitement $X^4+1$ sous cette forme.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 20,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-sinc",
+  "mat": "Maths",
+  "chap": "Équations différentielles",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "Équation xy″ + 2y′ + xy = 0",
+  "enonce": "On considère l'équation différentielle $(E)\\ :\\ x\\,y''+2y'+x\\,y=0$.\n\n1. Déterminer les solutions de $(E)$ développables en série entière au voisinage de $0$.\n2. Résoudre $(E)$ sur $]0,+\\infty[$ (on pourra poser $z(x)=x\\,y(x)$).\n3. Déterminer les solutions de $(E)$ de classe $\\mathcal C^2$ sur $\\mathbb R$. L'ensemble obtenu est-il un plan vectoriel ?\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 25,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-chiab",
+  "mat": "Maths",
+  "chap": "Topologie matricielle",
+  "niveau": 2,
+  "concours": "Mines-Ponts",
+  "titre": "χ_AB = χ_BA par densité",
+  "enonce": "Soient $A,B\\in\\mathcal M_n(\\mathbb C)$.\n\n1. Montrer que $GL_n(\\mathbb C)$ est dense dans $\\mathcal M_n(\\mathbb C)$.\n2. Montrer que si $A$ est inversible, $AB$ et $BA$ sont semblables.\n3. En déduire que $\\chi_{AB}=\\chi_{BA}$ pour toutes matrices $A,B$.\n4. $AB$ et $BA$ sont-elles toujours semblables ?\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 20,
+  "ajout": "2026-11-26"
  }
 ]

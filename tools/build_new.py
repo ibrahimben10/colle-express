@@ -2,7 +2,7 @@
 import json, sys, importlib
 sys.path.insert(0, 'tools')
 import newlib
-for m in ['new_phys1', 'new_phys2', 'new_chim', 'new_math', 'new_src_x', 'new_src_alg', 'new_src_ana', 'new_info_1', 'new_info_2', 'new_info_3', 'new_info_4', 'new_phys_src1', 'new_phys_src2']:
+for m in ['new_phys1', 'new_phys2', 'new_chim', 'new_math', 'new_src_x', 'new_src_alg', 'new_src_ana', 'new_info_1', 'new_info_2', 'new_info_3', 'new_info_4', 'new_phys_src1', 'new_phys_src2', 'new_mines']:
     importlib.import_module(m)
 E = [e for e in json.load(open('data/exercices.json')) if not e['id'].startswith(('n-', 'i-'))]
 C = {k: v for k, v in json.load(open('data/corriges.json')).items() if not k.startswith(('n-', 'i-'))}
