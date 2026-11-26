@@ -14,7 +14,7 @@ export const CONFIG = {
 
   // Colleur virtuel (fonction Supabase « colleur » + une clé gratuite GEMINI_API_KEY, GROQ_API_KEY ou MISTRAL_API_KEY).
   // Passe à true une fois la clé enregistrée dans les secrets Supabase et la fonction déployée.
-  COLLEUR: false,
+  COLLEUR: true,
 
   NOM_PROF: 'BEN YAKHLEF IBRAHIM',
   NOM_SITE: 'Colle express',

@@ -100,17 +100,22 @@ Deno.serve(async (req) => {
 
   let out: any;
   try {
-    const corps = (jsonMode: boolean) => JSON.stringify({
-      model: MODEL, messages, temperature: 0.4, max_tokens: 1500,
-      ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
-      ...(MODEL.startsWith("openai/gpt-oss") || MODEL.startsWith("gemini") ? { reasoning_effort: "low" } : {}),
+    // Modèles essayés dans l'ordre (le premier qui existe chez le fournisseur) ; options avancées retirées si refusées.
+    const modeles = Deno.env.get("IA_MODEL") ? [MODEL] : FOUR.cle === "GEMINI_API_KEY" ? [MODEL, "gemini-3-flash-preview", "gemini-2.5-flash"] : [MODEL];
+    const corps = (m: string, complet: boolean) => JSON.stringify({
+      model: m, messages, temperature: 0.4, max_tokens: 1500,
+      ...(complet ? { response_format: { type: "json_object" } } : {}),
+      ...(complet && (m.startsWith("openai/gpt-oss") || m.startsWith("gemini")) ? { reasoning_effort: "low" } : {}),
     });
-    const envoi = (jsonMode: boolean) => fetch(FOUR.url, {
-      method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: corps(jsonMode),
+    const envoi = (m: string, complet: boolean) => fetch(FOUR.url, {
+      method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: corps(m, complet),
     });
-    let r = await envoi(true);
-    if (r.status === 400) r = await envoi(false);   // modèle sans mode JSON, ou JSON invalide : on réessaie en texte libre
-
+    let r!: Response;
+    for (const m of modeles) {
+      r = await envoi(m, true);
+      if (r.status === 400) r = await envoi(m, false);   // options non prises en charge : on réessaie sans
+      if (r.ok || r.status === 429) break;               // sinon (modèle inconnu…) on essaie le suivant
+    }
     if (r.status === 429) return json({ error: "Le colleur est très sollicité en ce moment. Réessaie dans une minute." }, 429);
     if (!r.ok) throw new Error((await r.text()).slice(0, 300));
     const data = await r.json();
