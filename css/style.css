@@ -2552,3 +2552,10 @@ svg.hop{animation:none!important}
 :where(p,.pf-emptyline,.small,.colle-avert,.notice) a:not(.btn):not(.iconbtn){text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 .bdg{opacity:1}.bdg:not(.got) .bdg-m{opacity:.75}
 main#contenu:focus{outline:none}
+/* Barre de recherche de la liste : la recherche prend toute la ligne, Favoris et affichage dessous */
+.filters .searchrow{flex-wrap:wrap;align-items:stretch}
+.filters .searchrow .searchbox{flex:1 1 100%;min-width:0}
+.filters .searchrow .searchbox input{width:100%;box-sizing:border-box}
+.filters .searchrow .favtoggle{flex:1 1 auto;justify-content:center;font-size:14px;min-height:40px}
+.filters .searchrow .vue{margin-left:auto}
+#fMat.seg button,#app #fMat.seg button{padding-inline:4px;font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis}
