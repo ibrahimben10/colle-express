@@ -274,7 +274,7 @@ function route() {
   if (!api.user) return;
   let h = location.hash.slice(1) || 'exercices';
   if (h === 'merci') { SENT = true; history.replaceState(null, '', '#apropos'); h = 'apropos'; }
-  if (h.startsWith('ex-')) { const e = byId(h.slice(3)); if (e) { CUR = e.id; F.lvl = e.niveau; } h = 'exercices'; }
+  if (h.startsWith('ex-')) { const e = byId(h.slice(3)); if (e) { CUR = e.id; caleFiltres(e); } h = 'exercices'; }
   else if (h === 'exercices' && CUR) {   // retour (geste ou bouton) depuis un exercice
     const back = document.body.classList.contains('detail'); CUR = null;
     presence({v: 'exercices', ex: null, t: null, st: null});
@@ -408,12 +408,24 @@ $('#fVue').onclick = e => { const b = e.target.closest('[data-vue]'); if (b && b
 $('#items').onclick = e => { const b = e.target.closest('.item'); if (b) openEx(b.dataset.id); };
 // on commence à télécharger le corrigé dès que le doigt se pose sur l'exercice
 $('#items').addEventListener('pointerdown', e => { const b = e.target.closest('.item'); if (b) loadCorr(b.dataset.id); }, {passive: true});
+// venu d'ailleurs (Suivi, accueil, lien) : niveau, matière et chapitre suivent l'exercice pour qu'il soit sélectionné dans le menu
+function caleFiltres(ex) {
+  if (F.lvl === ex.niveau && filtered().some(e => e.id === ex.id)) return false;
+  const lvlChange = F.lvl !== ex.niveau;
+  Object.assign(F, {fav: false, q: '', lvl: ex.niveau, mat: ex.mat, chap: ex.chap});
+  return lvlChange;
+}
 function openEx(id) {
   loadMathJax(); vu(id);
   const from = CUR; CUR = id; const ex = byId(id);
+  if (ex && caleFiltres(ex)) renderStrip();
   if (phone() && !from) { LISTY = scrollY; history.pushState({ce: 'ex'}, '', '#ex-' + id); }   // le geste « retour » du téléphone ramène à la liste
   else history.replaceState(history.state, '', '#ex-' + id);
   renderList(); renderCopy();
+  { // l'exercice ouvert reste visible dans la liste (seule la liste défile, pas la page)
+    const L = $('#items'), it = L.querySelector('.item[aria-current="true"]');
+    if (it && L.scrollHeight > L.clientHeight + 2) { const r = it.getBoundingClientRect(), R = L.getBoundingClientRect(); if (r.top < R.top || r.bottom > R.bottom) L.scrollTop += r.top - R.top - (R.height - r.height) / 2; }
+  }
   presence({v: 'exercices', ex: id, t: ex?.titre?.slice(0, 90) || '', n: ex?.niveau || 0, st: 'lit', since: now()});
   document.body.classList.add('detail');
   scrollTo({top: innerWidth < 820 ? 0 : scrollY});
