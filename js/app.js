@@ -106,10 +106,6 @@ typeset($('#auth'));
 rotator(); heroBackground(); carousel(document.querySelector('.car'));
 initVitrine();
 document.querySelectorAll('[data-count]').forEach(e => +e.dataset.count && countUp(e, e.dataset.count));
-document.querySelectorAll('[data-nbfig]').forEach(e => countUp(e, Object.keys(FIG).length));
-// chiffres réels de la page d'accueil (fichier statique, mis en cache par le service worker)
-fetch('data/exercices.json').then(r => r.json()).then(L => { document.querySelectorAll('[data-nbex]').forEach(e => countUp(e, L.length));
-  document.querySelectorAll('[data-nbchap]').forEach(e => countUp(e, new Set(L.map(x => x.mat + x.chap)).size)); }).catch(() => {});
 $('#searchIc').outerHTML = ic('search');
 if (DEMO) $('#demo').hidden = false;
 
@@ -1258,9 +1254,9 @@ async function importPhoto(file) {
 /* ================= LANCEMENT ================= */
 (async function boot() {
   try { BASE = await (await fetch('data/exercices.json')).json(); } catch { BASE = []; }
-  document.querySelectorAll('[data-nbex]').forEach(e => BASE.length && countUp(e, BASE.length));
-  document.querySelectorAll('[data-nbchap]').forEach(e => BASE.length && countUp(e, new Set(BASE.map(x => x.mat + x.chap)).size));
-  document.querySelectorAll('[data-nbfig]').forEach(e => countUp(e, Object.keys(FIG).length));
+  document.querySelectorAll('[data-nbex]').forEach(e => { if (BASE.length) e.textContent = BASE.length; });
+  document.querySelectorAll('[data-nbchap]').forEach(e => { if (BASE.length) e.textContent = new Set(BASE.map(x => x.mat + x.chap)).size; });
+  document.querySelectorAll('[data-nbfig]').forEach(e => { e.textContent = Object.keys(FIG).length; });
   try { await api.init(); }
   catch { showAuth('in', {alert: navigator.onLine ? 'Connexion au serveur impossible pour le moment. Réessayez dans un instant.' : 'Vous êtes hors connexion : reconnectez-vous à Internet pour accéder à votre compte.'}); return; }
   if (api.linkError === 'email_link') return showAuth('in', {alert: MSG.email_link});
