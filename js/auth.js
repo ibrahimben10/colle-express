@@ -11,7 +11,6 @@ export const MSG = {
   invalid_email: 'Veuillez saisir une adresse email valide.',
   missing_password: 'Saisissez votre mot de passe.',
   missing_name: 'Indiquez votre prénom et votre nom.',
-  missing_code: 'Saisissez le code de classe qui vous a été communiqué.',
   mismatch: 'Les deux mots de passe ne sont pas identiques.',
   invalid_credentials: 'Adresse e-mail ou mot de passe incorrect.',
   email_not_confirmed: 'Confirmez d’abord votre adresse grâce à l’e-mail reçu à l’inscription.',
@@ -19,7 +18,6 @@ export const MSG = {
   server: 'Impossible de traiter votre demande pour le moment. Veuillez réessayer ultérieurement.',
   email_send: 'L’e-mail n’a pas pu être envoyé pour le moment (problème d’envoi côté serveur). Réessayez plus tard ; si cela persiste, prévenez l’administrateur du site.',
   demo: 'Mode démonstration : aucun e-mail ne peut être envoyé tant que Supabase n’est pas configuré.',
-  bad_class_code: 'Code de classe invalide. Vérifiez-le auprès de la personne qui vous l’a donné.',
   signup_refused: 'Impossible de créer un compte avec cette adresse. Si vous avez déjà un compte, connectez-vous ou réinitialisez votre mot de passe.',
   weak_password: `Le mot de passe doit contenir au moins ${PW_MIN} caractères, dont une lettre et un chiffre.`,
   same_password: 'Le nouveau mot de passe doit être différent de l’ancien.',
@@ -32,7 +30,7 @@ export const MSG = {
 };
 const HEAD = {
   in: ['Bon retour !', 'Connectez-vous pour retrouver vos exercices, vos groupes et votre suivi.'],
-  up: ['Créer votre compte', 'Gratuit. Il vous faut seulement le code de classe qui vous a été communiqué.'],
+  up: ['Créer votre compte', 'Gratuit et ouvert à tous : un nom, une adresse e-mail et un mot de passe suffisent.'],
   forgot: ['Mot de passe oublié', 'Indiquez votre adresse : vous recevrez un lien sécurisé, temporaire et utilisable une seule fois.'],
   new: ['Nouveau mot de passe', `Choisissez un mot de passe d’au moins ${PW_MIN} caractères, avec au moins une lettre et un chiffre.`],
 };
@@ -157,15 +155,15 @@ export function initAuth({ onSignedIn }) {
 
   /* Inscription */
   guard($('#fUp'), async () => {
-    const f = $('#fUp'), name = $('#upName'), mail = $('#upMail'), pass = $('#upPass'), code = $('#upCode');
+    const f = $('#fUp'), name = $('#upName'), mail = $('#upMail'), pass = $('#upPass');
     clearErrs(f); setAlert();
     const checks = [[name, name.value.trim().length >= 2 ? '' : MSG.missing_name], [mail, emailValide(mail.value) ? '' : MSG.invalid_email],
-      [pass, motDePasseErreur(pass.value)], [code, code.value.trim() ? '' : MSG.missing_code]];
+      [pass, motDePasseErreur(pass.value)]];
     checks.forEach(([i, m]) => fieldErr(i, m));
     const bad = checks.find(c => c[1]); if (bad) { bad[0].focus(); return; }
     const done = busy($('#upBtn'), 'Création du compte…');
     try {
-      const r = await api.signUp({name: name.value.trim(), email: mail.value, password: pass.value, code: code.value.trim(), niveau: +$('#upLvl').value});
+      const r = await api.signUp({name: name.value.trim(), email: mail.value, password: pass.value, niveau: +$('#upLvl').value});
       done();
       if (r === 'confirm') { setAlert('ok', MSG.signup_confirm); f.reset(); meter('', '#upMeter'); }
     } catch (x) {
@@ -173,7 +171,6 @@ export function initAuth({ onSignedIn }) {
       const c = err(x);
       if (c === 'invalid_email') fieldErr(mail, MSG.invalid_email);
       else if (c === 'weak_password') fieldErr(pass, x.detail || MSG.weak_password);
-      else if (c === 'bad_class_code') fieldErr(code, MSG.bad_class_code);
       else setAlert('error', MSG[c] || MSG.server);
     }
   });

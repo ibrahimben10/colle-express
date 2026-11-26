@@ -75,16 +75,10 @@ language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.profiles where id = auth.uid() and role = 'prof');
 $$;
 
--- Création automatique du profil à l'inscription, avec code de classe ---
+-- Création automatique du profil à l'inscription (inscription libre, sans code de classe) ---
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
-declare
-  attendu text;
 begin
-  select code_inscription into attendu from public.classe_secret where id = 1;
-  if coalesce(new.raw_user_meta_data->>'code', '') <> coalesce(attendu, '') then
-    raise exception 'Code de classe invalide';
-  end if;
   insert into public.profiles (id, full_name, niveau)
   values (new.id,
           left(coalesce(new.raw_user_meta_data->>'full_name', ''), 80),

@@ -144,12 +144,12 @@ export const api = {
     const { error } = await safe(() => sb.auth.signInWithPassword({email: email.trim(), password}));
     if (error) throw new AuthFail(classer(error, {invalid_credentials: 'invalid_credentials', email_not_confirmed: 'email_not_confirmed'}));
   },
-  async signUp({name, email, password, code, niveau}) {
+  async signUp({name, email, password, niveau}) {
     if (!emailValide(email)) throw new AuthFail('invalid_email');
     const pe = motDePasseErreur(password); if (pe) throw new AuthFail('weak_password', pe);
     if (DEMO) return this._demo(name, niveau);
-    const { data, error } = await safe(() => sb.auth.signUp({email: email.trim(), password, options: {data: {full_name: name, code, niveau}, emailRedirectTo: redirectURL()}}));
-    if (error) throw new AuthFail(/Database error|code de classe/i.test(error.message || '') ? 'bad_class_code' : classer(error, {weak_password: 'weak_password', user_already_exists: 'signup_refused', email_exists: 'signup_refused'}));
+    const { data, error } = await safe(() => sb.auth.signUp({email: email.trim(), password, options: {data: {full_name: name, niveau}, emailRedirectTo: redirectURL()}}));
+    if (error) throw new AuthFail(classer(error, {weak_password: 'weak_password', user_already_exists: 'signup_refused', email_exists: 'signup_refused'}));
     return data.session ? 'in' : 'confirm';
   },
   async _demo(name, niveau = 1) {
@@ -425,16 +425,6 @@ export const api = {
   async saveConfig(c) {
     if (DEMO) { ls.set('demo-config', c); emit('config'); return; }
     const { error } = await sb.from('classe_config').update({message: c.message, sel: c.sel, updated_at: new Date().toISOString()}).eq('id', 1);
-    if (error) throw error;
-  },
-  async getCode() {
-    if (DEMO) return 'MP2026';
-    const { data } = await sb.from('classe_secret').select('code_inscription').eq('id', 1).maybeSingle();
-    return data?.code_inscription || '';
-  },
-  async setCode(code) {
-    if (DEMO) return;
-    const { error } = await sb.from('classe_secret').update({code_inscription: code}).eq('id', 1);
     if (error) throw error;
   },
 

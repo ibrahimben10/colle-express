@@ -1162,15 +1162,12 @@ function buildProf() {
         <div id="pBank"></div>
       </div>
     </div>
-    <h3 class="sec">${ic('key')} Code d’inscription de la classe</h3>
-    <div class="panel form"><div class="row" style="align-items:end"><label class="field">Code à donner aux élèves<input id="cCode" autocomplete="off"></label><button class="btn" id="cCodeSave" style="flex:0 0 auto">Changer le code</button></div><span class="small" id="cCodeOk">Seuls les élèves qui ont ce code peuvent créer un compte.</span></div>`;
+`;
   $('#pRows').onclick = e => { const tr = e.target.closest('[data-st]'); if (tr) studentDialog(tr.dataset.st); };
   $('#pRows').onkeydown = e => { const tr = e.target.closest('[data-st]'); if (tr && e.key === 'Enter') studentDialog(tr.dataset.st); };
   $('#aSave').onclick = addExercise;
   $('#impFile') && ($('#impFile').onchange = e => importPhoto(e.target.files[0]));
   $('#pBank').onclick = async e => { const b = e.target.closest('[data-del]'); if (!b) return; b.disabled = true; try { await api.delBanque(b.dataset.del); BANK = await api.banque(); updateProf(); } catch { b.disabled = false; } };
-  api.getCode().then(c => { $('#cCode').value = c; });
-  $('#cCodeSave').onclick = async () => { const c = $('#cCode').value.trim(); if (c.length < 4) { $('#cCodeOk').textContent = '4 caractères minimum.'; return; } try { await api.setCode(c); $('#cCodeOk').textContent = 'Nouveau code enregistré.'; } catch { $('#cCodeOk').textContent = 'Échec.'; } };
   buildConfig();
 }
 function buildConfig() {
@@ -1215,7 +1212,7 @@ function updateProf() {
     return {c, ok: v.filter(x => x.s === 'reussi').length, tried: v.length, e: v.reduce((a, x) => a + (x.e || 0), 0), i: v.reduce((a, x) => a + (x.i || 0), 0), weak: weak?.k || '—', last: c.data?.journal?.[0]?.d || c.last_seen};
   }).sort((a, b) => new Date(b.last || 0) - new Date(a.last || 0));
   $('#pRows').innerHTML = rows.map(r => `<tr class="click" data-st="${esc(r.c.id)}" tabindex="0"><td><span class="person">${avatar(r.c.id, r.c.full_name)}${esc(r.c.full_name || 'Élève')}${PRES[r.c.id] ? ' <span class="dot on" title="en ligne"></span>' : ''}</span></td><td>${LV[r.c.niveau] || '—'}</td><td class="r">${r.ok}/${r.tried}</td><td class="r">${r.e}</td><td class="r">${r.i}</td><td>${esc(r.weak)}</td><td>${ago(r.last)}</td></tr>`).join('')
-    || '<tr><td colspan="7" class="empty">Aucun élève inscrit. Donne-leur l’adresse du site et le code de la classe.</td></tr>';
+    || '<tr><td colspan="7" class="empty">Aucun élève inscrit. Donne-leur l’adresse du site : l’inscription est libre.</td></tr>';
   const fromDb = [];
   for (const s of students) for (const j of (s.data?.journal || []).slice(0, 8)) fromDb.push({d: j.d, uid: s.id, name: s.full_name, id: j.id, k: j.k, v: j.v, sc: j.sc});
   const seen = new Set(), items = [];
