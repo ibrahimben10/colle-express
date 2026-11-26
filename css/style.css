@@ -382,7 +382,7 @@ main{max-width:1280px;margin:auto;padding:20px max(3vw,14px) 40px}
 .fig-svg .spring{stroke:var(--ink);stroke-width:1.5}
 .fig-svg .fillA{fill:color-mix(in srgb,var(--blue) 12%,transparent)}.fig-svg .fillB{fill:color-mix(in srgb,var(--blue) 24%,transparent)}
 .fig-svg .fillR{fill:color-mix(in srgb,var(--red) 18%,transparent)}.fig-svg .fillW{fill:var(--card)}.fig-svg .fillY{fill:color-mix(in srgb,var(--amber) 28%,transparent)}
-.fig-svg .fillI{fill:color-mix(in srgb,var(--m-maths) 20%,transparent)}.fig-svg .fill{fill:var(--ink)}
+.fig-svg .fillI{fill:color-mix(in srgb,var(--m-maths) 20%,transparent)}.fig-svg .fillG{fill:color-mix(in srgb,var(--soft) 24%,transparent)}.fig-svg .fill{fill:var(--ink)}
 .fig-svg .hatch{fill:url(#hatch);stroke:none}.fig-svg .ht{stroke:var(--soft);stroke-width:1.2}
 .fig-svg .fh{fill:var(--ink)}.fig-svg .fh.r{fill:var(--red)}.fig-svg .fh.b{fill:var(--blue)}
 .fig-svg .pt{fill:var(--ink)}.fig-svg .pt.r{fill:var(--red)}

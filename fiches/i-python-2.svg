@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 170" role="img" aria-label="Indices d’une liste de longueur n : de 0 à n − 1, ou de −n à −1 depuis la fin ; la tranche L[2:5] contient les éléments d’indices 2, 3 et 4 (borne de droite exclue)" class="fig-svg"><style>
+.s{fill:none;stroke:#2c2c2e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:2.6}.r{stroke:#c2410c}.b{stroke:#0066cc}.soft{stroke:#6e6e73}
+.dash{stroke-dasharray:5 4}.axis{stroke:#6e6e73;stroke-dasharray:8 3 2 3;stroke-width:1.1}.dim{stroke:#6e6e73;stroke-width:1}
+.ray{stroke:#a15c00;stroke-width:1.3}.spring{stroke:#2c2c2e;stroke-width:1.5}
+.fillA{fill:rgba(0,102,204,.10)}.fillB{fill:rgba(0,102,204,.2)}.fillR{fill:rgba(194,65,12,.15)}.fillW{fill:none}.fillY{fill:rgba(161,92,0,.18)}.fillI{fill:rgba(31,79,184,.2)}.fillG{fill:rgba(110,110,115,.22)}.fill{fill:#2c2c2e}
+.hatch{fill:url(#hatch);stroke:none}.ht{stroke:#6e6e73;stroke-width:1.2}
+.fh{fill:#2c2c2e}.fh.r{fill:#c2410c}.fh.b{fill:#0066cc}.pt{fill:#2c2c2e}.pt.r{fill:#c2410c}
+text{stroke:none}.lb{font:14px Georgia,'Times New Roman',serif;fill:#2c2c2e}.lb.r{fill:#c2410c}.lb.b{fill:#0066cc}
+.lb.nt{fill:#6e6e73;font:500 12.5px -apple-system,'Segoe UI',Roboto,Arial,sans-serif}.it{font-style:italic}.vec{font-size:11px;font-style:normal}
+</style><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh r"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1L10,5L0,9z" class="fh b"/></marker>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="ht"/></pattern>
+</defs>
+  <rect x="84" y="60" width="46" height="34" rx="0" class="s fillW"/><text x="107" y="82" class="lb " text-anchor="middle">a</text><rect x="130" y="60" width="46" height="34" rx="0" class="s fillW"/><text x="153" y="82" class="lb " text-anchor="middle">b</text><rect x="176" y="60" width="46" height="34" rx="0" class="s fillA"/><text x="199" y="82" class="lb " text-anchor="middle">c</text><rect x="222" y="60" width="46" height="34" rx="0" class="s fillA"/><text x="245" y="82" class="lb " text-anchor="middle">d</text><rect x="268" y="60" width="46" height="34" rx="0" class="s fillA"/><text x="291" y="82" class="lb " text-anchor="middle">e</text><rect x="314" y="60" width="46" height="34" rx="0" class="s fillW"/><text x="337" y="82" class="lb " text-anchor="middle">f</text><rect x="360" y="60" width="46" height="34" rx="0" class="s fillW"/><text x="383" y="82" class="lb " text-anchor="middle">g</text>
+  <text x="107" y="50" class="lb b" text-anchor="middle">0</text><text x="153" y="50" class="lb b" text-anchor="middle">1</text><text x="199" y="50" class="lb b" text-anchor="middle">2</text><text x="245" y="50" class="lb b" text-anchor="middle">3</text><text x="291" y="50" class="lb b" text-anchor="middle">4</text><text x="337" y="50" class="lb b" text-anchor="middle">5</text><text x="383" y="50" class="lb b" text-anchor="middle">6</text><text x="107" y="116" class="lb r" text-anchor="middle">−7</text><text x="153" y="116" class="lb r" text-anchor="middle">−6</text><text x="199" y="116" class="lb r" text-anchor="middle">−5</text><text x="245" y="116" class="lb r" text-anchor="middle">−4</text><text x="291" y="116" class="lb r" text-anchor="middle">−3</text><text x="337" y="116" class="lb r" text-anchor="middle">−2</text><text x="383" y="116" class="lb r" text-anchor="middle">−1</text>
+  <text x="74" y="50" class="lb nt" text-anchor="end">indice</text><text x="74" y="116" class="lb nt" text-anchor="end">négatif</text>
+  <line x1="176" y1="136" x2="176" y2="148" class="s "/><line x1="314" y1="136" x2="314" y2="148" class="s "/><line x1="176" y1="148" x2="314" y2="148" class="s "/><text x="245" y="164" class="lb b" text-anchor="middle">L[2:5]</text></svg>

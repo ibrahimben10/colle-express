@@ -246,4 +246,43 @@ D = [
  ('Diagramme E-pH de l\'eau','Droites des couples O2/H2O et H2O/H2, domaine de stabilité',1),
  ('Diagramme E-pH du fer','Domaines de Fe, Fe²⁺, Fe³⁺, Fe(OH)2, Fe(OH)3',1),
  ('Superposition de deux diagrammes','Domaines disjoints = réaction, lecture de la stabilité',2)]),
+('Informatique','MPSI','i-python','Programmer en Python',[
+ ('Références et mutabilité','Deux noms pour une même liste, effet d\'une modification, copie indépendante',1),
+ ('Indices et tranches','Liste avec indices positifs et négatifs, tranche L[2:5]',1)]),
+('Informatique','MPSI','i-nombres','Représentation des nombres',[
+ ('Entiers en complément à deux','Cercle des entiers sur 3 bits, débordement',1),
+ ('Flottants IEEE 754','Signe, exposant, mantisse sur 64 bits',1)]),
+('Informatique','MPSI','i-piles','Piles et files',[
+ ('Pile et file','Empiler/dépiler (LIFO), enfiler/défiler (FIFO)',1)]),
+('Informatique','MPSI','i-complexite','Complexité, terminaison, correction',[
+ ('Croissance comparée','Courbes log n, n, n log n, n², 2ⁿ',1)]),
+('Informatique','MPSI','i-recherche','Recherche et dichotomie',[
+ ('Recherche dichotomique','Intervalle [g, d] divisé par deux à chaque étape dans un tableau trié',1)]),
+('Informatique','MPSI','i-tris','Algorithmes de tri',[
+ ('Tri par insertion','Étapes successives, partie triée à gauche',1),
+ ('Tri fusion','Arbre de découpage puis de fusion',1)]),
+('Informatique','MPSI','i-recursivite','Récursivité',[
+ ('Arbre des appels','Appels de fib(4), sous-problèmes répétés',1),
+ ('Pile d\'appels','Empilement des appels de fact(3) puis retours',1)]),
+('Informatique','MPSI','i-gloutons','Algorithmes gloutons',[
+ ('Sélection d\'activités','Intervalles sur un axe du temps, choix par date de fin croissante',1)]),
+('Informatique','MPSI','i-graphes','Graphes : représentations et parcours',[
+ ('Représentations d\'un graphe','Dessin, matrice d\'adjacence, listes d\'adjacence',1),
+ ('Parcours en largeur et en profondeur','Ordres de visite depuis un même sommet',1)]),
+('Informatique','MPSI','i-plus-courts','Plus courts chemins',[
+ ('Algorithme de Dijkstra','Graphe pondéré, distances provisoires, sommets traités',1)]),
+('Informatique','MP','i-sql','Bases de données et SQL',[
+ ('Schéma relationnel','Deux tables, clé primaire, clé étrangère',1),
+ ('Jointure','Lignes associées par égalité de clés',1)]),
+('Informatique','MP','i-dictionnaires','Dictionnaires et hachage',[
+ ('Table de hachage','Clés, fonction de hachage, alvéoles, collision',1)]),
+('Informatique','MP','i-progdyn','Programmation dynamique',[
+ ('Sous-problèmes communs','Arbre des appels avec répétitions et mémoïsation',1),
+ ('Tableau de programmation dynamique','Remplissage d\'un tableau du sac à dos, dépendances',1)]),
+('Informatique','MP','i-ia','Algorithmes pour l\'intelligence artificielle',[
+ ('k plus proches voisins','Nuage de points de deux classes, point à classer, cercle des k voisins',1),
+ ('Algorithme des k-moyennes','Groupes, centres, itération',1)]),
+('Informatique','MP','i-jeux','Jeux et stratégies',[
+ ('Arbre minimax','Niveaux max et min, valeurs remontées',1),
+ ('Graphe de jeu et attracteur','Positions des deux joueurs, positions gagnantes',2)]),
 ]

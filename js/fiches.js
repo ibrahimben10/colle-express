@@ -5,7 +5,7 @@ import { ic } from './icons.js';
 
 let IDX = null, FIGS = {};
 const MODS = {p1: () => import('./fiches-fig-p1.js'), p2: () => import('./fiches-fig-p2.js'), p3: () => import('./fiches-fig-p2.js'), p4: () => import('./fiches-fig-p4.js'), p5: () => import('./fiches-fig-p5.js'), px: () => import('./fiches-fig-p5.js'),
-  mpa: () => import('./fiches-fig-mpa.js'), mpb: () => import('./fiches-fig-mpb.js'), mpc: () => import('./fiches-fig-mpc.js'), c: () => import('./fiches-fig-c.js')};
+  mpa: () => import('./fiches-fig-mpa.js'), mpb: () => import('./fiches-fig-mpb.js'), mpc: () => import('./fiches-fig-mpc.js'), c: () => import('./fiches-fig-c.js'), i: () => import('./fiches-fig-i.js')};
 async function index() { if (!IDX) IDX = await fetch('data/fiches/index.json').then(r => r.json()); return IDX; }
 async function figs(id) {
   let k = id.split('-')[0];
@@ -15,17 +15,27 @@ async function figs(id) {
   try { FIGS[k] = (await MODS[k]()).FIGS; } catch { FIGS[k] = {}; }
   return FIGS[k];
 }
-const MAT = {Physique: 'atom', Chimie: 'flask'};
+const MAT = {Physique: 'atom', Chimie: 'flask', Informatique: 'code'};
 
 function figure(F, key) {
   const f = F[key];
   if (!f) return `<figure class="fig ff ff-vide"><div class="ff-ph">${ic('eye')}<span>Schéma à venir</span></div></figure>`;
   return `<figure class="fig ff">${f[1]}<figcaption>${inlineC(f[0])}</figcaption></figure>`;
 }
+// Découpe en paragraphes (lignes vides), sans couper un bloc de code ``` qui contient des lignes vides.
+function blocs(md) {
+  const out = []; let cur = [], code = false;
+  for (const l of md.split('\n')) {
+    if (/^\s*```/.test(l)) code = !code;
+    if (!code && !l.trim()) { if (cur.length) out.push(cur.join('\n')); cur = []; } else cur.push(l);
+  }
+  if (cur.length) out.push(cur.join('\n'));
+  return out;
+}
 // Markdown des fiches : « ## Titre », « > **Définition — …** » (encadré), « [[fig:clé]] », tableaux, listes, formules.
 function corps(md, F) {
   const toc = [];
-  const html = md.replace(/^---[\s\S]*?---\s*/, '').split(/\n{2,}/).map(p => {
+  const html = blocs(md.replace(/^---[\s\S]*?---\s*/, '')).map(p => {
     const t = p.trim();
     let m;
     if ((m = t.match(/^##\s+(.+)$/))) { const id = 's' + toc.length; toc.push([id, m[1]]); return `<h2 class="fh2" id="${id}">${esc(m[1])}</h2>`; }
