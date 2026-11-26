@@ -5,7 +5,7 @@ import { ic } from './icons.js';
 
 let IDX = null, FIGS = {};
 const MODS = {p1: () => import('./fiches-fig-p1.js'), p2: () => import('./fiches-fig-p2.js'), p3: () => import('./fiches-fig-p2.js'), p4: () => import('./fiches-fig-p4.js'), p5: () => import('./fiches-fig-p5.js'), px: () => import('./fiches-fig-p5.js'),
-  mpa: () => import('./fiches-fig-mpa.js'), mpb: () => import('./fiches-fig-mpb.js'), mpc: () => import('./fiches-fig-mpc.js'), c: () => import('./fiches-fig-c.js'), i: () => import('./fiches-fig-i.js')};
+  mpa: () => import('./fiches-fig-mpa.js'), mpb: () => import('./fiches-fig-mpb.js'), mpc: () => import('./fiches-fig-mpc.js'), c: () => import('./fiches-fig-c.js'), i: () => import('./fiches-fig-i.js'), m1: () => import('./fiches-fig-m.js'), m2: () => import('./fiches-fig-m.js')};
 async function index() { if (!IDX) IDX = await fetch('data/fiches/index.json').then(r => r.json()); return IDX; }
 async function figs(id) {
   let k = id.split('-')[0];
@@ -15,7 +15,7 @@ async function figs(id) {
   try { FIGS[k] = (await MODS[k]()).FIGS; } catch { FIGS[k] = {}; }
   return FIGS[k];
 }
-const MAT = {Physique: 'atom', Chimie: 'flask', Informatique: 'code'};
+const MAT = {Maths: 'sigma', Physique: 'atom', Chimie: 'flask', Informatique: 'code'};
 
 function figure(F, key) {
   const f = F[key];
@@ -78,6 +78,8 @@ function renderIndex(el, L) {
     const g = `${f.mat} · ${f.niveau}`; let G = groupes.find(x => x.k === g); if (!G) groupes.push(G = {k: g, mat: f.mat, parties: []});
     let P = G.parties.find(x => x.t === f.partie); if (!P) G.parties.push(P = {t: f.partie, fs: []}); P.fs.push(f);
   }
+  const ORD = ['Maths', 'Physique', 'Chimie', 'Informatique'];
+  groupes.sort((a, b) => ORD.indexOf(a.mat) - ORD.indexOf(b.mat));
   el.innerHTML = `<div class="fiches-idx">
     <header class="fiche-head"><p class="kicker">${ic('book')} Fiches de cours</p><h1>L’essentiel de chaque chapitre</h1>
       <p class="small">Définitions, lois, méthodes et pièges, avec les schémas à connaître. ${L.length} fiches.</p>
@@ -85,7 +87,7 @@ function renderIndex(el, L) {
       <p class="fiche-count" id="fqN" aria-live="polite" hidden></p>
       <p class="fiche-actions"><a class="btn" href="#colle">${ic('msg')} Colleur virtuel : passer une colle de cours</a></p></header>
     ${groupes.map(G => `<section class="fgrp"><h2>${ic(MAT[G.mat] || 'book')} ${esc(G.k)}</h2>${G.parties.map(P => `<h3>${esc(P.t)}</h3><div class="fcards">${P.fs.map(f =>
-      (f.pret ? `<a class="fcard" href="#f/${f.id}"` : `<div class="fcard off"`) + ` data-q="${esc(norm(f.titre + ' ' + f.partie + ' ' + f.mat + ' ' + f.niveau + ' ' + (f.k || '')))}"><b>${esc(f.titre)}</b><span>${f.pret ? `${f.n} schéma${f.n > 1 ? 's' : ''}` : 'en préparation'}</span>` + (f.pret ? '</a>' : '</div>')).join('')}</div>`).join('')}</section>`).join('')}
+      (f.pret ? `<a class="fcard" href="#f/${f.id}"` : `<div class="fcard off"`) + ` data-q="${esc(norm(f.titre + ' ' + f.partie + ' ' + f.mat + ' ' + f.niveau + ' ' + (f.k || '')))}"><b>${esc(f.titre)}</b><span>${f.pret ? (f.n ? `${f.n} schéma${f.n > 1 ? 's' : ''}` : 'Fiche de cours') : 'en préparation'}</span>` + (f.pret ? '</a>' : '</div>')).join('')}</div>`).join('')}</section>`).join('')}
   </div>`;
   const q = el.querySelector('#fqF');
   const nb = el.querySelector('#fqN');

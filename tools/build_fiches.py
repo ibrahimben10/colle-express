@@ -11,7 +11,10 @@ PARTIE = [(r'^p1-', 'Signaux physiques'), (r'^p2-', 'Mécanique 1'), (r'^p3-', '
           (r'^c-(classification|lewis|intermoleculaire|cristal)', 'Structure de la matière'), (r'^c-(matiere|cinetique)', 'Transformations de la matière'),
           (r'^c-', 'Réactions en solution aqueuse'),
           (r'^i-(python|nombres|piles|fichiers|images)', 'Programmation'), (r'^i-(numpy|zeros|integration|edo|systemes|aleatoire)', 'Méthodes numériques'), (r'^i-(complexite|recherche|tris|recursivite|gloutons)', 'Algorithmique'), (r'^i-(graphes|plus-courts)', 'Graphes'),
-          (r'^i-sql', 'Bases de données'), (r'^i-(dictionnaires|progdyn)', 'Dictionnaires et programmation dynamique'), (r'^i-(ia|jeux)', 'Intelligence artificielle et jeux')]
+          (r'^i-sql', 'Bases de données'), (r'^i-(dictionnaires|progdyn)', 'Dictionnaires et programmation dynamique'), (r'^i-(ia|jeux)', 'Intelligence artificielle et jeux'),
+          (r'^m1-(logique|calculs|complexes|arithmetique|structures|polynomes)', 'Algèbre'), (r'^m1-(ev|dimension|matrices|determinants|prehilbertiens)', 'Algèbre linéaire'),
+          (r'^m1-(denombrement|probas)', 'Probabilités'), (r'^m1-', 'Analyse'),
+          (r'^m2-(algebre|algebre-lin|reduction|euclidiens)$', 'Algèbre'), (r'^m2-(algebre|algebre-lin|reduction|euclidiens)', 'Algèbre'), (r'^m2-probas', 'Probabilités'), (r'^m2-', 'Analyse')]
 src = os.path.join(H, 'fiches_src'); out = os.path.join(ROOT, 'data', 'fiches'); os.makedirs(out, exist_ok=True)
 idx = []
 for mat, niv, fid, titre, L in ns['D']:

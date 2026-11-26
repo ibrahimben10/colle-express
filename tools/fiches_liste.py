@@ -304,4 +304,62 @@ D = [
 ('Informatique','MP','i-jeux','Jeux et stratégies',[
  ('Arbre minimax','Niveaux max et min, valeurs remontées',1),
  ('Graphe de jeu et attracteur','Positions des deux joueurs, positions gagnantes',2)]),
+('Maths','MPSI','m1-logique','Logique, ensembles, applications',[
+ ('Injection, surjection, bijection','Diagrammes sagittaux des trois cas',1)]),
+('Maths','MPSI','m1-calculs','Calculs algébriques',[]),
+('Maths','MPSI','m1-complexes','Nombres complexes et trigonométrie',[
+ ('Forme exponentielle','Point d\'affixe z = r e^{iθ}, module, argument, cercle unité',1)]),
+('Maths','MPSI','m1-fonctions','Fonctions usuelles',[
+ ('Exponentielle et logarithme','Courbes symétriques par rapport à y = x',1)]),
+('Maths','MPSI','m1-edl','Équations différentielles linéaires',[]),
+('Maths','MPSI','m1-suites','Nombres réels et suites',[
+ ('Suite récurrente','Escalier ou escargot u_{n+1} = f(u_n), point fixe',1)]),
+('Maths','MPSI','m1-continuite','Limites et continuité',[
+ ('Théorème des valeurs intermédiaires','Fonction continue prenant toute valeur entre f(a) et f(b)',1)]),
+('Maths','MPSI','m1-derivabilite','Dérivabilité',[
+ ('Accroissements finis','Corde et tangente parallèle',1),
+ ('Convexité','Courbe sous ses cordes, au-dessus de ses tangentes',1)]),
+('Maths','MPSI','m1-asymptotique','Analyse asymptotique',[
+ ('Développements limités','Fonction et ses polynômes de Taylor successifs',1)]),
+('Maths','MPSI','m1-arithmetique','Arithmétique dans ℤ',[]),
+('Maths','MPSI','m1-structures','Structures algébriques usuelles',[]),
+('Maths','MPSI','m1-polynomes','Polynômes',[
+ ('Racines de l\'unité','Racines n-ièmes de l\'unité sur le cercle',1)]),
+('Maths','MPSI','m1-ev','Espaces vectoriels et applications linéaires',[
+ ('Projection','Projection sur F parallèlement à G',1)]),
+('Maths','MPSI','m1-dimension','Dimension finie',[]),
+('Maths','MPSI','m1-matrices','Matrices',[]),
+('Maths','MPSI','m1-determinants','Déterminants',[
+ ('Aire orientée','Déterminant de deux vecteurs et parallélogramme',1)]),
+('Maths','MPSI','m1-prehilbertiens','Espaces préhilbertiens réels',[
+ ('Projection orthogonale','Projeté orthogonal et distance à un sous-espace',1)]),
+('Maths','MPSI','m1-integration','Intégration sur un segment',[
+ ('Sommes de Riemann','Rectangles sous la courbe',1)]),
+('Maths','MPSI','m1-series','Séries numériques',[
+ ('Comparaison série-intégrale','Rectangles et intégrale d\'une fonction décroissante',1)]),
+('Maths','MPSI','m1-denombrement','Dénombrement',[]),
+('Maths','MPSI','m1-probas','Probabilités sur un univers fini',[
+ ('Arbre de probabilités','Probabilités totales et formule de Bayes',1)]),
+('Maths','MP','m2-algebre','Compléments d\'algèbre générale',[]),
+('Maths','MP','m2-algebre-lin','Compléments d\'algèbre linéaire',[]),
+('Maths','MP','m2-reduction','Réduction des endomorphismes',[
+ ('Vecteurs propres','Action d\'une matrice diagonalisable sur une base propre',1)]),
+('Maths','MP','m2-euclidiens','Endomorphismes des espaces euclidiens',[
+ ('Théorème spectral','Ellipse et axes propres d\'une matrice symétrique',1)]),
+('Maths','MP','m2-topologie','Espaces vectoriels normés',[
+ ('Boules unités','Boules des normes 1, 2 et infinie dans le plan',1)]),
+('Maths','MP','m2-series','Séries et familles sommables',[]),
+('Maths','MP','m2-suites-fonctions','Suites et séries de fonctions',[
+ ('Convergence simple non uniforme','x ↦ xⁿ sur [0, 1]',1),
+ ('Convergence uniforme','Bande de largeur ε autour de la limite',1)]),
+('Maths','MP','m2-series-entieres','Séries entières',[
+ ('Disque de convergence','Convergence absolue dans le disque, divergence grossière à l\'extérieur',1)]),
+('Maths','MP','m2-integration','Intégration sur un intervalle quelconque',[
+ ('Intégrales de Riemann','1/x^α en 0 et en +∞',1)]),
+('Maths','MP','m2-parametre','Intégrales à paramètre',[]),
+('Maths','MP','m2-probas','Probabilités',[
+ ('Lois usuelles','Lois géométrique et de Poisson',1)]),
+('Maths','MP','m2-edl','Équations différentielles linéaires',[]),
+('Maths','MP','m2-differentiel','Calcul différentiel',[
+ ('Gradient et lignes de niveau','Gradient orthogonal aux lignes de niveau',1)]),
 ]
