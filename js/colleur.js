@@ -1,14 +1,30 @@
 // Colleur virtuel : une colle de cours sur une fiche, menée par un modèle de langage (fonction Supabase « colleur »).
-// L'élève répond par écrit ou au micro (reconnaissance vocale du navigateur, si disponible) ; bilan noté à la fin.
+// L'élève répond par écrit, au micro (reconnaissance vocale du navigateur, si disponible) ou en photo de sa feuille ; bilan noté à la fin.
 import { CONFIG } from './config.js';
 import { api } from './api.js';
 import { esc, rich, inlineC } from './format.js';
 import { ic } from './icons.js';
 
 let IDX = null;
+const PHOTO_SEULE = '(réponse en photo)';
 let S = null;          // séance en cours : {fiche, titre, n, tours, messages, fil, fin, busy}
 const STAT = {juste: ['Juste', 'ok'], partiel: ['Incomplet', 'mid'], faux: ['À revoir', 'ko']};
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MAX_PHOTOS = 2;
+let PH = [];           // photos jointes à la réponse en cours (data URL JPEG réduites)
+
+// Photo de la feuille : réduite à 1568 px de côté, JPEG, fond blanc (les PNG transparents restent lisibles).
+async function reduire(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = url; });
+    const k = Math.min(1, 1568 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.82);
+  } finally { URL.revokeObjectURL(url); }
+}
+const vignettes = (L, suppr) => L.length ? `<div class="colle-ph">${L.map((d, i) => `<figure><img src="${d}" alt="Photo ${i + 1} de la réponse">${suppr ? `<button type="button" class="colle-ph-x" data-x="${i}" aria-label="Retirer la photo ${i + 1}">${ic('x')}</button>` : ''}</figure>`).join('')}</div>` : '';
 
 const memo = {
   get(id) { try { return JSON.parse(localStorage.getItem('ce:colle:' + id) || 'null'); } catch { return null; } },
@@ -56,7 +72,7 @@ function accueil(el, f, typeset) {
   let n = 5;
   el.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { n = +b.dataset.n; el.querySelectorAll('[data-n]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
   el.querySelector('#clStart').onclick = () => {
-    S = {fiche: f.id, titre: f.titre, n, tours: 0, messages: [], fil: [], fin: null, busy: false};
+    S = {fiche: f.id, titre: f.titre, n, tours: 0, messages: [], fil: [], fin: null, busy: false}; PH = [];
     appel(el, typeset, 'debut');
   };
   scrollTo(0, 0);
@@ -65,7 +81,10 @@ function accueil(el, f, typeset) {
 async function appel(el, typeset, action) {
   S.busy = true; S.err = ''; draw(el, typeset);
   try {
-    const r = await api.colleur({fiche: S.fiche, action, questions: S.n, messages: S.messages});
+    const images = action !== 'debut' && S.attente?.length ? S.attente : undefined;
+    const r = await api.colleur({fiche: S.fiche, action, questions: S.n, messages: S.messages, ...(images ? {images} : {})});
+    // ce que le colleur a lu sur la photo remplace la photo dans l'historique : les tours suivants gardent le contexte sans renvoyer l'image
+    if (images) { const m = S.messages[S.messages.length - 1]; m.content = `${m.content === PHOTO_SEULE ? '' : m.content + '\n\n'}[Réponse manuscrite en photo, lue par le colleur] ${r.lu || '(illisible)'}`; S.attente = null; }
     if (action === 'debut' && r.restantes != null) S.restantes = r.restantes;
     if (r.appreciation || r.question) {
       const txt = [r.appreciation, r.question].filter(Boolean).join('\n\n');
@@ -75,6 +94,9 @@ async function appel(el, typeset, action) {
     if (action === 'bilan') { S.fin = r; memo.set(S.fiche, {note: r.note, date: Date.now()}); }
   } catch (e) {
     S.err = e.message || 'Le colleur n’a pas pu répondre.';
+    if (S.attente?.length) {   // échec : la réponse n'est pas comptée, l'élève peut la renvoyer telle quelle
+      const m = S.messages.pop(), e2 = S.fil.pop(); S.tours--; PH = S.attente; S.attente = null; S.brouillon = m.content === PHOTO_SEULE ? '' : m.content; void e2;
+    }
     if (action === 'debut' && !S.fil.length) { const f = IDX.find(x => x.id === S.fiche); S = null; accueil(el, f, typeset); el.querySelector('.colle-choix').insertAdjacentHTML('afterend', `<p class="err">${esc(e.message)}</p>`); return; }
   }
   S.busy = false; draw(el, typeset);
@@ -82,14 +104,16 @@ async function appel(el, typeset, action) {
 
 function draw(el, typeset) {
   const fil = S.fil.map(m => m.qui === 'eleve'
-    ? `<div class="cb cb-e"><div class="cb-t">Vous</div>${rich(m.texte)}</div>`
+    ? `<div class="cb cb-e"><div class="cb-t">Vous</div>${m.texte ? rich(m.texte) : ''}${vignettes(m.photos || [])}</div>`
     : `<div class="cb cb-c"><div class="cb-t">${ic('msg')} Colleur${m.statut && STAT[m.statut] ? ` <span class="cb-s ${STAT[m.statut][1]}">${STAT[m.statut][0]}</span>` : ''}</div>
         ${m.appreciation ? `<div class="cb-app">${rich(m.appreciation)}</div>` : ''}${m.question ? `<div class="cb-q">${rich(m.question)}</div>` : ''}</div>`).join('');
   const reste = S.n - S.tours;
   const saisie = S.fin ? '' : `<div class="panel pad colle-saisie">
-      <textarea id="clR" rows="4" placeholder="Votre réponse… (formules : $E = mc^2$)" ${S.busy ? 'disabled' : ''}></textarea>
+      <textarea id="clR" rows="4" placeholder="Votre réponse… (formules : $E = mc^2$), ou une photo de votre feuille" ${S.busy ? 'disabled' : ''}></textarea>
+      ${vignettes(PH, !S.busy)}
       <div class="colle-btns">
         <button class="btn primary" id="clSend" type="button" ${S.busy ? 'disabled' : ''}>${ic('arrow')} Répondre</button>
+        <label class="btn${PH.length >= MAX_PHOTOS || S.busy ? ' is-off' : ''}" id="clPhL">${ic('camera')} Photo<input type="file" id="clPh" accept="image/*" multiple class="sr" ${PH.length >= MAX_PHOTOS || S.busy ? 'disabled' : ''}></label>
         ${SR ? `<button class="btn" id="clMic" type="button" ${S.busy ? 'disabled' : ''} aria-pressed="false">${ic('mic')} Dicter</button>` : ''}
         <button class="btn ghost" id="clPass" type="button" ${S.busy ? 'disabled' : ''}>Je ne sais pas</button>
         <button class="btn ghost" id="clStop" type="button" ${S.busy || !S.tours ? 'disabled' : ''}>Terminer et voir le bilan</button>
@@ -110,15 +134,25 @@ function draw(el, typeset) {
   fin?.scrollIntoView({block: 'nearest', behavior: 'smooth'});
   if (S.fin) { el.querySelector('#clNew').onclick = () => { const f = IDX.find(x => x.id === S.fiche); S = null; accueil(el, f, typeset); }; return; }
   const ta = el.querySelector('#clR');
+  if (S.brouillon) { ta.value = S.brouillon; S.brouillon = ''; }
   if (!S.busy) ta.focus({preventScroll: true});
-  const envoyer = txt => {
-    txt = txt.trim(); if (!txt || S.busy) return;
-    S.messages.push({role: 'user', content: txt}); S.fil.push({qui: 'eleve', texte: txt}); S.tours++;
+  const envoyer = (txt, sansPhoto) => {
+    txt = txt.trim(); const photos = sansPhoto ? [] : PH;
+    if ((!txt && !photos.length) || S.busy) return;
+    S.messages.push({role: 'user', content: txt || PHOTO_SEULE}); S.fil.push({qui: 'eleve', texte: txt, photos}); S.tours++;
+    S.attente = photos.length ? photos : null; PH = [];
     appel(el, typeset, S.tours >= S.n ? 'bilan' : 'repondre');
   };
+  const redessiner = () => { const v = ta.value; draw(el, typeset); el.querySelector('#clR').value = v; };
+  el.querySelector('#clPh').onchange = async e => {
+    const files = [...e.target.files].filter(f => f.type.startsWith('image/')).slice(0, MAX_PHOTOS - PH.length);
+    for (const f of files) { try { PH.push(await reduire(f)); } catch { S.err = 'Cette image n’a pas pu être lue.'; } }
+    redessiner();
+  };
+  el.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { PH.splice(+b.dataset.x, 1); redessiner(); });
   el.querySelector('#clSend').onclick = () => envoyer(ta.value);
   ta.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) envoyer(ta.value); };
-  el.querySelector('#clPass').onclick = () => envoyer('Je ne sais pas.');
+  el.querySelector('#clPass').onclick = () => envoyer('Je ne sais pas.', true);
   el.querySelector('#clStop').onclick = () => { if (S.tours) appel(el, typeset, 'bilan'); };
   const mic = el.querySelector('#clMic');
   if (mic) mic.onclick = () => dicter(mic, ta);
