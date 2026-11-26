@@ -2344,3 +2344,205 @@ pre.code{border:1px solid var(--line-soft);border-left:1px solid var(--line-soft
 .fdlg-t{margin:4px 0 2px;font-size:var(--t-lg)}
 
 .fiche-corps .fh3{font-size:1.02rem;margin:1.1rem 0 .35rem;font-weight:650}
+
+/* ======================================================================================
+   COPIE DOUBLE v4 — couche finale (2026-11-26)
+   IDÉE : l'élève cherche sur sa copie à grands carreaux, au stylo bleu ; le correcteur répond en rouge,
+   dans la marge. Couverture de cahier bleu nuit pour la barre, feuilles blanches sur un bureau bleuté,
+   quadrillage Seyès seulement dans les zones de travail, intercalaires colorés pour les matières.
+   TYPO : titres en Latin Modern Roman (la police des sujets de concours, accordée à MathJax),
+   interface en police système, annotations au stylo rouge en écriture manuscrite, avec parcimonie.
+   ====================================================================================== */
+:root{
+ --desk:light-dark(#EEF1F7,#0B1022);
+ --paper:var(--desk);--bg:var(--desk);
+ --card:light-dark(#FFFFFF,#141A2E);--card2:light-dark(#F8F9FC,#182038);--wash:light-dark(#F2F4F9,#111729);
+ --chip:light-dark(#E6EAF3,#1E2742);
+ --ink:light-dark(#1B2030,#E9ECF5);--soft:light-dark(#555C70,#A6AEC6);--faint:light-dark(#5F6678,#949CB6);
+ --line:light-dark(#CBD3E3,#2B3554);--line-soft:light-dark(#DFE4EF,#222B47);--rule:var(--line-soft);
+ /* encres */
+ --bic:light-dark(#2340C2,#8FA6FF);--bic-h:light-dark(#1C35A8,#A9BBFF);--on-bic:light-dark(#FFFFFF,#0B1022);
+ --rouge:light-dark(#CF2433,#FF6F78);--rouge-soft:light-dark(#FCE9EB,#3A1820);
+ --marge:light-dark(#EFA3AE,#7A3442);
+ --seyes:light-dark(#E3EAF6,#19223B);--seyes-fort:light-dark(#CFDBF0,#222D4D);
+ --couv:light-dark(#1C2B78,#0E1530);--couv2:light-dark(#24358E,#151E40);--on-couv:#F3F5FC;--on-couv-soft:light-dark(#B9C3EA,#9AA6CF);
+ --blue:var(--bic);--accent:var(--bic);--btn:var(--bic);--btn-h:var(--bic-h);--btn-p:var(--bic-h);--on-btn:var(--on-bic);
+ --accent-soft:light-dark(#E7ECFB,#1A2550);--ring:light-dark(#2340C255,#8FA6FF80);
+ --red:var(--rouge);--green:light-dark(#18794A,#45D08A);--amber:light-dark(#A35A00,#FFB347);
+ /* intercalaires */
+ --m-maths:light-dark(#5B3FC0,#B3A1FF);--m-physique:light-dark(#B0500A,#FFA25C);--m-chimie:light-dark(#0B7C80,#5ED3D6);--m-info:light-dark(#2B7A35,#6BD77A);
+ --fdisp:"Latin Modern Roman","Latin Modern","CMU Serif",ui-serif,Georgia,serif;
+ --fmain:Caveat,"Segoe Print","Bradley Hand",cursive;
+ --r:8px;--r-md:8px;--r-lg:12px;
+ --e1:0 1px 0 light-dark(#1B20300d,#00000066),0 1px 3px light-dark(#1B20300f,#00000055);
+ --e2:0 1px 2px light-dark(#1B203012,#00000066),0 10px 28px -16px light-dark(#1B203040,#000000cc);
+ --e3:0 2px 6px light-dark(#1B203014,#00000077),0 28px 64px -30px light-dark(#1C2B7859,#000000e6);
+ --ease-out:cubic-bezier(.23,1,.32,1);--ease-io:cubic-bezier(.77,0,.175,1);
+}
+body{background:var(--desk);color:var(--ink)}
+::selection{background:light-dark(#C9D4FA,#2C3F8F);color:inherit}
+:focus-visible{outline:2px solid var(--bic);outline-offset:2px;border-radius:6px}
+a{color:var(--bic)}
+a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+html{scrollbar-color:light-dark(#B7C2DA,#2E3A60) transparent}
+input,select,textarea{caret-color:var(--bic)}
+.mono,code,kbd{font-variant-numeric:tabular-nums}
+
+/* — Titres : la voix des sujets de concours — */
+h1,h2,#app h1,#app h2,#auth h1,#auth h2{font-family:var(--fdisp);font-weight:400;letter-spacing:-.012em;font-optical-sizing:auto}
+h1,#app h1{font-size:clamp(30px,3.4vw,44px);line-height:1.08}
+h2{line-height:1.15}
+h3{font-family:var(--fb);font-weight:650;letter-spacing:-.012em}
+
+/* — Mot-symbole : « Colle Express », souligné au stylo rouge — */
+.wm{position:relative;display:inline-block;font-family:var(--fdisp);font-size:25px;line-height:1;letter-spacing:-.01em;color:inherit;white-space:nowrap;padding-bottom:5px}
+.wm i,.top .brand .wm i,.lbrand .wm i{font-style:italic;color:inherit;font-weight:400}
+.wm-trait{position:absolute;left:44%;right:-2px;bottom:0;width:58%;height:7px;overflow:visible}
+.wm-trait path{fill:none;stroke:var(--rouge);stroke-width:2.2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.top .brand .wm::before,.lbrand .wm::before{display:none}
+.top .brand .logo,.lbrand .logo{display:none!important}
+
+/* — Barre : la couverture du cahier — */
+#app .top,.top{background:var(--couv)!important;color:var(--on-couv);border-bottom:0;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 1px 0 #0000001f!important}
+.top .brand{color:var(--on-couv)}
+.top .brand .wm-trait path{stroke:light-dark(#FF8A93,#FF6F78)}
+.top .in{max-width:1320px;min-height:60px;padding-block:6px}
+nav.tabs{gap:2px}
+nav.tabs a{color:var(--on-couv-soft);font-size:14.5px;font-weight:550;border-radius:8px;padding:8px 12px;min-height:40px;background:none;transition:color .16s var(--ease-out),background-color .16s var(--ease-out)}
+nav.tabs a .ic{opacity:.9}
+nav.tabs a:hover{color:var(--on-couv);background:#FFFFFF14}
+nav.tabs a[aria-current=page]{color:var(--on-couv);background:#FFFFFF1F;font-weight:650}
+nav.tabs a[aria-current=page]::after{content:"";position:absolute;left:12px;right:12px;bottom:3px;height:6px;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M1 4 C 25 1.5, 60 5.5, 99 2.5' fill='none' stroke='%23FF8A93' stroke-width='2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat center/100% 100%;
+ animation:trait .42s var(--ease-out) both}
+@keyframes trait{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media(min-width:1100px){
+ #app nav.tabs a .lbl,#app nav.tabs a:not([aria-current]) .lbl{display:inline!important;position:static!important;opacity:1!important;transform:none!important;pointer-events:auto;background:none!important;box-shadow:none!important;color:inherit!important;padding:0!important;border:0!important;font-size:inherit!important}
+ #app nav.tabs a .ic{display:none}
+}
+#me .btn.ghost,#me .iconbtn,#me .themebtn,#me a{color:var(--on-couv)!important}
+#me .themebtn,#me .iconbtn{background:#FFFFFF14!important;border-color:#FFFFFF26!important}
+#me .themebtn:hover,#me .iconbtn:hover{background:#FFFFFF26!important}
+#me .avatar{box-shadow:0 0 0 2px var(--couv),0 0 0 3px #FFFFFF59}
+
+/* — Barre du bas (téléphone) : même couverture — */
+@media(max-width:820px){
+ #app .bottombar,.bottombar{background:var(--couv)!important;-webkit-backdrop-filter:none;backdrop-filter:none;border-top:0;box-shadow:0 -1px 0 #0000001f}
+ .bottombar a{color:var(--on-couv-soft)!important}
+ #app .bottombar a[aria-current=page],.bottombar a[aria-current=page]{color:var(--on-couv)!important;background:#FFFFFF14!important}
+ #app .bottombar a::before{display:none!important}
+ .bottombar a[aria-current=page] .ic{color:light-dark(#FF9BA3,#FF7C84)}
+ .bottombar a[aria-current=page]::after{display:block!important;content:"";position:absolute;left:24%;right:24%;top:3px;height:5px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M1 4 C 25 1.5, 60 5.5, 99 2.5' fill='none' stroke='%23FF8A93' stroke-width='2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat center/100% 100%;animation:trait .42s var(--ease-out) both;border:0;border-radius:0;width:auto}
+ .bottombar a{position:relative}
+}
+.demo{background:var(--rouge-soft);color:light-dark(#8A1822,#FFB3B8);font-size:13px}
+
+/* — Boutons : rectangles d'encre, pression ressentie — */
+.btn,#app .btn,#auth .btn,#auth .acard .btn,#auth .hero-btns .primary{border-radius:8px;font-weight:600;letter-spacing:-.005em;min-height:42px;padding:8px 16px;
+ transition:background-color .16s var(--ease-out),border-color .16s var(--ease-out),color .16s var(--ease-out),transform .12s var(--ease-out),box-shadow .16s var(--ease-out)}
+.btn.primary,#app .btn.primary,#auth .btn.primary,#auth .hero-btns .primary{box-shadow:0 1px 0 #00000026,inset 0 1px 0 #FFFFFF1F}
+.btn.ghost,#app .btn.ghost{color:var(--bic)}
+.iconbtn,#app .iconbtn{border-radius:8px}
+.btn:active,#app .btn:active,.iconbtn:active,.fcard:active,.item:active{transform:scale(.97)}
+.btn.lg{border-radius:10px}
+
+/* — Surfaces : des feuilles posées sur le bureau — */
+.panel,#app .panel{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-lg);box-shadow:var(--e1)}
+.strip,#app .strip{border-radius:var(--r-lg)}
+.pill{border-radius:6px}
+.field :is(input,select,textarea),#auth .acard .field :is(input,select,textarea),select,#fChap{border-radius:8px}
+.field :is(input,select,textarea):focus{border-color:var(--bic);box-shadow:0 0 0 3px var(--ring)}
+
+/* — Quadrillage Seyès : uniquement là où l'on travaille — */
+.seyes,#app .copy{--sx:var(--seyes);--sy:var(--seyes-fort);
+ background-color:var(--card);
+ background-image:
+  linear-gradient(90deg,transparent calc(var(--marge-x,44px) - 1px),var(--marge) calc(var(--marge-x,44px) - 1px),var(--marge) var(--marge-x,44px),transparent var(--marge-x,44px)),
+  repeating-linear-gradient(180deg,transparent 0 39px,var(--sy) 39px 40px),
+  repeating-linear-gradient(180deg,transparent 0 9px,color-mix(in srgb,var(--sx) 55%,transparent) 9px 10px),
+  repeating-linear-gradient(90deg,transparent 0 39px,color-mix(in srgb,var(--sx) 70%,transparent) 39px 40px);
+ background-attachment:local}
+#app .copy{border-radius:4px 12px 12px 4px;padding-left:calc(var(--marge-x,44px) + clamp(16px,2.4vw,28px))!important;box-shadow:var(--e2)}
+#app .copy :is(.corrige,details,.notice,.callout,.expl,.gate,.guide-next,.panel,dialog,table,.fig,figure,.tools,.copy-h,.hints,.answer,form){background-color:var(--card)}
+@media(max-width:820px){#app .copy{--marge-x:22px;border-radius:0;padding-left:calc(22px + 14px)!important}}
+@media(prefers-contrast:more){.seyes,#app .copy{background-image:none}}
+
+/* — Liste des exercices : des lignes de sommaire — */
+.items .item,#app .items .item{border-radius:8px;transition:background-color .14s var(--ease-out),transform .12s var(--ease-out)}
+.item[aria-current=true],#app .items .item[aria-current=true]{background:var(--accent-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bic) 35%,transparent)}
+.item .tile{border-radius:6px}
+.tile.Maths{color:var(--m-maths)}.tile.Physique{color:var(--m-physique)}.tile.Chimie{color:var(--m-chimie)}.tile.Informatique{color:var(--m-info)}
+
+/* — Matières : intercalaires — */
+#fMat.seg,#app #fMat.seg{background:none;gap:4px;padding:0}
+#fMat.seg button,#app #fMat.seg button{border-radius:7px 7px 2px 2px;border:1px solid var(--line-soft);background:var(--card2);color:var(--soft);position:relative;overflow:hidden}
+#fMat.seg button::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--tab,var(--line))}
+#fMat.seg button:nth-child(2){--tab:var(--m-maths)}#fMat.seg button:nth-child(3){--tab:var(--m-physique)}#fMat.seg button:nth-child(4){--tab:var(--m-chimie)}#fMat.seg button:nth-child(5){--tab:var(--m-info)}
+#fMat.seg button[aria-pressed=true],#app #fMat.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);border-color:var(--line);box-shadow:var(--e1)}
+#fMat.seg button[aria-pressed=true]::before{height:4px}
+#fLvl.seg button[aria-pressed=true]{border-bottom-color:var(--rouge)!important}
+#fLvl.seg button[aria-pressed=true] .dots{color:var(--rouge)}
+
+/* — Le stylo rouge du correcteur — */
+.corrige .step.etape h4 .en,.corrige :is(.e1,.e2,.e3,.e4,.e5,.e6) h4 .en,.qn,.hn{color:var(--rouge)}
+.hn{border-color:color-mix(in srgb,var(--rouge) 45%,var(--line))}
+details[open]>summary .hn{background:var(--rouge-soft)}
+.trait-rouge{position:relative}
+.trait-rouge::after,.fiche-corps .fh2::after,.colle-page h1::after,.fiches-idx h1::after{content:"";display:block;width:min(180px,60%);height:7px;margin-top:4px;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M1 4 C 25 1.5, 60 5.5, 99 2.5' fill='none' stroke='%23CF2433' stroke-width='2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat left/100% 100%;
+ animation:trait .5s var(--ease-out) .08s both}
+:root[data-theme=dark] :is(.trait-rouge,.fiche-corps .fh2,.colle-page h1,.fiches-idx h1)::after{filter:brightness(1.6) saturate(.9)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) :is(.trait-rouge,.fiche-corps .fh2,.colle-page h1,.fiches-idx h1)::after{filter:brightness(1.6) saturate(.9)}}
+.main-rouge{font-family:var(--fmain);color:var(--rouge);font-size:1.25em;line-height:1;font-weight:600}
+
+/* — Fiches de cours — */
+.fiche-corps .fh2{font-family:var(--fdisp);font-weight:400;font-size:clamp(22px,2.2vw,27px);letter-spacing:-.005em}
+.fiche-corps .fh3{font-family:var(--fb)}
+.fcard,#app .fcard{border-radius:4px 10px 10px 4px;border:1px solid var(--line-soft);box-shadow:var(--e1);position:relative;padding-left:20px;transition:transform .14s var(--ease-out),box-shadow .16s var(--ease-out),border-color .16s var(--ease-out)}
+.fcard::before{content:"";position:absolute;left:9px;top:10px;bottom:10px;width:1px;background:var(--marge)}
+@media(hover:hover) and (pointer:fine){.fcard:hover{transform:translateY(-2px);box-shadow:var(--e2);border-color:var(--line)}}
+.fcard b{font-family:var(--fb);font-weight:620}
+.fiche-toc a{border-radius:6px}
+.fiche-corps .fig.ff{border-radius:6px;background:var(--card)}
+
+/* — Colleur virtuel : la copie face au colleur — */
+.cb{border-radius:10px}
+.cb-c{background:var(--card);border-color:var(--line)}
+.cb-c .cb-t{color:var(--rouge)}
+.cb-e{background:var(--accent-soft)}
+.colle-saisie textarea{border-radius:8px}
+
+/* — Profil, communauté, groupes — */
+.avatar-xl,.avatar{background:var(--couv2);color:var(--on-couv)}
+
+/* — Apparition des vues : un fondu court, jamais bloquant — */
+.view.on{animation:vue-in .22s var(--ease-out) both}
+@keyframes vue-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+dialog[open]{animation:dlg-in .26s var(--ease-out)}
+.fdlg[open]{animation:tiroir .3s cubic-bezier(.32,.72,0,1)}
+@keyframes tiroir{from{transform:translateX(100%)}to{transform:none}}
+
+@media(prefers-reduced-motion:reduce){
+ .view.on{animation:vue-fade .2s ease both}
+ .fdlg[open]{animation:vue-fade .2s ease both}
+ nav.tabs a[aria-current=page]::after,.bottombar a[aria-current=page]::after,.trait-rouge::after,.fiche-corps .fh2::after,.colle-page h1::after,.fiches-idx h1::after{animation:none}
+ .btn:active,#app .btn:active,.iconbtn:active,.fcard:active,.item:active{transform:none}
+}
+@keyframes vue-fade{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-transparency:reduce){dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* Métadonnées sous le titre, jamais au-dessus */
+:is(.fiche-head,.cn-head>div,.pf-id){display:flex;flex-direction:column}
+:is(.fiche-head,.cn-head>div,.pf-id)>h1{order:-1}
+:is(.fiche-head,.cn-head>div,.pf-id)>:is(.kicker,.pf-kicker){margin:6px 0 0;font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--soft)}
+.fiche-head>.fiche-actions,.fiche-head>.fiche-toc{order:1}
+.colle-bilan-t{font-size:22px;margin:0 0 6px}
+.colle-avert{display:flex}.colle-avert>span{flex:1}
+/* Gestes fréquents : pas de rebond, pas d'ondulation Material */
+.seg button[aria-pressed=true],.chipc input:checked+span{animation:none!important}
+svg.hop{animation:none!important}
+.rip{display:none!important}
+/* Rebond retiré, numéros de section décoratifs retirés, chiffres sans dégradé */
+:root{--spring:cubic-bezier(.23,1,.32,1)}
+.toast{transition:opacity .25s,transform .4s ease!important}
+.modesel .mk-n,.pf-num{display:none!important}
+.pf-fig b{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:var(--ink)!important;font-family:var(--fdisp);font-weight:400!important;letter-spacing:-.02em!important}

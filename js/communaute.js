@@ -19,7 +19,7 @@ let F = {q: '', filiere: '', matiere: '', etab: '', collections: false, suivis: 
 export async function renderCommunaute(el, tab) {
   if (tab) TAB = tab;
   el.innerHTML = `<div class="cm">
-    <header class="cm-head"><div><p class="pf-kicker">Communauté</p><h1>Les membres de Colle express</h1>
+    <header class="cm-head"><div><h1>Les membres de Colle express</h1>
       <p class="cn-sub">Seuls les profils publics qui ont choisi d’apparaître ici sont listés, par ordre alphabétique : il n’y a aucun classement.</p></div>
       <div class="seg" role="tablist" aria-label="Communauté"><button role="tab" data-tab="annuaire" aria-selected="${TAB === 'annuaire'}">${ic('users')} Annuaire</button><button role="tab" data-tab="fil" aria-selected="${TAB === 'fil'}">${ic('live')} Mes abonnements</button></div></header>
     <div id="cmBody"></div></div>`;

@@ -82,7 +82,7 @@ function renderIndex(el, L) {
   const ORD = ['Maths', 'Physique', 'Chimie', 'Informatique'];
   groupes.sort((a, b) => ORD.indexOf(a.mat) - ORD.indexOf(b.mat));
   el.innerHTML = `<div class="fiches-idx">
-    <header class="fiche-head"><p class="kicker">${ic('book')} Fiches de cours</p><h1>L’essentiel de chaque chapitre</h1>
+    <header class="fiche-head"><h1>L’essentiel de chaque chapitre</h1>
       <p class="small">Définitions, lois, méthodes et pièges, avec les schémas à connaître. ${L.length} fiches.</p>
       <div class="searchbox"><span>${ic('search')}</span><input id="fqF" type="search" placeholder="Chercher une fiche : Gauss, pH, Michelson…" aria-label="Chercher une fiche" autocomplete="off" spellcheck="false"></div>
       <p class="fiche-count" id="fqN" aria-live="polite" hidden></p>

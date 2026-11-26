@@ -28,13 +28,13 @@ function cadre(inner) {
   return `<div class="colle-page"><a class="btn ghost" href="#fiches">${ic('back')} Fiches de cours</a>${inner}</div>`;
 }
 const essai = `<p class="colle-essai">${ic('clock')} <span><b>Version d'essai</b> — le colleur virtuel est en test, ce n'est pas la version finale. Limité à 2 colles par jour.</span></p>`;
-const avert = `<p class="small colle-avert">${ic('bulb')} Colle de <b>cours</b> : définitions, lois, ordres de grandeur, interprétations. Le colleur s'appuie sur la fiche du chapitre, mais c'est une IA : il peut se tromper. En cas de doute, la fiche fait foi.</p>`;
+const avert = `<p class="small colle-avert">${ic('bulb')}<span>Colle de <b>cours</b> : définitions, lois, ordres de grandeur, interprétations. Le colleur s'appuie sur la fiche du chapitre, mais c'est une IA : il peut se tromper. En cas de doute, la fiche fait foi.</span></p>`;
 
 function choix(el, id) {
   const groupes = {};
   IDX.filter(x => x.pret).forEach(x => (groupes[`${x.mat} · ${x.niveau}`] ??= []).push(x));
-  el.innerHTML = cadre(`<header class="fiche-head"><p class="kicker">${ic('msg')} Colleur virtuel</p><h1>Passer une colle de cours</h1>
-    <p class="small">Choisissez un chapitre : le colleur vous interroge, juge chaque réponse et vous donne une note et les points à revoir.</p></header>${essai}
+  el.innerHTML = cadre(`<header class="fiche-head"><h1>Passer une colle de cours</h1>
+    <p class="small">Choisis un chapitre : le colleur t'interroge, juge chaque réponse et te donne une note et les points à revoir.</p></header>${essai}
     ${CONFIG.COLLEUR ? '' : `<div class="panel pad"><p>${ic('clock')} Le colleur virtuel sera disponible très bientôt.</p></div>`}
     <div class="panel pad colle-choix">
       <label class="fld"><span>Chapitre</span><select id="clF">${Object.entries(groupes).map(([g, L]) => `<optgroup label="${esc(g)}">${L.map(x => `<option value="${x.id}" ${x.id === id ? 'selected' : ''}>${esc(x.titre)}</option>`).join('')}</optgroup>`).join('')}</select></label>
@@ -95,7 +95,7 @@ function draw(el, typeset) {
         <button class="btn ghost" id="clStop" type="button" ${S.busy || !S.tours ? 'disabled' : ''}>Terminer et voir le bilan</button>
       </div>
       <p class="small">${S.busy ? 'Le colleur réfléchit…' : `Question ${Math.min(S.tours + 1, S.n)} sur ${S.n}${reste > 1 ? '' : ' (dernière)'}`}</p></div>`;
-  const bilan = S.fin ? `<section class="panel pad colle-bilan"><p class="kicker">Bilan de la colle</p>
+  const bilan = S.fin ? `<section class="panel pad colle-bilan"><h2 class="colle-bilan-t">Bilan de la colle</h2>
       <p class="colle-note"><b>${S.fin.note}</b>/20</p>
       ${S.fin.points_forts?.length ? `<h3>Points forts</h3><ul>${S.fin.points_forts.map(t => `<li>${inlineC(t)}</li>`).join('')}</ul>` : ''}
       ${S.fin.a_revoir?.length ? `<h3>À revoir</h3><ul>${S.fin.a_revoir.map(t => `<li>${inlineC(t)}</li>`).join('')}</ul>` : ''}
