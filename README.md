@@ -258,7 +258,7 @@ Depuis une fiche de cours, le bouton « Passer une colle sur ce chapitre » (ou 
 
 Mise en service (une seule clé suffit, gratuite) :
 1. Crée une clé chez l'un de ces fournisseurs : Google AI Studio (https://aistudio.google.com, bouton « Get API key », connexion avec un compte Google), Groq (https://console.groq.com) ou Mistral (https://console.mistral.ai).
-2. Supabase > Edge Functions > Secrets : ajoute `GEMINI_API_KEY`, `GROQ_API_KEY` ou `MISTRAL_API_KEY` selon le fournisseur. Facultatif : `IA_MODEL` (nom du modèle), `COLLE_LIMITE_JOUR` (défaut 60 échanges par élève et par jour).
+2. Supabase > Edge Functions > Secrets : ajoute `GEMINI_API_KEY`, `GROQ_API_KEY` ou `MISTRAL_API_KEY` selon le fournisseur. Facultatif : `IA_MODEL` (nom du modèle), `COLLES_PAR_JOUR` (défaut 2 colles par élève et par jour, version d'essai), `COLLE_LIMITE_JOUR` (défaut 40 échanges).
 3. Déploie la fonction `supabase/functions/colleur` (`npx supabase functions deploy colleur`).
 4. Dans `js/config.js`, passe `COLLEUR: true`.
 

@@ -27,13 +27,14 @@ export async function renderColleur(el, id, typeset) {
 function cadre(inner) {
   return `<div class="colle-page"><a class="btn ghost" href="#fiches">${ic('back')} Fiches de cours</a>${inner}</div>`;
 }
+const essai = `<p class="colle-essai">${ic('clock')} <span><b>Version d'essai</b> — le colleur virtuel est en test, ce n'est pas la version finale. Limité à 2 colles par jour.</span></p>`;
 const avert = `<p class="small colle-avert">${ic('bulb')} Colle de <b>cours</b> : définitions, lois, ordres de grandeur, interprétations. Le colleur s'appuie sur la fiche du chapitre, mais c'est une IA : il peut se tromper. En cas de doute, la fiche fait foi.</p>`;
 
 function choix(el, id) {
   const groupes = {};
   IDX.filter(x => x.pret).forEach(x => (groupes[`${x.mat} · ${x.niveau}`] ??= []).push(x));
   el.innerHTML = cadre(`<header class="fiche-head"><p class="kicker">${ic('msg')} Colleur virtuel</p><h1>Passer une colle de cours</h1>
-    <p class="small">Choisissez un chapitre : le colleur vous interroge, juge chaque réponse et vous donne une note et les points à revoir.</p></header>
+    <p class="small">Choisissez un chapitre : le colleur vous interroge, juge chaque réponse et vous donne une note et les points à revoir.</p></header>${essai}
     ${CONFIG.COLLEUR ? '' : `<div class="panel pad"><p>${ic('clock')} Le colleur virtuel sera disponible très bientôt.</p></div>`}
     <div class="panel pad colle-choix">
       <label class="fld"><span>Chapitre</span><select id="clF">${Object.entries(groupes).map(([g, L]) => `<optgroup label="${esc(g)}">${L.map(x => `<option value="${x.id}" ${x.id === id ? 'selected' : ''}>${esc(x.titre)}</option>`).join('')}</optgroup>`).join('')}</select></label>
@@ -46,7 +47,7 @@ function choix(el, id) {
 function accueil(el, f, typeset) {
   const der = memo.get(f.id);
   el.innerHTML = cadre(`<header class="fiche-head"><p class="kicker">${ic('msg')} Colleur virtuel · ${esc(f.mat)} ${esc(f.niveau)}</p><h1>${esc(f.titre)}</h1>
-    <p class="small">Le colleur pose une question à la fois. Répondez comme au tableau : précis, avec les hypothèses et les unités.${der ? ` Dernière colle sur ce chapitre : <b>${der.note}/20</b>.` : ''}</p></header>
+    <p class="small">Le colleur pose une question à la fois. Répondez comme au tableau : précis, avec les hypothèses et les unités.${der ? ` Dernière colle sur ce chapitre : <b>${der.note}/20</b>.` : ''}</p></header>${essai}
     <div class="panel pad colle-choix">
       <div class="fld"><span>Nombre de questions</span><div class="seg" role="group">${[5, 8, 10].map((n, i) => `<button type="button" aria-pressed="${i === 0}" data-n="${n}">${n}</button>`).join('')}</div></div>
       <button class="btn primary" id="clStart" type="button" ${CONFIG.COLLEUR ? '' : 'disabled'}>${ic('msg')} Commencer la colle</button>
@@ -65,6 +66,7 @@ async function appel(el, typeset, action) {
   S.busy = true; S.err = ''; draw(el, typeset);
   try {
     const r = await api.colleur({fiche: S.fiche, action, questions: S.n, messages: S.messages});
+    if (action === 'debut' && r.restantes != null) S.restantes = r.restantes;
     if (r.appreciation || r.question) {
       const txt = [r.appreciation, r.question].filter(Boolean).join('\n\n');
       S.messages.push({role: 'assistant', content: txt});
@@ -98,9 +100,9 @@ function draw(el, typeset) {
       ${S.fin.points_forts?.length ? `<h3>Points forts</h3><ul>${S.fin.points_forts.map(t => `<li>${inlineC(t)}</li>`).join('')}</ul>` : ''}
       ${S.fin.a_revoir?.length ? `<h3>À revoir</h3><ul>${S.fin.a_revoir.map(t => `<li>${inlineC(t)}</li>`).join('')}</ul>` : ''}
       ${S.fin.conseil ? `<p>${inlineC(S.fin.conseil)}</p>` : ''}
-      <p class="small">Note indicative, donnée par une IA.</p>
+      <p class="small">Note indicative, donnée par une IA (version d'essai).</p>
       <div class="colle-btns"><a class="btn primary" href="#f/${S.fiche}">${ic('book')} Revoir la fiche</a><button class="btn" id="clNew" type="button">${ic('msg')} Nouvelle colle</button></div></section>` : '';
-  el.innerHTML = cadre(`<header class="fiche-head"><p class="kicker">${ic('msg')} Colleur virtuel</p><h1>${esc(S.titre)}</h1></header>
+  el.innerHTML = cadre(`<header class="fiche-head"><p class="kicker">${ic('msg')} Colleur virtuel · <span class="colle-tag">Version d'essai</span></p><h1>${esc(S.titre)}</h1>${S.restantes != null ? `<p class="small">Colles restantes aujourd'hui après celle-ci : ${S.restantes}</p>` : ''}</header>
     <div class="colle-fil" aria-live="polite">${fil}${S.busy ? '<div class="cb cb-c cb-wait"><span></span><span></span><span></span></div>' : ''}</div>
     ${S.err ? `<p class="err">${esc(S.err)}</p>` : ''}${saisie}${bilan}`);
   typeset?.(el);

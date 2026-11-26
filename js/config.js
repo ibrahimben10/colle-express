@@ -31,6 +31,7 @@ export const CONFIG = {
     texte: [
       'Je m’appelle Ibrahim Ben Yakhlef. Je suis élève ingénieur en première année à l’ENSEEIHT, à Toulouse, dans le département Sciences du Numérique, après un baccalauréat Sciences Mathématiques obtenu avec la mention Très bien, puis deux années de classes préparatoires MPSI et MP au lycée Omar Ibn Abdelaziz, à Oujda.',
       'J’ai créé Colle express pour vous faire travailler comme en colle : des exercices courts et ciblés, des indices progressifs plutôt que la solution toute faite, et un corrigé détaillé une fois que vous avez vraiment cherché. C’est la méthode qui m’a le plus fait progresser pendant ma prépa.',
+      'Un conseil, le plus important : pour réussir, il faut travailler. Quelles que soient vos ressources et quel que soit votre professeur, rien ne remplace le travail personnel. Prenez l’initiative : attaquez les exercices vous-même, cherchez, bloquez, recommencez. C’est en résolvant par vous-même que vous progressez, pas en lisant des corrigés.',
     ],
     // Parcours, du plus récent au plus ancien.
     parcours: [

@@ -2,7 +2,7 @@
 // Secrets à définir dans Supabase (Edge Functions > Secrets) — UNE seule clé suffit, la première trouvée est utilisée :
 //   GEMINI_API_KEY (Google AI Studio, aistudio.google.com) | GROQ_API_KEY (console.groq.com) | MISTRAL_API_KEY (console.mistral.ai)
 //   IA_MODEL (facultatif) : nom du modèle, sinon le modèle par défaut du fournisseur ci-dessous.
-//   COLLE_LIMITE_JOUR (facultatif, défaut 60 échanges par élève et par jour) ; SITE_URL (facultatif) : adresse du site.
+//   COLLES_PAR_JOUR (facultatif, défaut 2 colles par élève et par jour) ; COLLE_LIMITE_JOUR (défaut 40 échanges) ; SITE_URL (facultatif).
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const CORS = {
@@ -18,7 +18,8 @@ const FOURNISSEURS = [
 ];
 const FOUR = FOURNISSEURS.find((f) => Deno.env.get(f.cle));
 const MODEL = Deno.env.get("IA_MODEL") ?? Deno.env.get("GROQ_MODEL") ?? FOUR?.modele ?? "";
-const LIMITE = Number(Deno.env.get("COLLE_LIMITE_JOUR") ?? "60");
+const LIMITE = Number(Deno.env.get("COLLE_LIMITE_JOUR") ?? "40");          // échanges par élève et par jour
+const COLLES = Number(Deno.env.get("COLLES_PAR_JOUR") ?? "2");              // colles commencées par élève et par jour
 const SITE = (Deno.env.get("SITE_URL") ?? "https://ibrahimben10.github.io/colle-express").replace(/\/$/, "");
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 const clip = (s: unknown, n: number) => String(s ?? "").slice(0, n);
@@ -75,11 +76,16 @@ Deno.serve(async (req) => {
   const action = ["debut", "repondre", "bilan"].includes(b.action) ? b.action : "repondre";
   const nbQ = Math.max(3, Math.min(10, Number(b.questions) || 5));
 
+  let restantes: number | null = null;
   if (prof?.role !== "prof") {
     const depuis = new Date(); depuis.setHours(0, 0, 0, 0);
-    const { count } = await admin.from("ia_usage").select("id", { count: "exact", head: true })
-      .eq("user_id", uid).eq("mode", "colle").gte("created_at", depuis.toISOString());
-    if ((count ?? 0) >= LIMITE) return json({ error: `Limite de ${LIMITE} échanges de colle par jour atteinte. Reviens demain !` }, 429);
+    const compte = async (mode: string) => (await admin.from("ia_usage").select("id", { count: "exact", head: true })
+      .eq("user_id", uid).eq("mode", mode).gte("created_at", depuis.toISOString())).count ?? 0;
+    const [colles, echanges] = await Promise.all([compte("colle-debut"), compte("colle")]);
+    if (action === "debut" && colles >= COLLES)
+      return json({ error: `Version d'essai : ${COLLES} colle${COLLES > 1 ? "s" : ""} par jour maximum. Reviens demain !`, restantes: 0 }, 429);
+    if (echanges >= LIMITE) return json({ error: `Limite d'échanges atteinte pour aujourd'hui. Reviens demain !` }, 429);
+    restantes = Math.max(0, COLLES - colles - (action === "debut" ? 1 : 0));
   }
 
   let F: { titre: string; corps: string };
@@ -124,7 +130,7 @@ Deno.serve(async (req) => {
     console.error(e);
     return json({ error: "Le colleur n'a pas pu répondre. Réessaie dans un instant." }, 502);
   }
-  await admin.from("ia_usage").insert({ user_id: uid, mode: "colle" });
+  await admin.from("ia_usage").insert({ user_id: uid, mode: action === "debut" ? "colle-debut" : "colle" });
 
   if (action === "bilan") {
     return json({
@@ -140,5 +146,6 @@ Deno.serve(async (req) => {
     appreciation: clip(out.appreciation, 2000),
     statut: ["juste", "partiel", "faux", "aucun"].includes(out.statut) ? out.statut : "aucun",
     question: clip(out.question, 1200),
+    restantes,
   });
 });
