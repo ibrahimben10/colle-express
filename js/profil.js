@@ -9,7 +9,7 @@ import { esc, rich } from './format.js';
 import { toast } from './ui.js';
 import { collectionsHTML, nouvelleCollection } from './biblio.js';
 import { TYPES } from './carnet.js';
-import { followBtn, bindFollow, openSignalement } from './communaute.js';
+import { followBtn, bindFollow, openSignalement, openRelations } from './communaute.js';
 
 let D = {};   // dépendances fournies par app.js : byId, all, LV, MAT_IC, typeset, pickPhoto, ensurePhoto
 export const initProfil = deps => { D = deps; };
@@ -81,7 +81,9 @@ export async function renderProfil(el, ref, {apercu = false} = {}) {
         <div class="pf-id">
           <p class="pf-kicker">${p.role === 'admin' ? 'Administrateur · ' : ''}${[p.filiere, p.annee ? p.annee + (p.annee === 1 ? 're' : 'e') + ' année' : '', p.etablissement].filter(Boolean).map(esc).join(' · ') || 'Membre de Colle express'}</p>
           <h1>${esc(p.nom || 'Membre')}</h1>
-          <p class="pf-user">@${esc(p.username || '')}<span>· membre depuis ${dateFR(p.membre_depuis, {month: 'long', year: 'numeric'})}</span>${p.abonnes != null ? `<span>· <b>${p.abonnes}</b> abonné${p.abonnes > 1 ? 's' : ''} · suit <b>${p.abonnements}</b></span>` : ''}</p>
+          <p class="pf-user">@${esc(p.username || '')}<span>· membre depuis ${dateFR(p.membre_depuis, {month: 'long', year: 'numeric'})}</span>${p.abonnes != null ? (p.self
+            ? `<span>· <button type="button" class="pf-rel" data-rel="abonnes"><b>${p.abonnes}</b> abonné${p.abonnes > 1 ? 's' : ''}</button> · <button type="button" class="pf-rel" data-rel="abonnements">suit <b>${p.abonnements}</b></button></span>`
+            : `<span>· <b>${p.abonnes}</b> abonné${p.abonnes > 1 ? 's' : ''} · suit <b>${p.abonnements}</b></span>`) : ''}</p>
           ${p.bio ? `<p class="pf-bio">${esc(p.bio)}</p>` : p.self ? `<p class="pf-bio empty-bio">Ajoute une courte présentation : ce que tu prépares, ce que tu aimes en sciences…</p>` : ''}
           ${p.matieres?.length ? `<ul class="pf-tags" aria-label="Matières préférées">${p.matieres.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : ''}
           ${liensHTML(p.liens)}
@@ -248,6 +250,8 @@ function starsHTML(p) {
 
 function bindProfil(el, p) {
   el.querySelector('#pfSig')?.addEventListener('click', () => openSignalement('profil', p.id));
+  el.querySelectorAll('[data-rel]').forEach(b => b.onclick = () => openRelations(b.dataset.rel, d => {
+    p.abonnements += d; const s = el.querySelector('[data-rel="abonnements"] b'); if (s) s.textContent = p.abonnements; }));
   bindFollow(el, () => { p.je_suis = !p.je_suis; p.abonnes += p.je_suis ? 1 : -1; return p; }, () => renderProfil(el, D.ref()));
   el.querySelector('#pfNewColl')?.addEventListener('click', async () => { const c = await nouvelleCollection(); if (c) location.hash = '#c/' + c.id; });
   el.querySelector('#pfShare')?.addEventListener('click', async () => {

@@ -2571,3 +2571,21 @@ main#contenu:focus{outline:none}
 #clPhL{cursor:pointer;position:relative}
 #clPhL:focus-within{outline:2px solid var(--blue);outline-offset:2px}
 #clPhL.is-off{opacity:.5;pointer-events:none}
+
+/* Mes abonnés / mes abonnements */
+.pf-rel{background:none;border:0;padding:2px 0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:3px;min-height:24px}
+.pf-rel:hover{color:var(--ink);text-decoration-color:currentColor}
+.pf-rel:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+.dlg-rel .dlg-in{width:min(520px,calc(100vw - 32px))}
+.rel-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:4px 0 12px}
+.rel-tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font:inherit;font-weight:600;color:var(--soft);cursor:pointer;margin-bottom:-1px}
+.rel-tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+.rel-tabs button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.rel-body{max-height:min(60vh,520px);overflow:auto}
+.rel-list{list-style:none;margin:0;padding:0}
+.rel-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.rel-list li:last-child{border-bottom:0}
+.rel-list .cm-id{min-width:0;flex:1}
+.rel-list .cm-id .small{display:block}
+.rel-priv,.rel-vide{display:flex;gap:8px;align-items:flex-start;margin:12px 2px}
+.rel-priv svg{flex:none;width:16px;height:16px;margin-top:2px}

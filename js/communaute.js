@@ -162,6 +162,39 @@ function bindSolutions(box, ex, L, ctx) {
   };
 }
 
+/* ===================== MES ABONNÉS / MES ABONNEMENTS ===================== */
+// Fenêtre ouverte depuis son propre profil. onChange(delta) : le compteur « suit N » du profil suit les clics.
+const depuis = d => (Date.now() - Date.parse(d)) < 864e5 ? 'depuis aujourd’hui' : 'depuis le ' + new Date(d).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short', year: new Date(d).getFullYear() === new Date().getFullYear() ? undefined : 'numeric'});
+export function openRelations(sens = 'abonnes', onChange = () => {}) {
+  const dlg = document.createElement('dialog'); dlg.className = 'dlg dlg-rel';
+  const T = {abonnes: 'Mes abonnés', abonnements: 'Mes abonnements'};
+  dlg.innerHTML = `<div class="dlg-in"><header><h2 id="relT">${T[sens]}</h2><button class="iconbtn" type="button" data-close aria-label="Fermer">${ic('x')}</button></header>
+    <div class="rel-tabs" role="tablist">${Object.entries(T).map(([k, l]) => `<button type="button" role="tab" data-sens="${k}" aria-selected="${k === sens}">${k === 'abonnes' ? 'Abonnés' : 'Abonnements'}</button>`).join('')}</div>
+    <div class="rel-body" aria-live="polite"></div></div>`;
+  document.body.append(dlg);
+  const body = dlg.querySelector('.rel-body');
+  let L = [];
+  const draw = async s => {
+    sens = s; dlg.querySelector('#relT').textContent = T[s];
+    dlg.querySelectorAll('[data-sens]').forEach(b => b.setAttribute('aria-selected', b.dataset.sens === s));
+    body.innerHTML = `<div role="status" aria-label="Chargement">${'<span class="skel skel-item"></span>'.repeat(3)}</div>`;
+    let R; try { R = await api.mesRelations(s); } catch (x) { body.innerHTML = `<p class="small">Liste indisponible : ${esc(x.message)}</p>`; return; }
+    if (sens !== s) return;
+    L = R.liste || [];
+    const prives = R.prives ? `<p class="small rel-priv">${ic('lock')} ${R.prives === 1 ? '1 membre au profil privé' : R.prives + ' membres au profil privé'} ${s === 'abonnes' ? 'te suit' + (R.prives > 1 ? 'ent' : '') : ''} (non affiché${R.prives > 1 ? 's' : ''} par respect de leur choix).</p>` : '';
+    body.innerHTML = L.length || R.prives ? `${L.length ? `<ul class="rel-list">${L.map(m => `<li><a class="cm-id" href="#u/${esc(m.username || m.id)}" data-close>${av(m.id, m.nom, m.photo)}<span><b>${esc(m.nom)}</b><span class="small">@${esc(m.username || '')}${m.filiere ? ' · ' + esc(m.filiere) : ''} · ${depuis(m.depuis)}</span></span></a>${followBtn(m.id, m.suivi)}</li>`).join('')}</ul>` : ''}${prives}`
+      : `<p class="small rel-vide">${s === 'abonnes' ? 'Personne ne te suit encore. Rends ton profil public et publie une solution ou une collection pour te faire connaître.' : 'Tu ne suis personne pour l’instant. Trouve des camarades dans l’annuaire de la Communauté.'}</p>`;
+    bindFollow(body, id => { const m = L.find(x => x.id === id); m.suivi = !m.suivi; onChange(m.suivi ? 1 : -1); return m; },
+      m => { body.querySelector(`[data-follow="${m.id}"]`).outerHTML = followBtn(m.id, m.suivi); });
+  };
+  dlg.onclick = e => {
+    const t = e.target.closest('[data-sens]'); if (t && t.dataset.sens !== sens) return draw(t.dataset.sens);
+    if (e.target.closest('[data-close]') || e.target === dlg) dlg.close();
+  };
+  dlg.addEventListener('close', () => dlg.remove());
+  dlg.showModal(); draw(sens);
+}
+
 /* ===================== SIGNALEMENT ===================== */
 export function openSignalement(type, id) {
   const dlg = document.createElement('dialog'); dlg.className = 'dlg';

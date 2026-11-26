@@ -336,6 +336,12 @@ export const api = {
     const r = oui ? await sb.from('abonnements').insert({suiveur_id: this.user.id, suivi_id: id}) : await sb.from('abonnements').delete().eq('suiveur_id', this.user.id).eq('suivi_id', id);
     if (r.error && r.error.code !== '23505') throw new Error(/row-level/.test(r.error.message) ? 'Ce profil n’est pas public.' : errFr(r.error));
   },
+  /** Mes abonnés (sens 'abonnes') ou les profils que je suis ('abonnements') : {liste, prives}. */
+  async mesRelations(sens = 'abonnes') {
+    if (DEMO) return {liste: [], prives: 0};
+    const { data, error } = await sb.rpc('mes_relations', {p_sens: sens}); if (error) throw new Error(errFr(error));
+    return data || {liste: [], prives: 0};
+  },
   async filAbonnements() {
     if (DEMO) return [];
     const { data, error } = await sb.rpc('fil_abonnements', {p_limite: 50}); if (error) throw new Error(errFr(error)); return data || [];

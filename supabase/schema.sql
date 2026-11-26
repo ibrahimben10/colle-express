@@ -1733,3 +1733,26 @@ create table if not exists public.corrections_ia (
 create index if not exists corrections_ia_ex on public.corrections_ia(exercice_id, type);
 alter table public.corrections_ia enable row level security;
 revoke all on public.corrections_ia from anon, authenticated;
+
+-- Mes abonnés / mes abonnements : visible par le titulaire du compte seulement.
+-- Les membres au profil public sont listés ; ceux au profil privé ne sont que comptés (jamais nommés).
+create or replace function public.mes_relations(p_sens text default 'abonnes') returns jsonb
+language sql stable security definer set search_path = public as $$
+  with r as (
+    select case when p_sens = 'abonnements' then a.suivi_id else a.suiveur_id end u, a.created_at
+    from public.abonnements a
+    where auth.uid() is not null
+      and (case when p_sens = 'abonnements' then a.suiveur_id else a.suivi_id end) = auth.uid()
+  )
+  select jsonb_build_object(
+    'liste', coalesce((select jsonb_agg(x order by x->>'depuis' desc) from (
+      select jsonb_build_object('id', p.user_id, 'username', p.username, 'nom', pf.full_name, 'photo', coalesce(s.data->>'photo', ''),
+        'filiere', p.filiere, 'annee', p.annee, 'depuis', r.created_at,
+        'suivi', exists (select 1 from public.abonnements b where b.suiveur_id = auth.uid() and b.suivi_id = r.u)) x
+      from r join public.profils p on p.user_id = r.u and p.public
+      join public.profiles pf on pf.id = r.u left join public.suivi s on s.user_id = r.u
+      order by r.created_at desc limit 300) q), '[]'),
+    'prives', (select count(*) from r where not public.profil_est_public(r.u)));
+$$;
+revoke all on function public.mes_relations(text) from public, anon;
+grant execute on function public.mes_relations(text) to authenticated;
