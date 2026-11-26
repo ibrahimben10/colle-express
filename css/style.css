@@ -2551,3 +2551,4 @@ svg.hop{animation:none!important}
 .bdg .small{color:var(--soft)}
 :where(p,.pf-emptyline,.small,.colle-avert,.notice) a:not(.btn):not(.iconbtn){text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 .bdg{opacity:1}.bdg:not(.got) .bdg-m{opacity:.75}
+main#contenu:focus{outline:none}
