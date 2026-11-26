@@ -47,14 +47,17 @@ FICHE DE COURS :
 ${corps}`;
 }
 
-const FORMAT_TOUR = `Réponds UNIQUEMENT avec un objet JSON : {"appreciation":"… (vide au premier tour)","statut":"juste|partiel|faux|aucun","question":"la question suivante (ou la relance)"}`;
-const FORMAT_BILAN = `La colle est terminée. Fais le bilan de toutes les réponses de l'élève. Réponds UNIQUEMENT avec un objet JSON :
+const FORMAT_TOUR = `Réponds UNIQUEMENT avec un objet JSON valide (dans les chaînes, double chaque antislash du LaTeX : \\\\frac, \\\\vec) : {"appreciation":"… (vide au premier tour)","statut":"juste|partiel|faux|aucun","question":"la question suivante (ou la relance)"}`;
+const FORMAT_BILAN = `La colle est terminée. Fais le bilan de toutes les réponses de l'élève. Réponds UNIQUEMENT avec un objet JSON valide (antislashs du LaTeX doublés) :
 {"appreciation":"appréciation de la DERNIÈRE réponse (2 à 4 phrases, avec la réponse attendue si besoin)","statut":"juste|partiel|faux|aucun","note":<entier de 0 à 20>,"points_forts":["…"],"a_revoir":["notions précises à retravailler"],"conseil":"une ou deux phrases"}`;
 
+// Les modèles écrivent souvent le LaTeX sans doubler les antislashs (« \frac » au lieu de « \\frac ») : JSON invalide,
+// ou pire, \f, \t, \n… lus comme des caractères de contrôle. On double les antislashs isolés avant de lire le JSON.
+const LATEX = /\\\\|\\(?=(?:frac|dfrac|tfrac|beta|bar|boxed|binom|bf|bigg?|text|textbf|theta|tau|times|tan|tanh|to|tilde|top|nu|nabla|neq|ne|not|newline|notin|rho|right|rightarrow|rangle|rm|underline|uparrow|unit|uplus|forall|flat|frown|bullet|bot)(?![a-zA-Z]))|\\(?!["\\/bfnrtu])/g;
 function parse(t: string) {
   const a = t.indexOf("{"), b = t.lastIndexOf("}");
   if (a < 0 || b < a) throw new Error("Réponse illisible");
-  return JSON.parse(t.slice(a, b + 1));
+  return JSON.parse(t.slice(a, b + 1).replace(LATEX, (m) => (m.length === 2 ? m : "\\\\")));
 }
 
 Deno.serve(async (req) => {
