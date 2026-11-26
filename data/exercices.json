@@ -3472,5 +3472,27 @@
   "enonce": "Soient $A,B\\in\\mathcal M_n(\\mathbb C)$.\n\n1. Montrer que $GL_n(\\mathbb C)$ est dense dans $\\mathcal M_n(\\mathbb C)$.\n2. Montrer que si $A$ est inversible, $AB$ et $BA$ sont semblables.\n3. En déduire que $\\chi_{AB}=\\chi_{BA}$ pour toutes matrices $A,B$.\n4. $AB$ et $BA$ sont-elles toujours semblables ?\n\n*Dans l'esprit des oraux Mines-Ponts.*",
   "duree": 20,
   "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-densite",
+  "mat": "Maths",
+  "chap": "Topologie matricielle",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "Diagonalisables : densité, intérieur, Cayley-Hamilton",
+  "enonce": "On note $\\mathcal D_n$ l'ensemble des matrices diagonalisables de $\\mathcal M_n(\\mathbb C)$ et $\\Omega_n$ l'ensemble des matrices ayant $n$ valeurs propres distinctes.\n\n1. Montrer que $\\mathcal D_n$ est dense dans $\\mathcal M_n(\\mathbb C)$.\n2. Montrer que $\\Omega_n$ est un ouvert de $\\mathcal M_n(\\mathbb C)$.\n3. Montrer que l'intérieur de $\\mathcal D_n$ est exactement $\\Omega_n$.\n4. En déduire une preuve du théorème de Cayley-Hamilton dans $\\mathcal M_n(\\mathbb C)$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 35,
+  "ajout": "2026-11-26"
+ },
+ {
+  "id": "n-mp-marche",
+  "mat": "Maths",
+  "chap": "Probabilités",
+  "niveau": 3,
+  "concours": "Mines-Ponts",
+  "titre": "Retour à l’origine d’une marche aléatoire",
+  "enonce": "Soit $(X_k)_{k\\ge1}$ une suite de variables aléatoires indépendantes telles que $P(X_k=1)=P(X_k=-1)=\\frac12$, et $S_0=0$, $S_n=X_1+\\dots+X_n$. On note $T=\\min\\{n\\ge1,\\ S_n=0\\}$ (avec $T=+\\infty$ si l'ensemble est vide), $u_n=P(S_{2n}=0)$ et $f_n=P(T=2n)$ pour $n\\ge1$ ; $u_0=1$.\n\n1. Calculer $u_n$ et en donner un équivalent.\n2. Montrer que $u_n=\\sum_{k=1}^nf_k\\,u_{n-k}$ pour $n\\ge1$.\n3. On pose $U(x)=\\sum_{n\\ge0}u_nx^n$ et $F(x)=\\sum_{n\\ge1}f_nx^n$. Montrer que $U(x)=\\frac1{\\sqrt{1-x}}$ et $F(x)=1-\\sqrt{1-x}$ pour $x\\in[0,1[$.\n4. En déduire que la marche revient presque sûrement en $0$, mais que $E(T)=+\\infty$.\n\n*Dans l'esprit des oraux Mines-Ponts.*",
+  "duree": 35,
+  "ajout": "2026-11-26"
  }
 ]

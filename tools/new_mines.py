@@ -418,3 +418,97 @@ r"""**Étape 1 — Analyse de l'énoncé.** Le résultat est facile quand $A$ es
 $$\boxed{\forall A,B\in\mathcal M_n(\mathbb C),\ \chi_{AB}=\chi_{BA},\ \text{mais }AB\ \text{et}\ BA\ \text{ne sont pas toujours semblables}}$$""",
 r"""$A-\frac1pI_n$ est inversible pour $p$ grand : $GL_n$ est dense ; $AB=A(BA)A^{-1}$ si $A$ inversible ; continuité de $M\mapsto\chi_{MB}(x)-\chi_{BM}(x)$ ; contre-exemple à la similitude avec $AB\ne0=BA$.""")
 mp()
+
+# ------------------------------------------------------------ 11. Matrices diagonalisables : densité et intérieur (très difficile)
+ex('n-mp-densite', 'Maths', 'Topologie matricielle', 3, 'Diagonalisables : densité, intérieur, Cayley-Hamilton', 35, r"""
+On note $\mathcal D_n$ l'ensemble des matrices diagonalisables de $\mathcal M_n(\mathbb C)$ et $\Omega_n$ l'ensemble des matrices ayant $n$ valeurs propres distinctes.
+
+1. Montrer que $\mathcal D_n$ est dense dans $\mathcal M_n(\mathbb C)$.
+2. Montrer que $\Omega_n$ est un ouvert de $\mathcal M_n(\mathbb C)$.
+3. Montrer que l'intérieur de $\mathcal D_n$ est exactement $\Omega_n$.
+4. En déduire une preuve du théorème de Cayley-Hamilton dans $\mathcal M_n(\mathbb C)$.
+""", r"""Toute matrice complexe est trigonalisable : comment rendre ses coefficients diagonaux deux à deux distincts par une perturbation aussi petite qu'on veut ?""",
+r"""Pour l'ouverture, raisonne par l'absurde avec une suite $A_p\to A$ et des valeurs propres doubles $\mu_p$ de $A_p$ : elles sont bornées (par une norme subordonnée), donc on peut en extraire une suite convergente. Une racine double annule $\chi$ et $\chi'$.""",
+r"""Pour l'intérieur : si $\lambda$ est valeur propre multiple d'une diagonalisable $A=PDP^{-1}$, ajoute $\varepsilon E_{12}$ au bloc $\lambda I$ de $D$ et compare dimension du sous-espace propre et multiplicité. Pour Cayley-Hamilton, $A\mapsto\chi_A(A)$ est continue.""",
+r"""**Étape 1 — Analyse de l'énoncé.** On étudie la topologie de l'ensemble des matrices diagonalisables : il est dense mais pas ouvert, et son intérieur est l'ensemble des matrices « génériques » à valeurs propres simples. La densité donne une preuve élégante de Cayley-Hamilton.
+
+**Étape 2 — Rappels du cours.**
+
+> **Théorème — Trigonalisation.** Toute $A\in\mathcal M_n(\mathbb C)$ s'écrit $A=PTP^{-1}$ avec $T$ triangulaire supérieure.
+
+> **Propriété — Valeurs propres bornées.** Pour une norme subordonnée, toute valeur propre $\mu$ de $M$ vérifie $|\mu|\le\|M\|$.
+
+> **Propriété — Racines multiples.** $\mu$ est racine au moins double de $Q$ si et seulement si $Q(\mu)=Q'(\mu)=0$.
+
+> **Théorème — Critère.** $A$ est diagonalisable si et seulement si, pour toute valeur propre, la dimension du sous-espace propre égale la multiplicité.
+
+**Étape 3 — Stratégie.** Densité par trigonalisation et perturbation de la diagonale ; ouverture par l'absurde et compacité ; intérieur en exhibant des matrices non diagonalisables proches de toute diagonalisable à valeur propre multiple ; Cayley-Hamilton par continuité.
+
+**Étape 4 — Résolution détaillée.**
+
+**4.1 Densité de $\mathcal D_n$.** Soit $A=PTP^{-1}$, $T$ triangulaire de diagonale $t_1,\dots,t_n$. Posons $T_p=T+\mathrm{diag}\big(\frac1p,\frac2p,\dots,\frac np\big)$. Pour $i\ne j$, $t_i+\frac ip=t_j+\frac jp$ équivaut à $p(t_i-t_j)=j-i$, ce qui n'arrive que pour au plus une valeur de $p$. Pour $p$ assez grand, les coefficients diagonaux de $T_p$ sont donc distincts : $T_p$ a $n$ valeurs propres distinctes, elle est diagonalisable, et $A_p=PT_pP^{-1}$ aussi. Comme $A_p\to A$, $\mathcal D_n$ est dense.
+
+**4.2 $\Omega_n$ est ouvert.** Supposons le contraire : il existe $A\in\Omega_n$ et une suite $A_p\to A$ avec $A_p\notin\Omega_n$. Chaque $\chi_{A_p}$ a une racine multiple $\mu_p$ : $\chi_{A_p}(\mu_p)=\chi_{A_p}'(\mu_p)=0$. Pour une norme subordonnée, $|\mu_p|\le\|A_p\|$, borné car $(A_p)$ converge. Quitte à extraire, $\mu_p\to\mu$. Les coefficients de $\chi_M$ et de $\chi_M'$ sont polynomiaux en ceux de $M$, donc $(M,z)\mapsto\chi_M(z)$ et $(M,z)\mapsto\chi_M'(z)$ sont continues : à la limite, $\chi_A(\mu)=\chi_A'(\mu)=0$. Alors $\mu$ est racine double de $\chi_A$, ce qui contredit $A\in\Omega_n$. Donc $\Omega_n$ est ouvert.
+
+**4.3 Intérieur.** $\Omega_n\subset\mathcal D_n$ et $\Omega_n$ est ouvert, donc $\Omega_n\subset\mathring{\mathcal D}_n$. Réciproquement, soit $A\in\mathcal D_n\setminus\Omega_n$ : $A=PDP^{-1}$ avec $D=\mathrm{diag}(\lambda,\lambda,d_3,\dots,d_n)$ (on range une valeur propre multiple en tête). Pour $\varepsilon\ne0$, posons $A_\varepsilon=P(D+\varepsilon E_{12})P^{-1}$. $D+\varepsilon E_{12}$ est triangulaire de même diagonale que $D$, donc $\lambda$ a la même multiplicité $m\ge2$ dans $\chi_{A_\varepsilon}$. Mais $\operatorname{rg}(D+\varepsilon E_{12}-\lambda I_n)=\operatorname{rg}(D-\lambda I_n)+1$ (la colonne 2 devient non nulle, $\varepsilon e_1$, indépendante des autres colonnes non nulles qui sont portées par les $e_j$ avec $d_j\ne\lambda$). Donc $\dim E_\lambda(A_\varepsilon)=m-1<m$ : $A_\varepsilon\notin\mathcal D_n$. Comme $A_\varepsilon\to A$ quand $\varepsilon\to0$, $A$ n'est pas intérieur. Ainsi $\mathring{\mathcal D}_n=\Omega_n$. (En particulier, pour $n\ge2$, $\mathcal D_n$ n'est pas ouvert : $I_n$ n'est pas intérieur.)
+
+**4.4 Cayley-Hamilton.** Si $A=PDP^{-1}$ est diagonalisable, $\chi_A(A)=P\,\chi_A(D)\,P^{-1}=P\,\mathrm{diag}\big(\chi_A(d_i)\big)P^{-1}=0$ car les $d_i$ sont les racines de $\chi_A$. L'application $\Phi:A\mapsto\chi_A(A)$ est continue (ses coefficients sont polynomiaux en ceux de $A$), nulle sur la partie dense $\mathcal D_n$, donc nulle partout : $\chi_A(A)=0$ pour tout $A\in\mathcal M_n(\mathbb C)$.
+
+**Étape 5 — Vérification.**
+
+> **Vérification — Cas $n=2$.** $I_2\in\mathcal D_2\setminus\Omega_2$ et $I_2+\varepsilon E_{12}=\begin{pmatrix}1&\varepsilon\\0&1\end{pmatrix}$ n'est pas diagonalisable pour $\varepsilon\ne0$ : on retrouve que $I_2$ est au bord de $\mathcal D_2$.
+
+**Étape 6 — Conclusion.**
+$$\boxed{\overline{\mathcal D_n}=\mathcal M_n(\mathbb C),\qquad\mathring{\mathcal D}_n=\Omega_n\ \text{(ouvert)},\qquad\chi_A(A)=0\ \text{pour tout }A}$$""",
+r"""Densité : trigonaliser et rendre la diagonale distincte ; $\Omega_n$ ouvert par l'absurde (valeurs propres bornées, racine double à la limite) ; intérieur : $D+\varepsilon E_{12}$ n'est pas diagonalisable ; Cayley-Hamilton par continuité de $A\mapsto\chi_A(A)$.""")
+mp()
+
+# ------------------------------------------------------------ 12. Retour à l'origine d'une marche aléatoire (très difficile)
+ex('n-mp-marche', 'Maths', 'Probabilités', 3, 'Retour à l’origine d’une marche aléatoire', 35, r"""
+Soit $(X_k)_{k\ge1}$ une suite de variables aléatoires indépendantes telles que $P(X_k=1)=P(X_k=-1)=\frac12$, et $S_0=0$, $S_n=X_1+\dots+X_n$. On note $T=\min\{n\ge1,\ S_n=0\}$ (avec $T=+\infty$ si l'ensemble est vide), $u_n=P(S_{2n}=0)$ et $f_n=P(T=2n)$ pour $n\ge1$ ; $u_0=1$.
+
+1. Calculer $u_n$ et en donner un équivalent.
+2. Montrer que $u_n=\sum_{k=1}^nf_k\,u_{n-k}$ pour $n\ge1$.
+3. On pose $U(x)=\sum_{n\ge0}u_nx^n$ et $F(x)=\sum_{n\ge1}f_nx^n$. Montrer que $U(x)=\frac1{\sqrt{1-x}}$ et $F(x)=1-\sqrt{1-x}$ pour $x\in[0,1[$.
+4. En déduire que la marche revient presque sûrement en $0$, mais que $E(T)=+\infty$.
+""", r"""Pour que $S_{2n}=0$, combien de pas $+1$ faut-il parmi les $2n$ ? Et pour la question 2, sur quel événement peut-on découper $(S_{2n}=0)$ ?""",
+r"""Formule des probabilités totales selon la date $2k$ du premier retour, puis indépendance des pas après cette date. Pour $U$, reconnaître la série du binôme $(1-y)^{-1/2}$ ; la relation de convolution devient $U=1+FU$.""",
+r"""$P(T<+\infty)=\sum f_k=\lim_{x\to1^-}F(x)$ car les $f_k$ sont positifs (justifie l'échange) ; de même $E(T)=\sum2kf_k=\lim_{x\to1^-}2F'(x)$.""",
+r"""**Étape 1 — Analyse de l'énoncé.** On veut savoir si la marche aléatoire simple sur $\mathbb Z$ revient en $0$, et en combien de temps en moyenne. Les séries génératrices transforment la relation de « renouvellement » en équation algébrique.
+
+**Étape 2 — Rappels du cours.**
+
+> **Formule — Série du binôme.** Pour $|y|<1$, $(1-y)^{-1/2}=\sum_{n\ge0}\binom{2n}{n}\frac{y^n}{4^n}$.
+
+> **Théorème — Stirling.** $n!\sim\sqrt{2\pi n}\,\left(\frac ne\right)^n$.
+
+> **Théorème — Probabilités totales.** Si $(B_k)$ est un système complet (ou quasi complet), $P(A)=\sum_kP(A\cap B_k)$.
+
+> **Propriété — Lemme des coalitions.** Des fonctions de paquets disjoints de variables indépendantes sont indépendantes.
+
+**Étape 3 — Stratégie.** Dénombrement pour $u_n$ ; découpage selon le premier retour pour la convolution ; série du binôme pour $U$ ; produit de Cauchy pour obtenir $U=1+FU$ ; passage à la limite en $1^-$ pour la probabilité de retour et l'espérance.
+
+**Étape 4 — Résolution détaillée.**
+
+**4.1 Calcul de $u_n$.** $S_{2n}=0$ si et seulement si exactement $n$ des $2n$ pas valent $+1$ : $u_n=\binom{2n}{n}\frac1{4^n}$. Par Stirling, $\binom{2n}n=\frac{(2n)!}{(n!)^2}\sim\frac{\sqrt{4\pi n}(2n/e)^{2n}}{2\pi n(n/e)^{2n}}=\frac{4^n}{\sqrt{\pi n}}$, donc $u_n\sim\frac1{\sqrt{\pi n}}$.
+
+**4.2 Convolution.** $S$ ne peut valoir $0$ qu'aux instants pairs. Si $S_{2n}=0$ ($n\ge1$), alors $T\le2n$ et $T$ est pair : $(S_{2n}=0)=\bigsqcup_{k=1}^n(T=2k,\ S_{2n}=0)$. Or $(T=2k)$ ne dépend que de $X_1,\dots,X_{2k}$, et sur cet événement $S_{2n}=X_{2k+1}+\dots+X_{2n}$, qui ne dépend que des pas suivants et a la loi de $S_{2(n-k)}$. Par le lemme des coalitions :
+$$P(T=2k,\ S_{2n}=0)=P(T=2k)\,P(X_{2k+1}+\dots+X_{2n}=0)=f_k\,u_{n-k}.$$
+D'où $u_n=\sum_{k=1}^nf_ku_{n-k}$.
+
+**4.3 Séries génératrices.** Comme $0\le u_n,f_n\le1$, les deux séries convergent pour $|x|<1$. La série du binôme avec $y=x$ donne $U(x)=\sum\binom{2n}n\frac{x^n}{4^n}=\frac1{\sqrt{1-x}}$. Par produit de Cauchy et 4.2 :
+$$F(x)U(x)=\sum_{n\ge1}\Big(\sum_{k=1}^nf_ku_{n-k}\Big)x^n=\sum_{n\ge1}u_nx^n=U(x)-1.$$
+Donc $F(x)=1-\frac1{U(x)}=1-\sqrt{1-x}$ sur $[0,1[$.
+
+**4.4 Retour presque sûr.** Les $f_k$ sont positifs. Pour $x\in[0,1[$, $F(x)\le\sum_kf_k$ ; et pour tout $N$, $\sum_{k\le N}f_kx^k\le F(x)$, d'où, en faisant $x\to1^-$, $\sum_{k\le N}f_k\le\lim_{x\to1^-}F(x)$. Ainsi $P(T<+\infty)=\sum_kf_k=\lim_{x\to1^-}\big(1-\sqrt{1-x}\big)=1$ : la marche revient presque sûrement en $0$.
+
+**4.5 Espérance infinie.** Sur $[0,1[$, $F'(x)=\sum kf_kx^{k-1}=\frac1{2\sqrt{1-x}}$. Le même argument de monotonie donne $E(T)=\sum_k2kf_k=\lim_{x\to1^-}2F'(x)=\lim_{x\to1^-}\frac1{\sqrt{1-x}}=+\infty$.
+
+**Étape 5 — Vérification.**
+
+> **Vérification — Premiers termes.** $F(x)=1-\sqrt{1-x}=\frac x2+\frac{x^2}8+\dots$ : $f_1=\frac12$ (après deux pas, on est en $0$ avec probabilité $\frac12$) et $f_2=\frac18$ (seuls $++--$ et $--++$ conviennent, soit $\frac2{16}$) ✓. Plus généralement $f_k=\frac{1}{2k-1}\binom{2k}{k}\frac{1}{4^k}$.
+
+**Étape 6 — Conclusion.**
+$$\boxed{u_n=\binom{2n}n4^{-n}\sim\frac1{\sqrt{\pi n}},\quad F(x)=1-\sqrt{1-x},\quad P(T<+\infty)=1,\quad E(T)=+\infty}$$""",
+r"""$u_n=\binom{2n}n4^{-n}\sim\frac{1}{\sqrt{\pi n}}$ ; premier retour : $u_n=\sum f_ku_{n-k}$, soit $U=1+FU$ avec $U=(1-x)^{-1/2}$ ; $F=1-\sqrt{1-x}$, donc $\sum f_k=1$ (retour presque sûr) et $E(T)=\lim 2F'=+\infty$.""")
+mp()

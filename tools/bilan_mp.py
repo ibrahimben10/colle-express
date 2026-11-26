@@ -50,3 +50,13 @@ B['n-mp-chiab'] = ([r"**Densité de $GL_n(\mathbb C)$** dans $\mathcal M_n(\math
   [r"Approcher $A$ par $A-\frac1pI_n$, inversible pour $p$ grand.",
    r"Prouver d'abord une identité pour $A$ inversible, puis passer à la limite.",
    r"Même polynôme caractéristique n'implique pas semblables : comparer à la matrice nulle."])
+B['n-mp-densite'] = ([r"**Trigonalisation** dans $\mathcal M_n(\mathbb C)$ et **critère** dimension du sous-espace propre = multiplicité.",
+  r"**Prolongement par densité** d'une identité continue ; valeurs propres bornées par une norme subordonnée."],
+  [r"Perturber la diagonale d'une triangulaire par $\frac kp$ pour séparer les valeurs propres.",
+   r"Montrer qu'un ensemble est ouvert par l'absurde : suite qui converge, extraction, passage à la limite.",
+   r"Une matrice diagonalisable à valeur propre multiple est limite de non diagonalisables : ajouter $\varepsilon E_{12}$ dans le bloc."])
+B['n-mp-marche'] = ([r"**Série du binôme.** $(1-y)^{-1/2}=\sum\binom{2n}n\frac{y^n}{4^n}$ pour $|y|<1$.",
+  r"**Probabilités totales et lemme des coalitions** pour découper selon un premier instant."],
+  [r"Découper selon le premier retour : la relation devient un produit de Cauchy.",
+   r"Séries génératrices : une convolution devient un produit, ici $U=1+FU$.",
+   r"Coefficients positifs : la somme de la série en $1$ est la limite en $1^-$ (monotonie)."])

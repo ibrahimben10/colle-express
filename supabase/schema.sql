@@ -1118,7 +1118,9 @@ insert into public.exercices_meta (id, mat, chap, niveau) values
   ('n-mp-sinrac','Maths','Séries',1),
   ('n-mp-deuxcarres','Maths','Polynômes',2),
   ('n-mp-sinc','Maths','Équations différentielles',2),
-  ('n-mp-chiab','Maths','Topologie matricielle',2)
+  ('n-mp-chiab','Maths','Topologie matricielle',2),
+  ('n-mp-densite','Maths','Topologie matricielle',3),
+  ('n-mp-marche','Maths','Probabilités',3)
 on conflict (id) do update set mat = excluded.mat, chap = excluded.chap, niveau = excluded.niveau;
 alter table public.exercices_meta enable row level security;
 drop policy if exists "méta: lecture" on public.exercices_meta;
