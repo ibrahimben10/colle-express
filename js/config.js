@@ -12,7 +12,7 @@ export const CONFIG = {
   // import d'énoncé par photo. Passe à true une fois la clé enregistrée dans les secrets Supabase.
   IA: false,
 
-  // Colleur virtuel (fonction Supabase « colleur » + clé GROQ_API_KEY, gratuite sur console.groq.com).
+  // Colleur virtuel (fonction Supabase « colleur » + une clé gratuite GEMINI_API_KEY, GROQ_API_KEY ou MISTRAL_API_KEY).
   // Passe à true une fois la clé enregistrée dans les secrets Supabase et la fonction déployée.
   COLLEUR: false,
 

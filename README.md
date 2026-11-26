@@ -256,13 +256,13 @@ Le mode Rigoureux affiche d'abord la rédaction de concours écrite par l'équip
 
 Depuis une fiche de cours, le bouton « Passer une colle sur ce chapitre » (ou l'adresse `#colle`) lance une colle : le colleur pose une question à la fois, juge chaque réponse en s'appuyant sur la fiche, puis donne une note indicative et les points à revoir. L'élève répond par écrit ou au micro (reconnaissance vocale du navigateur, Chrome et Edge).
 
-Mise en service :
-1. Crée une clé gratuite sur https://console.groq.com (menu API Keys).
-2. Supabase > Edge Functions > Secrets : ajoute `GROQ_API_KEY` = ta clé. Facultatif : `GROQ_MODEL` (défaut `openai/gpt-oss-120b`), `COLLE_LIMITE_JOUR` (défaut 60 échanges par élève et par jour).
+Mise en service (une seule clé suffit, gratuite) :
+1. Crée une clé chez l'un de ces fournisseurs : Google AI Studio (https://aistudio.google.com, bouton « Get API key », connexion avec un compte Google), Groq (https://console.groq.com) ou Mistral (https://console.mistral.ai).
+2. Supabase > Edge Functions > Secrets : ajoute `GEMINI_API_KEY`, `GROQ_API_KEY` ou `MISTRAL_API_KEY` selon le fournisseur. Facultatif : `IA_MODEL` (nom du modèle), `COLLE_LIMITE_JOUR` (défaut 60 échanges par élève et par jour).
 3. Déploie la fonction `supabase/functions/colleur` (`npx supabase functions deploy colleur`).
 4. Dans `js/config.js`, passe `COLLEUR: true`.
 
-La clé reste côté serveur et n'apparaît jamais dans le site. Chaque échange est compté dans `ia_usage` (mode `colle`) ; le professeur n'est pas limité. L'offre gratuite de Groq a ses propres limites de débit : si elles sont atteintes, l'élève voit « Le colleur est très sollicité, réessaie dans une minute ».
+La clé reste côté serveur et n'apparaît jamais dans le site. Chaque échange est compté dans `ia_usage` (mode `colle`) ; le professeur n'est pas limité. Les offres gratuites ont leurs propres limites de débit : si elles sont atteintes, l'élève voit « Le colleur est très sollicité, réessaie dans une minute ».
 
 ## Identité visuelle
 

@@ -1,8 +1,8 @@
-// Supabase Edge Function « colleur » : colle de cours simulée sur une fiche, avec un modèle gratuit de Groq.
-// Secrets à définir dans Supabase (Edge Functions > Secrets) :
-//   GROQ_API_KEY (obligatoire, créée sur console.groq.com)
-//   GROQ_MODEL (facultatif, défaut openai/gpt-oss-120b), COLLE_LIMITE_JOUR (facultatif, défaut 60 échanges par élève et par jour)
-//   SITE_URL (facultatif) : adresse du site, d'où sont lues les fiches.
+// Supabase Edge Function « colleur » : colle de cours simulée sur une fiche, avec un modèle gratuit.
+// Secrets à définir dans Supabase (Edge Functions > Secrets) — UNE seule clé suffit, la première trouvée est utilisée :
+//   GEMINI_API_KEY (Google AI Studio, aistudio.google.com) | GROQ_API_KEY (console.groq.com) | MISTRAL_API_KEY (console.mistral.ai)
+//   IA_MODEL (facultatif) : nom du modèle, sinon le modèle par défaut du fournisseur ci-dessous.
+//   COLLE_LIMITE_JOUR (facultatif, défaut 60 échanges par élève et par jour) ; SITE_URL (facultatif) : adresse du site.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const CORS = {
@@ -10,7 +10,14 @@ const CORS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
+// Fournisseurs compatibles avec l'API « chat completions » d'OpenAI.
+const FOURNISSEURS = [
+  { cle: "GEMINI_API_KEY", url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", modele: "gemini-flash-latest" },
+  { cle: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", modele: "openai/gpt-oss-120b" },
+  { cle: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", modele: "mistral-small-latest" },
+];
+const FOUR = FOURNISSEURS.find((f) => Deno.env.get(f.cle));
+const MODEL = Deno.env.get("IA_MODEL") ?? Deno.env.get("GROQ_MODEL") ?? FOUR?.modele ?? "";
 const LIMITE = Number(Deno.env.get("COLLE_LIMITE_JOUR") ?? "60");
 const SITE = (Deno.env.get("SITE_URL") ?? "https://ibrahimben10.github.io/colle-express").replace(/\/$/, "");
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...CORS, "Content-Type": "application/json" } });
@@ -52,8 +59,8 @@ function parse(t: string) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "Méthode non autorisée" }, 405);
-  const key = Deno.env.get("GROQ_API_KEY");
-  if (!key) return json({ error: "Le colleur n'est pas encore activé (clé GROQ_API_KEY absente côté serveur)." }, 503);
+  const key = FOUR ? Deno.env.get(FOUR.cle) : "";
+  if (!FOUR || !key) return json({ error: "Le colleur n'est pas encore activé (aucune clé d'IA côté serveur)." }, 503);
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { data: u } = await admin.auth.getUser((req.headers.get("Authorization") ?? "").replace("Bearer ", ""));
@@ -85,16 +92,20 @@ Deno.serve(async (req) => {
   const consigne = action === "bilan" ? FORMAT_BILAN
     : action === "debut" ? `Commence la colle : salue brièvement l'élève et pose la première question. ${FORMAT_TOUR}`
     : `Évalue la dernière réponse de l'élève puis enchaîne. ${FORMAT_TOUR}`;
-  const messages = [{ role: "system", content: systeme(F.titre, F.corps, nbQ) }, ...hist, { role: "system", content: consigne }];
+  // Un seul message système (consigne du tour comprise) et toujours un dernier message de l'élève : exigé par certains fournisseurs.
+  const messages: { role: string; content: string }[] = [{ role: "system", content: `${systeme(F.titre, F.corps, nbQ)}\n\nCONSIGNE POUR CE TOUR : ${consigne}` }, ...hist];
+  if (messages[messages.length - 1].role !== "user") {
+    messages.push({ role: "user", content: action === "debut" ? "Bonjour, je suis prêt." : action === "bilan" ? "Je m'arrête ici : faites le bilan de la colle." : "(pas de réponse)" });
+  }
 
   let out: any;
   try {
     const corps = (jsonMode: boolean) => JSON.stringify({
-      model: MODEL, messages, temperature: 0.4, max_completion_tokens: 1200,
+      model: MODEL, messages, temperature: 0.4, max_tokens: 1500,
       ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
-      ...(MODEL.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),
+      ...(MODEL.startsWith("openai/gpt-oss") || MODEL.startsWith("gemini") ? { reasoning_effort: "low" } : {}),
     });
-    const envoi = (jsonMode: boolean) => fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const envoi = (jsonMode: boolean) => fetch(FOUR.url, {
       method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: corps(jsonMode),
     });
     let r = await envoi(true);
